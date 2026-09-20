@@ -1,0 +1,50 @@
+// ============================================================
+// Root Stylesheet - Process Management System
+// Light BG + Dark & Secondary Component Theme
+// ============================================================
+
+// 1. Shared Theme Variables
+@import './styles/variables';
+
+// 2. Bootstrap variable overrides (before importing Bootstrap)
+$body-bg:    $theme-bg;
+$body-color: $dark-primary;
+$primary:    $dark-primary;
+$secondary:  $dark-muted;
+$font-family-sans-serif: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+// 3. Import Bootstrap
+@import '../node_modules/bootstrap/scss/bootstrap';
+
+// 4. Import Bootstrap Icons
+@import '../node_modules/bootstrap-icons/font/bootstrap-icons.css';
+
+// 5. Shared Theme Mixins & Utilities
+@import './styles/mixins';
+
+// ── Global Resets ──────────────────────────────────────────
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  background: $body-bg;
+}
+
+body {
+  font-family: $font-family-sans-serif;
+  font-size: 0.875rem;
+  color: $body-color;
+  background: $body-bg;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// ── Utility helpers ────────────────────────────────────────
+.fade-in-up {
+  animation: fadeInUp 0.25s ease forwards;
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+}
