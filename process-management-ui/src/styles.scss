@@ -7,11 +7,19 @@
 @import './styles/variables';
 
 // 2. Bootstrap variable overrides (before importing Bootstrap)
-$body-bg:    $theme-bg;
-$body-color: $dark-primary;
-$primary:    $dark-primary;
-$secondary:  $dark-muted;
+$body-bg:            $theme-bg;
+$body-color:         $dark-primary;
+$primary:            $dark-primary;
+$secondary:          $dark-muted;
 $font-family-sans-serif: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+// Native Tooltip Overrides (Solid Black & High Contrast)
+$tooltip-bg:         #000000;
+$tooltip-color:      #ffffff;
+$tooltip-opacity:    1;
+$tooltip-padding-y:  0.28rem;
+$tooltip-padding-x:  0.6rem;
+$tooltip-font-size:  0.72rem;
 
 // 3. Import Bootstrap
 @import '../node_modules/bootstrap/scss/bootstrap';
@@ -38,6 +46,13 @@ body {
   background: $body-bg;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+// ── Global Tooltip Customization ───────────────────────────
+.tooltip {
+  --bs-tooltip-bg: #000000;
+  --bs-tooltip-color: #ffffff;
+  --bs-tooltip-opacity: 1;
 }
 
 // ── Utility helpers ────────────────────────────────────────
