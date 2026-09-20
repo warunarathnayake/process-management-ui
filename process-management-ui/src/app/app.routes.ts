@@ -11,18 +11,11 @@ export const routes: Routes = [
       import('./components/login/login.component').then(m => m.LoginComponent)
   },
 
-  // Header standalone demo/preview route
+  // Header standalone preview route
   {
     path: 'header',
     loadComponent: () =>
       import('./components/header/header.component').then(m => m.HeaderComponent)
-  },
-
-  // Main Dashboard route (which embeds the Header)
-  {
-    path: 'dashboard',
-    loadComponent: () =>
-      import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
   },
 
   // Catch-all

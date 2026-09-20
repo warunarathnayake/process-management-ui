@@ -53,7 +53,7 @@ export class LoginComponent {
     try {
       // Simulate login delay
       await new Promise(resolve => setTimeout(resolve, 800));
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/header']);
     } catch (err: any) {
       this.errorMsg.set(err.message || 'Invalid credentials. Please try again.');
     } finally {
