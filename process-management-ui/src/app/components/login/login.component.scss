@@ -1,0 +1,199 @@
+@import 'variables';
+@import 'mixins';
+
+// ============================================================
+// Login Page SCSS — Light Gray Theme + Dark & Secondary Elements
+// ============================================================
+
+.login-page {
+  background: $theme-bg;
+}
+
+// ── Left Brand Panel ───────────────────────────────────────
+.login-brand-panel {
+  background: $theme-bg;
+  padding: 3.5rem 4rem;
+
+  .brand-title {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: $dark-primary;
+    line-height: 1.25;
+
+    span {
+      color: $dark-secondary;
+    }
+  }
+
+  .brand-subtitle {
+    font-size: 0.85rem;
+    color: $dark-secondary;
+    line-height: 1.65;
+  }
+
+  .brand-features {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: $dark-secondary;
+      i { font-size: 0.9rem; }
+    }
+  }
+
+  .domain-icons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+
+    .domain-chip {
+      @extend .pms-chip;
+    }
+  }
+
+  .brand-footer {
+    font-size: 0.72rem;
+    color: $dark-muted;
+    font-weight: 500;
+  }
+}
+
+// ── Right Form Panel & Login Card ──────────────────────────
+.login-form-panel {
+  background: $theme-bg;
+}
+
+// ── Logo: "Pm." Black Circle ───────────────────────────────
+.logo-circle {
+  @include pms-logo-circle(52px, 0.95rem);
+
+  &.logo-circle-sm {
+    @include pms-logo-circle(36px, 0.72rem);
+  }
+}
+
+// ── Card & Input Components (Dark & Secondary Theme) ───────
+.card {
+  background: $bg-surface;
+  border-radius: 16px;
+}
+
+.form-title {
+  color: $dark-primary;
+}
+
+.form-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: $dark-primary;
+  margin-bottom: 0.35rem;
+}
+
+.input-group-text {
+  background-color: $bg-surface-subtle;
+  border-color: $border-color;
+  color: $dark-secondary;
+  font-size: 0.85rem;
+  transition: border-color 0.2s, color 0.2s, background-color 0.2s;
+}
+
+.form-control {
+  @include pms-form-control;
+
+  &.is-invalid {
+    border-color: var(--bs-danger, #dc3545);
+    background-image: none;
+    padding-right: 0.6rem;
+    &:focus {
+      box-shadow: 0 0 0 0.18rem rgba(220, 53, 69, 0.15);
+    }
+  }
+}
+
+// Focus sync: prefix icon border follows focus
+.input-group:focus-within {
+  .input-group-text {
+    border-color: $dark-primary;
+    background-color: $bg-surface;
+    color: $dark-primary;
+  }
+}
+
+// Error sync: prefix icon border follows invalid state
+.input-group:has(.is-invalid) {
+  .input-group-text {
+    border-color: var(--bs-danger, #dc3545);
+  }
+}
+
+// ── Password Field: Embedded Eye Toggle Icon ───────────────
+.pass-wrap {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  border-top-right-radius: var(--bs-border-radius-sm, 0.375rem);
+  border-bottom-right-radius: var(--bs-border-radius-sm, 0.375rem);
+
+  &.is-invalid .pass-input {
+    border-color: var(--bs-danger, #dc3545) !important;
+  }
+}
+
+.pass-input {
+  width: 100%;
+  padding-right: 2rem !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  border-top-right-radius: var(--bs-border-radius-sm, 0.375rem) !important;
+  border-bottom-right-radius: var(--bs-border-radius-sm, 0.375rem) !important;
+  background-image: none !important;
+}
+
+.eye-icon {
+  position: absolute;
+  right: 0.55rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: $dark-muted;
+  font-size: 0.88rem;
+  cursor: pointer;
+  line-height: 1;
+  z-index: 5;
+  user-select: none;
+  transition: color 0.15s ease-in-out;
+
+  &:hover {
+    color: $dark-primary;
+  }
+}
+
+// ── Sign In Button ─────────────────────────────────────────
+.login-btn {
+  @include pms-button-dark;
+  padding: 0.32rem 0.85rem;
+}
+
+// ── System Access Divider ──────────────────────────────────
+.system-access-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: $text-placeholder;
+}
+
+// ── Access Note ────────────────────────────────────────────
+.access-note {
+  @extend .pms-note;
+}
+
+// ── Copyright ──────────────────────────────────────────────
+.form-copyright {
+  font-size: 0.72rem;
+}

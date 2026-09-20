@@ -1,0 +1,98 @@
+@import 'variables';
+@import 'mixins';
+
+// ============================================================
+// Brand Component SCSS — PMS Dark & Secondary Theme
+// ============================================================
+
+:host {
+  display: inline-block;
+}
+
+.brand-container {
+  gap: 0.6rem;
+  line-height: 1.2;
+
+  &.layout-vertical {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .logo-circle {
+    @include pms-logo-circle(42px, 0.82rem);
+  }
+
+  .brand-text-block {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .brand-name {
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .brand-sub {
+    font-size: 0.72rem;
+    font-weight: 500;
+  }
+
+  // ── Themes ─────────────────────────────────
+  &.theme-light {
+    .brand-name {
+      color: $dark-primary;
+    }
+    .brand-sub {
+      color: $dark-muted;
+    }
+  }
+
+  &.theme-dark {
+    .brand-name {
+      color: #ffffff;
+    }
+    .brand-sub {
+      color: $text-placeholder;
+    }
+  }
+
+  // ── Sizes ──────────────────────────────────
+  &.size-sm {
+    gap: 0.45rem;
+    .logo-circle {
+      @include pms-logo-circle(32px, 0.68rem);
+    }
+    .brand-name {
+      font-size: 0.8rem;
+    }
+    .brand-sub {
+      font-size: 0.65rem;
+    }
+  }
+
+  &.size-md {
+    gap: 0.6rem;
+    .logo-circle {
+      @include pms-logo-circle(42px, 0.82rem);
+    }
+    .brand-name {
+      font-size: 0.92rem;
+    }
+    .brand-sub {
+      font-size: 0.72rem;
+    }
+  }
+
+  &.size-lg {
+    gap: 0.75rem;
+    .logo-circle {
+      @include pms-logo-circle(56px, 1rem);
+    }
+    .brand-name {
+      font-size: 1.25rem;
+    }
+    .brand-sub {
+      font-size: 0.82rem;
+    }
+  }
+}

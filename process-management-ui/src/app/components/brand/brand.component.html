@@ -1,0 +1,12 @@
+<div class="brand-container d-inline-flex align-items-center"
+     [ngClass]="[
+       'size-' + size,
+       'layout-' + layout,
+       'theme-' + theme
+     ]">
+  <div class="logo-circle">Pm.</div>
+  <div class="brand-text-block">
+    <div class="brand-name">Business Process Management System</div>
+    <div *ngIf="showSubtitle" class="brand-sub">{{ subtitle }}</div>
+  </div>
+</div>
