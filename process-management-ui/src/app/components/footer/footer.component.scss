@@ -1,0 +1,31 @@
+@import 'variables';
+@import 'mixins';
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.app-footer {
+  background-color: $theme-bg;
+  border: none;
+  font-size: 0.74rem;
+  color: rgba(0, 0, 0, 0.5);
+
+  .footer-text,
+  .footer-system-name {
+    color: rgba(0, 0, 0, 0.5);
+    font-weight: 400;
+  }
+
+  .footer-divider {
+    color: rgba(0, 0, 0, 0.25);
+  }
+
+  .footer-badge {
+    font-size: 0.68rem;
+    font-weight: 500;
+    background-color: rgba(0, 0, 0, 0.06) !important;
+    color: rgba(0, 0, 0, 0.65) !important;
+  }
+}

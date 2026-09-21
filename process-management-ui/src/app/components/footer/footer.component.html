@@ -1,0 +1,23 @@
+<footer class="app-footer px-3 px-lg-4 py-2">
+  <div class="container-fluid p-0">
+    <div class="row align-items-center justify-content-between g-2 text-black-50 fs-7">
+      
+      <!-- Left: Copyright -->
+      <div class="col-auto">
+        <span class="footer-text">
+          &copy; {{ currentYear }} {{ companyName }}. All rights reserved.
+        </span>
+      </div>
+
+      <!-- Right: System Info & Version -->
+      <div class="col-auto d-flex align-items-center gap-2">
+        <span class="footer-system-name d-none d-md-inline">{{ systemName }}</span>
+        <span class="footer-divider d-none d-md-inline">|</span>
+        <span class="badge rounded-pill bg-black-subtle text-dark border-0 px-2 py-1 footer-badge">
+          {{ version }}
+        </span>
+      </div>
+
+    </div>
+  </div>
+</footer>
