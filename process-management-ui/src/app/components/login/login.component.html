@@ -1,165 +1,186 @@
-<div class="login-page min-vh-100">
-  <div class="container-fluid min-vh-100 p-0">
-    <div class="row g-0 min-vh-100">
+<div class="login-page min-vh-100 d-flex flex-column justify-content-between">
+  
+  <!-- ════════════ MAIN CONTENT AREA: Centered Grid Row ════════════ -->
+  <div class="container-fluid flex-grow-1 d-flex flex-column justify-content-center p-3 p-sm-4 p-xl-5">
+    <div class="row g-4 g-xl-5 align-items-stretch justify-content-center login-main-row mx-auto w-100">
 
-      <!-- ════════════ LEFT COLUMN: Brand Panel (col-lg-7 col-xl-8) ════════════ -->
-      <div class="col-lg-7 col-xl-8 d-none d-lg-flex flex-column justify-content-between p-4 p-xl-5 login-brand-panel">
-        <div>
+      <!-- ════════════ LEFT COLUMN: Brand Panel ════════════ -->
+      <div class="col-lg-7 col-xl-7 d-none d-lg-flex flex-column justify-content-between brand-panel-col">
+        
+        <!-- Top Section: Logo, Title, Subtitle, Features -->
+        <div class="brand-top-section">
           <!-- Logo: Pm. in black circle -->
-          <div class="logo-circle mb-4">Pm.</div>
+          <div class="logo-circle mb-3 mb-xl-4">Pm.</div>
 
           <h1 class="brand-title mb-2">
             Business Process<br><span>Management System</span>
           </h1>
 
-          <p class="brand-subtitle mb-4">
+          <p class="brand-subtitle mb-3 mb-xl-4">
             A centralized platform that connects and manages all key business processes, providing complete visibility, streamlined operations, and better control across the organization.
           </p>
 
-          <div class="brand-features mb-4">
+          <div class="brand-features">
             <div class="feature-item"><i class="bi bi-check-circle-fill text-success"></i> End-to-End Business Process Management &amp; Tracking</div>
             <div class="feature-item"><i class="bi bi-check-circle-fill text-success"></i> Integrated Finance, Procurement &amp; Inventory Management</div>
             <div class="feature-item"><i class="bi bi-check-circle-fill text-success"></i> Centralized Customer, Supplier &amp; Transaction Management</div>
             <div class="feature-item"><i class="bi bi-check-circle-fill text-success"></i> Real-Time Reporting, Workflow Control &amp; Business Insights</div>
           </div>
-
-          <div class="domain-icons">
-            <span class="domain-chip"><i class="bi bi-cash-stack"></i> Finance Management</span>
-            <span class="domain-chip"><i class="bi bi-bag-check"></i> Procurement Management</span>
-            <span class="domain-chip"><i class="bi bi-graph-up-arrow"></i> Sales Management</span>
-            <span class="domain-chip"><i class="bi bi-receipt"></i> Invoicing Management</span>
-            <span class="domain-chip"><i class="bi bi-box-seam"></i> Inventory Management</span>
-            <span class="domain-chip"><i class="bi bi-people"></i> Customer Management</span>
-            <span class="domain-chip"><i class="bi bi-building"></i> Supplier Management</span>
-            <span class="domain-chip"><i class="bi bi-tag"></i> Product &amp; Item Management</span>
-            <span class="domain-chip"><i class="bi bi-clipboard-check"></i> Order Management</span>
-            <span class="domain-chip"><i class="bi bi-credit-card"></i> Payment Management</span>
-            <span class="domain-chip"><i class="bi bi-wallet2"></i> Expense Management</span>
-            <span class="domain-chip"><i class="bi bi-person-badge"></i> Employee Management</span>
-            <span class="domain-chip"><i class="bi bi-diagram-3"></i> Process &amp; Workflow Management</span>
-            <span class="domain-chip"><i class="bi bi-bar-chart-line"></i> Reporting &amp; Analytics</span>
-          </div>
         </div>
 
-        <div class="brand-footer pt-3">Powered by Aithusa PVT LTD</div>
+        <!-- Space is automatically distributed via justify-content-between in flex column -->
+
+        <!-- Bottom Section: Domain Icons (Bottom line aligns with login card bottom) -->
+        <div class="domain-icons mt-auto pt-3 pt-xl-4">
+          <span class="domain-chip"><i class="bi bi-cash-stack"></i> Finance Management</span>
+          <span class="domain-chip"><i class="bi bi-bag-check"></i> Procurement Management</span>
+          <span class="domain-chip"><i class="bi bi-graph-up-arrow"></i> Sales Management</span>
+          <span class="domain-chip"><i class="bi bi-receipt"></i> Invoicing Management</span>
+          <span class="domain-chip"><i class="bi bi-box-seam"></i> Inventory Management</span>
+          <span class="domain-chip"><i class="bi bi-people"></i> Customer Management</span>
+          <span class="domain-chip"><i class="bi bi-building"></i> Supplier Management</span>
+          <span class="domain-chip"><i class="bi bi-tag"></i> Product &amp; Item Management</span>
+          <span class="domain-chip"><i class="bi bi-clipboard-check"></i> Order Management</span>
+          <span class="domain-chip"><i class="bi bi-credit-card"></i> Payment Management</span>
+          <span class="domain-chip"><i class="bi bi-wallet2"></i> Expense Management</span>
+          <span class="domain-chip"><i class="bi bi-person-badge"></i> Employee Management</span>
+          <span class="domain-chip"><i class="bi bi-diagram-3"></i> Process &amp; Workflow Management</span>
+          <span class="domain-chip"><i class="bi bi-bar-chart-line"></i> Reporting &amp; Analytics</span>
+        </div>
+
       </div>
 
-      <!-- ════════════ RIGHT COLUMN: Form Panel (col-12 col-lg-5 col-xl-4) ════════════ -->
-      <div class="col-12 col-lg-5 col-xl-4 d-flex flex-column align-items-center justify-content-center p-4 p-md-5 login-form-panel">
-        <div class="w-100" style="max-width: 400px;">
+      <!-- ════════════ RIGHT COLUMN: Form Panel / Login Card ════════════ -->
+      <div class="col-12 col-lg-5 col-xl-5 d-flex flex-column align-items-center align-items-lg-end justify-content-center form-panel-col">
+        <div class="w-100 h-100 d-flex flex-column" style="max-width: 420px;">
 
-          <!-- Native Bootstrap Card -->
-          <div class="card shadow-sm border-0 rounded-4">
-            <div class="card-body p-4">
+          <!-- Native Bootstrap Card (Matches exact height and bottom line of brand column) -->
+          <div class="card login-card shadow-sm border-0 rounded-4 w-100 h-100 flex-grow-1">
+            <div class="card-body p-4 p-sm-5 d-flex flex-column justify-content-between">
 
-              <!-- Logo inside card -->
-              <div class="logo-circle logo-circle-sm mb-3">Pm.</div>
+              <div>
+                <!-- Logo inside card -->
+                <div class="logo-circle logo-circle-sm mb-3 mb-xl-4">Pm.</div>
 
-              <!-- Header -->
-              <div class="mb-3">
-                <h5 class="form-title fw-bold mb-1">Welcome back</h5>
-                <p class="mb-0 text-black-50 small fw-medium">Sign in to your account to continue</p>
-              </div>
-
-              <!-- Error Alert -->
-              <div *ngIf="errorMsg()"
-                   class="alert alert-danger d-flex align-items-center gap-2 py-2 px-3 fade-in-up"
-                   role="alert">
-                <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
-                <small>{{ errorMsg() }}</small>
-              </div>
-
-              <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
-
-                <!-- Email -->
-                <div class="mb-3">
-                  <label for="email" class="form-label form-label-sm">Email Address</label>
-                  <div class="input-group input-group-sm has-validation">
-                    <span class="input-group-text">
-                      <i class="bi bi-envelope"></i>
-                    </span>
-                    <input
-                      type="email"
-                      id="email"
-                      formControlName="email"
-                      class="form-control form-control-sm"
-                      [class.is-invalid]="email.invalid && email.touched"
-                      placeholder="you@company.com"
-                      autocomplete="email">
-                    <div class="invalid-feedback">
-                      <span *ngIf="email.errors?.['required']">Email is required.</span>
-                      <span *ngIf="email.errors?.['email']">Enter a valid email address.</span>
-                    </div>
-                  </div>
+                <!-- Header -->
+                <div class="mb-3 mb-xl-4">
+                  <h5 class="form-title fw-bold mb-1">Welcome back</h5>
+                  <p class="mb-0 text-black-50 small fw-medium">Sign in to your account to continue</p>
                 </div>
 
-                <!-- Password -->
-                <div class="mb-3">
-                  <label for="password" class="form-label form-label-sm">Password</label>
-                  <div class="input-group input-group-sm has-validation">
-                    <span class="input-group-text">
-                      <i class="bi bi-lock"></i>
-                    </span>
-                    <div class="pass-wrap" [class.is-invalid]="password.invalid && password.touched">
-                      <input
-                        [type]="showPass() ? 'text' : 'password'"
-                        id="password"
-                        formControlName="password"
-                        class="form-control form-control-sm pass-input"
-                        [class.is-invalid]="password.invalid && password.touched"
-                        placeholder="Enter your password"
-                        autocomplete="current-password">
-                      <!-- Eye icon inside password input -->
-                      <span class="eye-icon" (click)="togglePassword()" [title]="showPass() ? 'Hide' : 'Show'">
-                        <i [class]="showPass() ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+                <!-- Error Alert -->
+                <div *ngIf="errorMsg()"
+                     class="alert alert-danger d-flex align-items-center gap-2 py-2 px-3 mb-3 fade-in-up"
+                     role="alert">
+                  <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+                  <small>{{ errorMsg() }}</small>
+                </div>
+
+                <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+
+                  <!-- Email -->
+                  <div class="mb-3 pb-1">
+                    <label for="email" class="form-label form-label-sm">Email Address</label>
+                    <div class="input-group input-group-sm has-validation">
+                      <span class="input-group-text">
+                        <i class="bi bi-envelope"></i>
                       </span>
-                    </div>
-                    <div class="invalid-feedback">
-                      <span *ngIf="password.errors?.['required']">Password is required.</span>
+                      <input
+                        type="email"
+                        id="email"
+                        formControlName="email"
+                        class="form-control form-control-sm"
+                        [class.is-invalid]="email.invalid && email.touched"
+                        placeholder="you@company.com"
+                        autocomplete="email">
+                      <div class="invalid-feedback">
+                        <span *ngIf="email.errors?.['required']">Email is required.</span>
+                        <span *ngIf="email.errors?.['email']">Enter a valid email address.</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <!-- Sign In Button (sm size) -->
-                <button
-                  type="submit"
-                  class="btn btn-dark btn-sm w-100 rounded-pill shadow-sm login-btn"
-                  [disabled]="isLoading()">
-                  <ng-container *ngIf="!isLoading(); else loadingTpl">
-                    <i class="bi bi-shield-lock me-1"></i> Sign In
-                  </ng-container>
-                  <ng-template #loadingTpl>
-                    <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-                    Authenticating...
-                  </ng-template>
-                </button>
+                  <!-- Password -->
+                  <div class="mb-3 mb-xl-4">
+                    <label for="password" class="form-label form-label-sm">Password</label>
+                    <div class="input-group input-group-sm has-validation">
+                      <span class="input-group-text">
+                        <i class="bi bi-lock"></i>
+                      </span>
+                      <div class="pass-wrap" [class.is-invalid]="password.invalid && password.touched">
+                        <input
+                          [type]="showPass() ? 'text' : 'password'"
+                          id="password"
+                          formControlName="password"
+                          class="form-control form-control-sm pass-input"
+                          [class.is-invalid]="password.invalid && password.touched"
+                          placeholder="Enter your password"
+                          autocomplete="current-password">
+                        <!-- Eye icon inside password input -->
+                        <span class="eye-icon" (click)="togglePassword()" [title]="showPass() ? 'Hide' : 'Show'">
+                          <i [class]="showPass() ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+                        </span>
+                      </div>
+                      <div class="invalid-feedback">
+                        <span *ngIf="password.errors?.['required']">Password is required.</span>
+                      </div>
+                    </div>
+                  </div>
 
-              </form>
+                  <!-- Sign In Button (sm size) -->
+                  <button
+                    type="submit"
+                    class="btn btn-dark btn-sm w-100 rounded-pill shadow-sm login-btn py-2"
+                    [disabled]="isLoading()">
+                    <ng-container *ngIf="!isLoading(); else loadingTpl">
+                      <i class="bi bi-shield-lock me-1"></i> Sign In
+                    </ng-container>
+                    <ng-template #loadingTpl>
+                      <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                      Authenticating...
+                    </ng-template>
+                  </button>
 
-              <!-- Divider -->
-              <div class="d-flex align-items-center text-uppercase my-3 system-access-divider">
-                <hr class="flex-grow-1 my-0 me-2 border-secondary-subtle opacity-50">
-                <span class="system-access-title">System Access</span>
-                <hr class="flex-grow-1 my-0 ms-2 border-secondary-subtle opacity-50">
+                </form>
               </div>
 
-              <!-- Access Note -->
-              <div class="access-note">
-                <i class="bi bi-shield-lock-fill"></i>
-                <small>Access is restricted to authorized personnel only. Contact help desk for credentials.</small>
+              <!-- Bottom Content: System Access & Copyright pushed to bottom line -->
+              <div class="card-bottom-section mt-auto pt-3 d-flex flex-column">
+                <!-- Divider -->
+                <div class="d-flex align-items-center text-uppercase my-3 system-access-divider">
+                  <hr class="flex-grow-1 my-0 me-2 border-secondary-subtle opacity-50">
+                  <span class="system-access-title">System Access</span>
+                  <hr class="flex-grow-1 my-0 ms-2 border-secondary-subtle opacity-50">
+                </div>
+
+                <!-- Access Note -->
+                <div class="access-note mb-3">
+                  <i class="bi bi-shield-lock-fill"></i>
+                  <small>Access is restricted to authorized personnel only. Contact help desk for credentials.</small>
+                </div>
+
+                <!-- Copyright pushed to bottom line of card -->
+                <p class="card-copyright text-center mb-0">
+                  © 2026 Aithusa PVT LTD. All rights reserved.
+                </p>
               </div>
 
             </div>
           </div><!-- /card -->
-
-          <!-- Copyright -->
-          <p class="form-copyright text-center mt-3 mb-0 text-secondary">
-            © 2026 Aithusa PVT LTD. All rights reserved.
-          </p>
 
         </div>
       </div>
 
     </div>
   </div>
+
+  <!-- ════════════ BOTTOM FOOTER: Left Aligned with Brand Column ════════════ -->
+  <div class="container-fluid login-bottom-bar px-3 px-sm-4 px-xl-5 pb-3 pb-xl-4 pt-0">
+    <div class="row g-4 g-xl-5 align-items-center login-main-row mx-auto w-100">
+      <div class="col-lg-7 col-xl-7 d-none d-lg-block text-start brand-footer">
+        Powered by Aithusa PVT LTD
+      </div>
+    </div>
+  </div>
+
 </div>

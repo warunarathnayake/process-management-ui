@@ -9,11 +9,12 @@
   background: $theme-bg;
 }
 
-// ── Left Brand Panel ───────────────────────────────────────
-.login-brand-panel {
-  background: $theme-bg;
-  padding: 3.5rem 4rem;
+.login-main-row {
+  max-width: 1320px;
+}
 
+// ── Left Brand Panel ───────────────────────────────────────
+.brand-panel-col {
   .brand-title {
     font-size: 1.85rem;
     font-weight: 800;
@@ -29,6 +30,7 @@
     font-size: 0.85rem;
     color: $dark-secondary;
     line-height: 1.65;
+    max-width: 620px;
   }
 
   .brand-features {
@@ -51,22 +53,18 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.45rem;
+    margin-top: auto;
+    padding-top: 2.5rem; // Dedicated generous space between brand features & domain chips
 
     .domain-chip {
       @extend .pms-chip;
     }
   }
-
-  .brand-footer {
-    font-size: 0.72rem;
-    color: $dark-muted;
-    font-weight: 500;
-  }
 }
 
 // ── Right Form Panel & Login Card ──────────────────────────
-.login-form-panel {
-  background: $theme-bg;
+.form-panel-col {
+  // Aligns seamlessly with left brand column in stretch grid row
 }
 
 // ── Logo: "Pm." Black Circle ───────────────────────────────
@@ -79,9 +77,37 @@
 }
 
 // ── Card & Input Components (Dark & Secondary Theme) ───────
-.card {
+.card.login-card {
   background: $bg-surface;
-  border-radius: 16px;
+  border-radius: 18px;
+  min-height: 560px;
+
+  .card-body {
+    padding: 2.25rem 2rem 0.65rem 2rem;
+  }
+
+  .card-bottom-section {
+    margin-top: auto;
+  }
+
+  .card-copyright {
+    font-size: 0.68rem;
+    color: $dark-muted;
+    font-weight: 500;
+    line-height: 1.2;
+    opacity: 0.85;
+    margin-top: 40px;
+    display: block;
+  }
+}
+
+// ── Bottom Footer Bar ──────────────────────────────────────
+.login-bottom-bar {
+  .brand-footer {
+    font-size: 0.72rem;
+    color: $dark-muted;
+    font-weight: 500;
+  }
 }
 
 .form-title {
