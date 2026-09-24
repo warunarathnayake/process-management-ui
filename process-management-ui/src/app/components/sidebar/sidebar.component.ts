@@ -131,7 +131,9 @@ export class SidebarComponent {
           icon: 'bi-shield-check',
           expanded: false,
           children: [
-            { id: 'users', label: 'User Management', route: '/users' }
+            { id: 'users', label: 'User Management', route: '/users' },
+            { id: 'roles', label: 'Roles & Permissions', route: '/roles' },
+            { id: 'departments', label: 'Department Management', route: '/departments' }
           ]
         }
       ]
