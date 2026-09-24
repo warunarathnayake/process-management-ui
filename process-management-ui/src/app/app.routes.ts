@@ -1,23 +1,42 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
-  // Default redirect to login
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
-
-  // Login page
+  // Authentication Route
   {
     path: 'login',
     loadComponent: () =>
       import('./components/login/login.component').then(m => m.LoginComponent)
   },
 
-  // Header standalone preview route
+  // Main Application Layout Shell with Header, Sidebar, and Footer
+  {
+    path: 'app',
+    loadComponent: () =>
+      import('./components/layout/layout.component').then(m => m.LayoutComponent)
+  },
+  {
+    path: '',
+    redirectTo: 'app',
+    pathMatch: 'full'
+  },
+
+  // Standalone Component Previews (Developer routes)
   {
     path: 'header',
     loadComponent: () =>
       import('./components/header/header.component').then(m => m.HeaderComponent)
   },
+  {
+    path: 'sidebar',
+    loadComponent: () =>
+      import('./components/sidebar/sidebar.component').then(m => m.SidebarComponent)
+  },
+  {
+    path: 'footer',
+    loadComponent: () =>
+      import('./components/footer/footer.component').then(m => m.FooterComponent)
+  },
 
-  // Catch-all
-  { path: '**', redirectTo: 'login' }
+  // Catch-all route
+  { path: '**', redirectTo: '' }
 ];

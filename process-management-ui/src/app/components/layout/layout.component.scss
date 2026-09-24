@@ -1,0 +1,30 @@
+@import 'variables';
+@import 'mixins';
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background-color: $theme-bg;
+}
+
+.app-shell {
+  min-height: 100vh;
+  background-color: $theme-bg;
+}
+
+.app-main-container {
+  min-height: calc(100vh - 120px);
+  background-color: $theme-bg;
+}
+
+.sidebar-wrapper {
+  width: 260px;
+  min-width: 260px;
+  background-color: $theme-bg;
+  border: none;
+}
+
+.panel-wrapper {
+  background-color: $theme-bg;
+  overflow-y: auto;
+}
