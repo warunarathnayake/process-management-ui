@@ -1,0 +1,15 @@
+services:
+  process-management-ui:
+    build:
+      context: ./process-management-ui
+      dockerfile: Dockerfile
+    container_name: process-management-ui
+    ports:
+      - "${PORT:-4200}:80"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
