@@ -11,6 +11,7 @@ $body-bg:            $theme-bg;
 $body-color:         $dark-primary;
 $primary:            $dark-primary;
 $secondary:          $dark-muted;
+$form-check-input-bg: #ffffff;
 $font-family-sans-serif: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
 
 // Native Tooltip Overrides (Solid Black & High Contrast)
@@ -63,3 +64,40 @@ body {
     to   { opacity: 1; transform: translateY(0); }
   }
 }
+
+// ── Pagination Outline Dark Variant ────────────────────────
+.pagination-outline-dark {
+  --bs-pagination-color: #{$dark-primary};
+  --bs-pagination-bg: transparent;
+  --bs-pagination-border-width: 1px;
+  --bs-pagination-border-color: #{$dark-primary};
+  --bs-pagination-hover-color: #ffffff;
+  --bs-pagination-hover-bg: #{$dark-primary};
+  --bs-pagination-hover-border-color: #{$dark-primary};
+  --bs-pagination-focus-color: #ffffff;
+  --bs-pagination-focus-bg: #{$dark-primary};
+  --bs-pagination-focus-box-shadow: 0 0 0 0.15rem rgba(26, 31, 46, 0.18);
+  --bs-pagination-active-color: #ffffff;
+  --bs-pagination-active-bg: #{$dark-primary};
+  --bs-pagination-active-border-color: #{$dark-primary};
+  --bs-pagination-disabled-color: #{$dark-primary};
+  --bs-pagination-disabled-bg: transparent;
+  --bs-pagination-disabled-border-color: #{$dark-primary};
+
+  .page-item.disabled,
+  .page-link:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .page-link {
+    font-weight: 500;
+    cursor: pointer;
+
+    &:focus {
+      outline: 0;
+    }
+  }
+}
+
