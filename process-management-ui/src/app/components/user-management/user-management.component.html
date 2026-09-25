@@ -1,0 +1,254 @@
+<div class="user-management-page">
+
+  <!-- Page Header -->
+  <div class="page-header d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h4 class="page-title mb-1">
+        <i class="bi bi-people-fill me-2 text-black-50"></i>User Management
+      </h4>
+      <p class="page-subtitle mb-0">Manage system users, roles, and access</p>
+    </div>
+    <button class="btn btn-outline-dark btn-sm px-3" (click)="openAddModal()">
+      <i class="bi bi-person-add me-1"></i> Add User
+    </button>
+  </div>
+
+  <!-- Filters & Search -->
+  <div class="filter-bar d-flex flex-wrap align-items-center gap-2 mb-3">
+    <div class="search-wrapper flex-grow-1">
+      <span class="search-icon" aria-hidden="true">
+        <i class="bi bi-search"></i>
+      </span>
+      <input
+        type="text"
+        class="form-control form-control-sm search-input"
+        placeholder="Search by name, email, role or department…"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="onSearch($event)"
+      />
+    </div>
+    <div class="btn-group status-filter" role="group">
+      <button
+        *ngFor="let s of ['All', 'Active', 'Inactive']"
+        type="button"
+        class="btn btn-outline-dark btn-sm"
+        [class.active]="filterStatus() === s"
+        (click)="setFilter(s)"
+      >{{ s }}</button>
+    </div>
+  </div>
+
+  <!-- Users Table -->
+  <div class="table-card shadow-sm" data-bs-theme="light">
+    <div class="table-responsive">
+      <table class="table table-striped align-middle mb-0">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">Role</th>
+            <th scope="col">Department</th>
+            <th scope="col">Status</th>
+            <th scope="col">Created</th>
+            <th scope="col" class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="filteredUsers().length === 0">
+            <td colspan="8" class="text-center py-5 text-muted">
+              <i class="bi bi-inbox fs-2 d-block mb-2"></i>No users found.
+            </td>
+          </tr>
+          <tr *ngFor="let user of paginatedUsers(); let i = index">
+            <th scope="row" class="fw-bold text-black">{{ (currentPage() - 1) * pageSize() + i + 1 }}</th>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="avatar">{{ user.name.charAt(0) }}</div>
+                <span class="fw-medium text-black">{{ user.name }}</span>
+              </div>
+            </td>
+            <td class="text-black">{{ user.email }}</td>
+            <td class="text-black">{{ user.role }}</td>
+            <td class="text-black">{{ user.department }}</td>
+            <td>
+              <span
+                class="status-badge"
+                [class.status-active]="user.status === 'Active'"
+                [class.status-inactive]="user.status === 'Inactive'"
+                (click)="toggleStatus(user)"
+                title="Click to toggle"
+              >
+                <i class="bi" [class.bi-check-circle-fill]="user.status === 'Active'" [class.bi-x-circle-fill]="user.status === 'Inactive'"></i>
+                {{ user.status }}
+              </span>
+            </td>
+            <td class="text-black small">{{ user.createdAt }}</td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-link p-1 text-secondary" title="Edit" (click)="openEditModal(user)">
+                <i class="bi bi-pencil-square fs-5"></i>
+              </button>
+              <button class="btn btn-sm btn-link p-1 text-danger" title="Delete" (click)="deleteUser(user.id)">
+                <i class="bi bi-trash3 fs-5"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table-footer d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <span class="text-black-50 small">
+        Showing {{ showingFrom() }} to {{ showingTo() }} of {{ filteredUsers().length }} users
+      </span>
+      <nav aria-label="Table pagination" *ngIf="totalPages() > 1">
+        <ul class="pagination pagination-sm pagination-outline-dark mb-0">
+          <li class="page-item" [class.disabled]="currentPage() === 1">
+            <button
+              type="button"
+              class="page-link"
+              (click)="goToPage(currentPage() - 1)"
+              [disabled]="currentPage() === 1"
+              aria-label="Previous"
+            >
+              Previous
+            </button>
+          </li>
+          <li
+            class="page-item"
+            *ngFor="let p of pageNumbers()"
+            [class.active]="currentPage() === p"
+          >
+            <button
+              type="button"
+              class="page-link"
+              (click)="goToPage(p)"
+              [attr.aria-current]="currentPage() === p ? 'page' : null"
+            >
+              {{ p }}
+            </button>
+          </li>
+          <li class="page-item" [class.disabled]="currentPage() === totalPages()">
+            <button
+              type="button"
+              class="page-link"
+              (click)="goToPage(currentPage() + 1)"
+              [disabled]="currentPage() === totalPages()"
+              aria-label="Next"
+            >
+              Next
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+</div>
+
+<!-- Add / Edit Modal -->
+<div class="modal fade show d-block" tabindex="-1" *ngIf="showModal()" (click)="closeModal()" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+    <div class="modal-content shadow border-0">
+      <div class="modal-header border-0 pt-4 px-4 pb-0 d-block">
+        <h5 class="modal-title fs-5 fw-bold mb-1">
+          <i class="bi me-2 text-black-50" [class.bi-person-fill-add]="!isEditMode()" [class.bi-person-fill-gear]="isEditMode()"></i>
+          {{ isEditMode() ? 'Edit User' : 'Add New User' }}
+        </h5>
+        <p class="modal-subtitle mb-0">
+          {{ isEditMode() ? 'Update user information and access status.' : 'Enter user details to create a new account in the system.' }}
+        </p>
+      </div>
+      <div class="modal-body px-4 py-3">
+        <div class="mb-3">
+          <label class="form-label form-label-sm">EPF / NIC No</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text"><i class="bi bi-person-vcard"></i></span>
+            <input type="text" class="form-control form-control-sm" placeholder="Enter EPF or NIC number" [(ngModel)]="formData.epfNicNo" />
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label form-label-sm">Full Name</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text"><i class="bi bi-person"></i></span>
+            <input type="text" class="form-control form-control-sm" placeholder="Enter full name" [(ngModel)]="formData.name" />
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label form-label-sm">Email Address</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+            <input type="email" class="form-control form-control-sm" placeholder="Enter email" [(ngModel)]="formData.email" />
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label form-label-sm">Role</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text"><i class="bi bi-shield"></i></span>
+            <select class="form-select form-select-sm" [(ngModel)]="formData.role">
+              <option value="" disabled>Select role</option>
+              <option>Admin</option>
+              <option>Manager</option>
+              <option>Staff</option>
+            </select>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label form-label-sm">Department</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text"><i class="bi bi-building"></i></span>
+            <select class="form-select form-select-sm" [(ngModel)]="formData.department">
+              <option value="" disabled>Select department</option>
+              <option>IT</option>
+              <option>Operations</option>
+              <option>HR</option>
+              <option>Finance</option>
+              <option>Logistics</option>
+            </select>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label form-label-sm d-block">Status</label>
+          <div class="d-flex align-items-center gap-4 pt-1">
+            <div class="form-check form-check-inline mb-0">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="userStatus"
+                id="statusActive"
+                value="Active"
+                [(ngModel)]="formData.status"
+              />
+              <label class="form-check-label" for="statusActive">Active</label>
+            </div>
+            <div class="form-check form-check-inline mb-0">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="userStatus"
+                id="statusInactive"
+                value="Inactive"
+                [(ngModel)]="formData.status"
+              />
+              <label class="form-check-label" for="statusInactive">Inactive</label>
+            </div>
+          </div>
+          <p class="modal-field-desc mt-2 mb-0">
+            {{ formData.status === 'Active' ? 'Active users can log in and access system features.' : 'Inactive users are disabled from logging in.' }}
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer border-0 px-4 pb-4 pt-0 gap-2">
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeModal()">
+          <i class="bi bi-x-circle"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="resetForm()">
+          <i class="bi bi-arrow-counterclockwise"></i> Reset
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="saveUser()">
+          <i class="bi bi-check-circle"></i> Save
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="showModal()" (click)="closeModal()"></div>
