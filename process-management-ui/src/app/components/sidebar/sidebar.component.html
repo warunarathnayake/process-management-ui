@@ -18,7 +18,7 @@
             <button
               type="button"
               class="nav-link menu-item main-menu-item d-flex align-items-center justify-content-between w-100 border-0 bg-transparent text-start"
-              [class.active]="selectedId === item.id"
+              [class.active]="isMainActive(item)"
               [class.is-expanded]="item.expanded"
               (click)="onSelectMain(item)"
               [attr.aria-expanded]="item.expanded">
@@ -52,7 +52,7 @@
                       [routerLinkActiveOptions]="{ exact: true }"
                       (click)="onSelectSub(item, sub, $event)"
                       class="submenu-link d-flex align-items-center gap-2 text-decoration-none"
-                      [class.active]="selectedSubId === sub.id">
+                      [class.active]="isSubActive(sub)">
                       
                       <!-- Bullet Dot Slot (Exact same slot width and position as main menu icon) -->
                       <span class="icon-slot dot-slot">
@@ -66,7 +66,7 @@
                       <button
                         type="button"
                         class="submenu-link d-flex align-items-center gap-2 w-100 border-0 bg-transparent text-start"
-                        [class.active]="selectedSubId === sub.id"
+                        [class.active]="isSubActive(sub)"
                         (click)="onSelectSub(item, sub, $event)">
                         <span class="icon-slot dot-slot">
                           <span class="tree-bullet-dot"></span>
@@ -92,7 +92,7 @@
               [routerLinkActiveOptions]="{ exact: true }"
               (click)="onSelectMain(item)"
               class="nav-link menu-item main-menu-item d-flex align-items-center gap-2 w-100 border-0 bg-transparent text-start text-decoration-none"
-              [class.active]="selectedId === item.id && !selectedSubId">
+              [class.active]="isSingleMainActive(item)">
               <span class="icon-slot">
                 <i class="bi menu-icon" [ngClass]="item.icon"></i>
               </span>
@@ -104,7 +104,7 @@
               <button
                 type="button"
                 class="nav-link menu-item main-menu-item d-flex align-items-center gap-2 w-100 border-0 bg-transparent text-start"
-                [class.active]="selectedId === item.id && !selectedSubId"
+                [class.active]="isSingleMainActive(item)"
                 (click)="onSelectMain(item)">
                 <span class="icon-slot">
                   <i class="bi menu-icon" [ngClass]="item.icon"></i>

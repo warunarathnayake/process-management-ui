@@ -10,38 +10,31 @@ export const routes: Routes = [
 
   // Main Application Layout Shell with Header, Sidebar, and Footer
   {
-    path: 'app',
-    loadComponent: () =>
-      import('./components/layout/layout.component').then(m => m.LayoutComponent)
-  },
-  {
-    path: 'users',
+    path: '',
     loadComponent: () =>
       import('./components/layout/layout.component').then(m => m.LayoutComponent),
     children: [
       {
-        path: '',
+        path: 'app',
+        redirectTo: 'users',
+        pathMatch: 'full'
+      },
+      {
+        path: 'users',
         loadComponent: () =>
           import('./components/administrator/user-management/user-management.component').then(m => m.UserManagementComponent)
-      }
-    ]
-  },
-  {
-    path: 'departments',
-    loadComponent: () =>
-      import('./components/layout/layout.component').then(m => m.LayoutComponent),
-    children: [
+      },
       {
-        path: '',
+        path: 'departments',
         loadComponent: () =>
           import('./components/administrator/department-management/department-management.component').then(m => m.DepartmentManagementComponent)
+      },
+      {
+        path: '',
+        redirectTo: 'users',
+        pathMatch: 'full'
       }
     ]
-  },
-  {
-    path: '',
-    redirectTo: 'app',
-    pathMatch: 'full'
   },
 
   // Standalone Component Previews (Developer routes)

@@ -1,6 +1,7 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 
 export interface SubMenuItem {
   id: string;
@@ -32,7 +33,9 @@ export interface MenuGroup {
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss']
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit {
+  private router = inject(Router);
+
   @Input() selectedId: string = 'dashboard';
   @Input() selectedSubId: string = '';
 
@@ -55,7 +58,7 @@ export class SidebarComponent {
           id: 'material-management',
           label: 'Material Management',
           icon: 'bi-boxes',
-          expanded: true,
+          expanded: false,
           children: [
             { id: 'materials', label: 'Materials & Stock', route: '/materials' },
             { id: 'material-categories', label: 'Material Categories', route: '/material-categories' },
@@ -142,6 +145,15 @@ export class SidebarComponent {
 
   @Output() menuSelect = new EventEmitter<MenuItem | SubMenuItem>();
 
+  ngOnInit(): void {
+    this.syncActiveMenuWithRoute(this.router.url);
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd)
+    ).subscribe(event => {
+      this.syncActiveMenuWithRoute(event.urlAfterRedirects || event.url);
+    });
+  }
+
   toggleExpand(item: MenuItem, event?: Event): void {
     if (event) {
       event.stopPropagation();
@@ -164,6 +176,12 @@ export class SidebarComponent {
     } else {
       this.selectedId = item.id;
       this.selectedSubId = '';
+      // Collapse all accordions when selecting a single link
+      this.menuGroups.forEach(group => {
+        group.items.forEach(m => {
+          m.expanded = false;
+        });
+      });
       this.menuSelect.emit(item);
     }
   }
@@ -174,10 +192,85 @@ export class SidebarComponent {
     }
     this.selectedId = parent.id;
     this.selectedSubId = sub.id;
+
+    // Keep parent expanded and collapse all other main menus
+    this.menuGroups.forEach(group => {
+      group.items.forEach(m => {
+        m.expanded = (m.id === parent.id);
+      });
+    });
+
     this.menuSelect.emit(sub);
   }
 
+  isMainActive(item: MenuItem): boolean {
+    if (item.children && item.children.length > 0) {
+      return (this.selectedId === item.id && !!this.selectedSubId) ||
+        item.children.some(child => this.isSubActive(child));
+    }
+    return this.isSingleMainActive(item);
+  }
+
   isSubActive(sub: SubMenuItem): boolean {
-    return this.selectedSubId === sub.id;
+    if (this.selectedSubId === sub.id) {
+      return true;
+    }
+    if (sub.route) {
+      const currentPath = this.router.url.split('?')[0].split('#')[0];
+      return currentPath === sub.route || currentPath.startsWith(sub.route + '/');
+    }
+    return false;
+  }
+
+  isSingleMainActive(item: MenuItem): boolean {
+    if (this.selectedSubId) {
+      // When a submenu is active, no single main menu (e.g. Dashboard) can be active
+      return false;
+    }
+    if (item.route) {
+      const currentPath = this.router.url.split('?')[0].split('#')[0];
+      return currentPath === item.route;
+    }
+    return this.selectedId === item.id;
+  }
+
+  private syncActiveMenuWithRoute(url: string): void {
+    if (!url) return;
+    const currentPath = url.split('?')[0].split('#')[0];
+
+    let matchedParentId: string | null = null;
+    let matchedSubId: string | null = null;
+
+    for (const group of this.menuGroups) {
+      for (const item of group.items) {
+        if (item.children && item.children.length > 0) {
+          const matchedChild = item.children.find(child =>
+            child.route && (currentPath === child.route || currentPath.startsWith(child.route + '/'))
+          );
+          if (matchedChild) {
+            matchedParentId = item.id;
+            matchedSubId = matchedChild.id;
+            break;
+          }
+        } else if (item.route && (currentPath === item.route || currentPath.startsWith(item.route + '/'))) {
+          matchedParentId = item.id;
+          matchedSubId = '';
+          break;
+        }
+      }
+      if (matchedParentId) break;
+    }
+
+    if (matchedParentId) {
+      this.selectedId = matchedParentId;
+      this.selectedSubId = matchedSubId || '';
+
+      // Set the matched parent to expanded, collapse all others
+      this.menuGroups.forEach(group => {
+        group.items.forEach(m => {
+          m.expanded = (m.id === matchedParentId);
+        });
+      });
+    }
   }
 }
