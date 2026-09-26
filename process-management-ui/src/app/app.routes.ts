@@ -27,6 +27,18 @@ export const routes: Routes = [
     ]
   },
   {
+    path: 'departments',
+    loadComponent: () =>
+      import('./components/layout/layout.component').then(m => m.LayoutComponent),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./components/administrator/department-management/department-management.component').then(m => m.DepartmentManagementComponent)
+      }
+    ]
+  },
+  {
     path: '',
     redirectTo: 'app',
     pathMatch: 'full'
@@ -47,6 +59,11 @@ export const routes: Routes = [
     path: 'footer',
     loadComponent: () =>
       import('./components/footer/footer.component').then(m => m.FooterComponent)
+  },
+  {
+    path: 'department-management',
+    loadComponent: () =>
+      import('./components/administrator/department-management/department-management.component').then(m => m.DepartmentManagementComponent)
   },
 
   // Catch-all route

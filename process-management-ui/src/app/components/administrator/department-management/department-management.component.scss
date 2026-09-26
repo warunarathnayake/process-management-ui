@@ -1,0 +1,258 @@
+@import 'variables';
+@import 'mixins';
+
+// ── Page Shell ──────────────────────────────────────────────────────────────
+.department-management-page { 
+  padding: 0.25rem 0;
+}
+
+// ── Page Header ──────────────────────────────────────────────────────────────
+.page-header {
+  .page-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: $dark-primary;
+  }
+
+  .page-subtitle {
+    font-size: 0.85rem;
+    color: $dark-muted;
+  }
+}
+
+// ── Filter Bar (Full Width) ──────────────────────────────────────────────────
+.filter-bar {
+  .search-wrapper {
+    position: relative;
+    width: 100%;
+
+    .search-input {
+      @include pms-form-control;
+      width: 100%;
+      padding-left: 2.25rem;
+      padding-right: 2.25rem;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: $dark-muted;
+      font-size: 0.88rem;
+      line-height: 1;
+      z-index: 5;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .search-clear-btn {
+      position: absolute;
+      right: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 0;
+      color: $dark-muted;
+      font-size: 0.95rem;
+      line-height: 1;
+      z-index: 5;
+      text-decoration: none;
+      border: 0;
+      background: transparent;
+      transition: color 0.15s ease-in-out;
+
+      &:hover {
+        color: $dark-primary;
+      }
+    }
+  }
+}
+
+// ── Table Card ────────────────────────────────────────────────────────────────
+.table-card {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+
+  .table {
+    --bs-table-bg: #ffffff;
+    --bs-table-striped-bg: rgba(0, 0, 0, 0.035);
+  }
+
+  thead tr th {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $dark-muted;
+    white-space: nowrap;
+  }
+
+  thead tr th:first-child,
+  tbody tr th:first-child,
+  tbody tr td:first-child {
+    padding-left: 1.5rem;
+  }
+
+  tbody th,
+  tbody td {
+    color: #000;
+  }
+
+  .dept-desc-col {
+    line-height: 1.4;
+  }
+
+  .user-count-chip {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: $dark-secondary;
+    background-color: $bg-surface-subtle;
+    border: 1px solid $border-light;
+    padding: 0.22rem 0.65rem;
+    border-radius: 20px;
+  }
+
+  .table-footer {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.78rem;
+    color: $text-placeholder;
+    background: $bg-surface-subtle;
+
+    .pagination {
+      --bs-pagination-color: #{$dark-primary};
+      --bs-pagination-bg: transparent;
+      --bs-pagination-border-width: 1px;
+      --bs-pagination-border-color: #{$dark-primary};
+      --bs-pagination-hover-color: #ffffff;
+      --bs-pagination-hover-bg: #{$dark-primary};
+      --bs-pagination-hover-border-color: #{$dark-primary};
+      --bs-pagination-focus-color: #ffffff;
+      --bs-pagination-focus-bg: #{$dark-primary};
+      --bs-pagination-focus-box-shadow: 0 0 0 0.15rem rgba(26, 31, 46, 0.18);
+      --bs-pagination-active-color: #ffffff;
+      --bs-pagination-active-bg: #{$dark-primary};
+      --bs-pagination-active-border-color: #{$dark-primary};
+      --bs-pagination-disabled-color: #{$dark-primary};
+      --bs-pagination-disabled-bg: transparent;
+      --bs-pagination-disabled-border-color: #{$dark-primary};
+
+      .page-item.disabled {
+        cursor: not-allowed;
+
+        .page-link {
+          opacity: 0.45;
+          pointer-events: none;
+        }
+      }
+
+      .page-link:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        pointer-events: none;
+      }
+
+      .page-link {
+        font-weight: 500;
+        cursor: pointer;
+        transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+        &:focus {
+          outline: 0;
+        }
+      }
+    }
+  }
+}
+
+// ── Avatar ────────────────────────────────────────────────────────────────────
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $dark-secondary, $dark-primary);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+// ── Native Bootstrap Modal Customization ──────────────────────────────
+.modal-content {
+  border-radius: 12px;
+  background-color: $bg-surface;
+
+  .modal-title {
+    color: $dark-primary;
+  }
+
+  .modal-subtitle {
+    font-size: 0.8125rem;
+    color: $dark-muted;
+  }
+
+  .modal-field-desc {
+    font-size: 0.775rem;
+    color: $dark-muted;
+  }
+
+  .form-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: $dark-primary;
+    margin-bottom: 0.35rem;
+  }
+
+  .input-group-text {
+    background-color: $bg-surface-subtle;
+    border-color: $border-color;
+    color: $dark-secondary;
+    font-size: 0.85rem;
+    transition: border-color 0.2s, color 0.2s, background-color 0.2s;
+  }
+
+  .form-control {
+    @include pms-form-control;
+  }
+
+  .input-group:focus-within {
+    .input-group-text {
+      border-color: $dark-primary;
+      background-color: $bg-surface;
+      color: $dark-primary;
+    }
+  }
+
+  .modal-btn {
+    width: 105px;
+    min-width: 105px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    background-color: transparent;
+    border-color: $dark-primary;
+    color: $dark-primary;
+    font-weight: 500;
+    transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, color 0.15s ease-in-out;
+
+    &:hover {
+      background-color: $dark-primary;
+      border-color: $dark-primary;
+      color: #ffffff;
+    }
+
+    &:active {
+      background-color: $dark-active;
+      border-color: $dark-active;
+      color: #ffffff;
+    }
+  }
+}
