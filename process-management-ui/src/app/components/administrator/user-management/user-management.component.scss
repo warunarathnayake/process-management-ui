@@ -30,7 +30,7 @@
     .search-input {
       @include pms-form-control;
       padding-left: 2.25rem;
-      padding-right: 0.85rem;
+      padding-right: 2.25rem;
     }
 
     .search-icon {
@@ -44,6 +44,26 @@
       z-index: 5;
       user-select: none;
       pointer-events: none;
+    }
+
+    .search-clear-btn {
+      position: absolute;
+      right: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 0;
+      color: $dark-muted;
+      font-size: 0.95rem;
+      line-height: 1;
+      z-index: 5;
+      text-decoration: none;
+      border: 0;
+      background: transparent;
+      transition: color 0.15s ease-in-out;
+
+      &:hover {
+        color: $dark-primary;
+      }
     }
   }
 

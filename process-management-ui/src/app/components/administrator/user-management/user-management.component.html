@@ -26,6 +26,14 @@
         [ngModel]="searchQuery()"
         (ngModelChange)="onSearch($event)"
       />
+      <button
+        *ngIf="searchQuery()"
+        type="button"
+        class="btn btn-link btn-sm search-clear-btn"
+        (click)="onSearch('')"
+        title="Clear search">
+        <i class="bi bi-x-circle-fill"></i>
+      </button>
     </div>
     <div class="btn-group status-filter" role="group">
       <button
