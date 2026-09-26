@@ -15,6 +15,18 @@ export const routes: Routes = [
       import('./components/layout/layout.component').then(m => m.LayoutComponent)
   },
   {
+    path: 'users',
+    loadComponent: () =>
+      import('./components/layout/layout.component').then(m => m.LayoutComponent),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./components/administrator/user-management/user-management.component').then(m => m.UserManagementComponent)
+      }
+    ]
+  },
+  {
     path: '',
     redirectTo: 'app',
     pathMatch: 'full'
