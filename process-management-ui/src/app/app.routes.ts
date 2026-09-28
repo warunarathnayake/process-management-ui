@@ -40,6 +40,16 @@ export const routes: Routes = [
         pathMatch: 'full'
       },
       {
+        path: 'material-categories',
+        loadComponent: () =>
+          import('./components/material-management/material-category/material-category.component').then(m => m.MaterialCategoryComponent)
+      },
+      {
+        path: 'material-category',
+        redirectTo: 'material-categories',
+        pathMatch: 'full'
+      },
+      {
         path: '',
         redirectTo: 'users',
         pathMatch: 'full'
@@ -72,6 +82,16 @@ export const routes: Routes = [
     path: 'unit',
     loadComponent: () =>
       import('./components/material-management/unit/unit.component').then(m => m.UnitComponent)
+  },
+  {
+    path: 'material-category',
+    loadComponent: () =>
+      import('./components/material-management/material-category/material-category.component').then(m => m.MaterialCategoryComponent)
+  },
+  {
+    path: 'material-categories',
+    redirectTo: 'material-category',
+    pathMatch: 'full'
   },
 
   // Catch-all route
