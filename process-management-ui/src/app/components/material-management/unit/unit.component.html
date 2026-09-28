@@ -1,0 +1,283 @@
+<div class="unit-management-page">
+
+  <!-- Page Header -->
+  <div class="page-header d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h4 class="page-title mb-1">
+        <i class="bi bi-flask-fill me-2 text-black-50"></i>Units of Measure
+      </h4>
+      <p class="page-subtitle mb-0">Manage material measurement units and types</p>
+    </div>
+    <button class="btn btn-outline-dark btn-sm px-3" (click)="openAddModal()">
+      <i class="bi bi-node-plus me-1"></i> Add Unit
+    </button>
+  </div>
+
+  <!-- Filters & Search Bar -->
+  <div class="filter-bar d-flex flex-wrap align-items-center gap-2 mb-3">
+    <!-- Search Input -->
+    <div class="search-wrapper flex-grow-1">
+      <span class="search-icon" aria-hidden="true">
+        <i class="bi bi-search"></i>
+      </span>
+      <input
+        type="text"
+        class="form-control form-control-sm search-input"
+        placeholder="Search units by name, type, or code…"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="onSearch($event)"
+      />
+      <button
+        *ngIf="searchQuery()"
+        type="button"
+        class="btn btn-link btn-sm search-clear-btn"
+        (click)="onSearch('')"
+        title="Clear search">
+        <i class="bi bi-x-circle-fill"></i>
+      </button>
+    </div>
+
+    <!-- Type Filter Dropdown -->
+    <div class="type-filter">
+      <select
+        class="form-select form-select-sm"
+        [ngModel]="typeFilter()"
+        (ngModelChange)="setTypeFilter($event)">
+        <option value="All">All Types</option>
+        <option *ngFor="let t of measurementTypes" [value]="t">{{ t }}</option>
+      </select>
+    </div>
+
+    <!-- Status Filter Buttons -->
+    <div class="btn-group status-filter" role="group">
+      <button
+        *ngFor="let s of ['All', 'Active', 'Inactive']"
+        type="button"
+        class="btn btn-outline-dark btn-sm"
+        [class.active]="statusFilter() === s"
+        (click)="setStatusFilter(s)"
+      >{{ s }}</button>
+    </div>
+  </div>
+
+  <!-- Units Table -->
+  <div class="table-card shadow-sm" data-bs-theme="light">
+    <div class="table-responsive">
+      <table class="table table-striped align-middle mb-0">
+        <thead>
+          <tr>
+            <th scope="col" style="width: 70px;">#</th>
+            <th scope="col" style="width: 250px;">Unit Name</th>
+            <th scope="col" style="width: 220px;">Measurement Type</th>
+            <th scope="col" style="width: 180px;">Assigned Materials</th>
+            <th scope="col" style="width: 120px;">Status</th>
+            <th scope="col" class="text-center" style="width: 120px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Empty State -->
+          <tr *ngIf="filteredUnits().length === 0">
+            <td colspan="6" class="text-center py-5 text-muted">
+              <i class="bi bi-inbox fs-2 d-block mb-2"></i>No measurement units found matching your criteria.
+            </td>
+          </tr>
+
+          <!-- Rows -->
+          <tr *ngFor="let unit of paginatedUnits(); let i = index">
+            <th scope="row" class="fw-bold text-black">{{ (currentPage() - 1) * pageSize() + i + 1 }}</th>
+
+            <!-- Unit Name with Circular Avatar Icon -->
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="avatar">
+                  <i class="bi" [ngClass]="getTypeIcon(unit.type)"></i>
+                </div>
+                <span class="fw-medium text-black">{{ unit.name }}</span>
+              </div>
+            </td>
+
+            <!-- Measurement Type -->
+            <td>
+              <span class="type-badge" [ngClass]="getTypeBadgeClass(unit.type)">
+                <i class="bi me-1" [ngClass]="getTypeIcon(unit.type)"></i>
+                {{ unit.type }}
+              </span>
+            </td>
+
+            <!-- Assigned Materials -->
+            <td>
+              <span class="material-count-chip">
+                <i class="bi bi-boxes me-1 text-secondary"></i>
+                {{ unit.materialsCount || 0 }} {{ (unit.materialsCount === 1) ? 'material' : 'materials' }}
+              </span>
+            </td>
+
+            <!-- Status -->
+            <td>
+              <span
+                class="status-badge"
+                [class.status-active]="unit.status === 'Active'"
+                [class.status-inactive]="unit.status === 'Inactive'"
+                (click)="toggleStatus(unit)"
+                title="Click to toggle status"
+              >
+                <i class="bi" [class.bi-check-circle-fill]="unit.status === 'Active'" [class.bi-x-circle-fill]="unit.status === 'Inactive'"></i>
+                {{ unit.status }}
+              </span>
+            </td>
+
+            <!-- Actions -->
+            <td class="text-center">
+              <button
+                class="btn btn-sm btn-link p-1 text-secondary"
+                title="Edit Unit"
+                (click)="openEditModal(unit)">
+                <i class="bi bi-pencil-square fs-5"></i>
+              </button>
+              <button
+                class="btn btn-sm btn-link p-1 text-danger"
+                title="Delete Unit"
+                (click)="deleteUnit(unit)">
+                <i class="bi bi-trash3 fs-5"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Table Footer with Pagination -->
+    <div class="table-footer d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <span class="text-black-50 small">
+        Showing {{ showingFrom() }} to {{ showingTo() }} of {{ filteredUnits().length }} units
+      </span>
+      <nav aria-label="Units pagination" *ngIf="totalPages() > 1">
+        <ul class="pagination pagination-sm pagination-outline-dark mb-0">
+          <li class="page-item" [class.disabled]="currentPage() === 1">
+            <button
+              type="button"
+              class="page-link"
+              (click)="goToPage(currentPage() - 1)"
+              [disabled]="currentPage() === 1"
+              aria-label="Previous">
+              Previous
+            </button>
+          </li>
+          <li
+            *ngFor="let p of pageNumbers()"
+            class="page-item"
+            [class.active]="currentPage() === p">
+            <button type="button" class="page-link" (click)="goToPage(p)">{{ p }}</button>
+          </li>
+          <li class="page-item" [class.disabled]="currentPage() === totalPages()">
+            <button
+              type="button"
+              class="page-link"
+              (click)="goToPage(currentPage() + 1)"
+              [disabled]="currentPage() === totalPages()"
+              aria-label="Next">
+              Next
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+</div>
+
+<!-- Add / Edit Unit Modal -->
+<div class="modal fade show d-block" tabindex="-1" *ngIf="showModal()" (click)="closeModal()" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+    <div class="modal-content shadow border-0">
+
+      <!-- Modal Header -->
+      <div class="modal-header border-0 pt-4 px-4 pb-0 d-block">
+        <h5 class="modal-title fs-5 fw-bold mb-1">
+          <i class="bi me-2 text-black-50" [class.bi-node-plus-fill]="!isEditMode()" [class.bi-measuring-cup-fill]="isEditMode()"></i>
+          {{ isEditMode() ? 'Edit Unit of Measure' : 'Add New Unit of Measure' }}
+        </h5>
+        <p class="modal-subtitle mb-0">
+          {{ isEditMode() ? 'Update measurement unit details for material management.' : 'Enter measurement unit details for material tracking and stock assignment.' }}
+        </p>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body px-4 py-3">
+        <!-- Unit Name -->
+        <div class="mb-3">
+          <label class="form-label form-label-sm">Unit Name</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text"><i class="bi bi-tag"></i></span>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              placeholder="e.g. Kilogram, Piece, Liter"
+              [(ngModel)]="formData.name"
+              (keydown.enter)="saveUnit()"
+              autofocus
+            />
+          </div>
+        </div>
+
+        <!-- Measurement Type -->
+        <div class="mb-3">
+          <label class="form-label form-label-sm">Measurement Type</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text"><i class="bi bi-diagram-3"></i></span>
+            <select class="form-select form-select-sm" [(ngModel)]="formData.type">
+              <option *ngFor="let t of measurementTypes" [value]="t">{{ t }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Status -->
+        <div class="mb-2">
+          <label class="form-label form-label-sm d-block">Status</label>
+          <div class="d-flex align-items-center gap-4 pt-1">
+            <div class="form-check form-check-inline mb-0">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="unitStatus"
+                id="statusUnitActive"
+                value="Active"
+                [(ngModel)]="formData.status"
+              />
+              <label class="form-check-label" for="statusUnitActive">Active</label>
+            </div>
+            <div class="form-check form-check-inline mb-0">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="unitStatus"
+                id="statusUnitInactive"
+                value="Inactive"
+                [(ngModel)]="formData.status"
+              />
+              <label class="form-check-label" for="statusUnitInactive">Inactive</label>
+            </div>
+          </div>
+          <p class="modal-field-desc mt-2 mb-0">
+            {{ formData.status === 'Active' ? 'Active units can be assigned to raw materials.' : 'Inactive units cannot be assigned to new materials.' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer border-0 px-4 pb-4 pt-0 gap-2">
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeModal()">
+          <i class="bi bi-x-circle"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="resetForm()">
+          <i class="bi bi-arrow-counterclockwise"></i> Reset
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="saveUnit()">
+          <i class="bi bi-check-circle"></i> Save
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="showModal()" (click)="closeModal()"></div>

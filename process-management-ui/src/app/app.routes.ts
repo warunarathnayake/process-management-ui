@@ -30,6 +30,16 @@ export const routes: Routes = [
           import('./components/administrator/department-management/department-management.component').then(m => m.DepartmentManagementComponent)
       },
       {
+        path: 'units',
+        loadComponent: () =>
+          import('./components/material-management/unit/unit.component').then(m => m.UnitComponent)
+      },
+      {
+        path: 'unit',
+        redirectTo: 'units',
+        pathMatch: 'full'
+      },
+      {
         path: '',
         redirectTo: 'users',
         pathMatch: 'full'
@@ -57,6 +67,11 @@ export const routes: Routes = [
     path: 'department-management',
     loadComponent: () =>
       import('./components/administrator/department-management/department-management.component').then(m => m.DepartmentManagementComponent)
+  },
+  {
+    path: 'unit',
+    loadComponent: () =>
+      import('./components/material-management/unit/unit.component').then(m => m.UnitComponent)
   },
 
   // Catch-all route
