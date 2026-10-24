@@ -1,6 +1,7 @@
 import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AutoPageSizeDirective } from '../../../shared/directives/auto-page-size.directive';
 
 export interface User {
   id: number;
@@ -16,7 +17,7 @@ export interface User {
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AutoPageSizeDirective],
   templateUrl: './user-management.component.html',
   styleUrls: ['./user-management.component.scss']
 })

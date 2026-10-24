@@ -101,3 +101,57 @@ body {
   }
 }
 
+
+// ── Full-Height Page Layout (table fits the window) ────────
+// Routed page hosts (e.g. <app-unit>) stretch to fill the layout panel.
+.panel-wrapper > :not(router-outlet) {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+// Add `page-fill` to a page's root element: header + filters keep their
+// natural height and the table card takes all the remaining window height.
+.page-fill {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+
+  > .page-header,
+  > .filter-bar {
+    flex-shrink: 0;
+  }
+
+  > .table-card {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+
+    > .table-responsive {
+      // Height comes from the window (flex-basis 0), never from the row count;
+      // the AutoPageSize directive then fits the number of rows to this height.
+      flex: 1 1 0;
+      min-height: 0;
+      overflow-y: hidden;
+      // Empty space below the last row uses the table footer colour
+      // (rows/header keep their own white background).
+      background-color: $bg-surface-subtle;
+
+      // Keep column headers visible if rows ever overflow the card
+      thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background-color: #ffffff;
+      }
+    }
+
+    > .table-footer {
+      flex-shrink: 0;
+      margin-top: auto;
+    }
+  }
+}

@@ -3,28 +3,40 @@
 
 :host {
   display: block;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background-color: $theme-bg;
 }
 
+// App shell is locked to the viewport height (no window-level scrolling).
 .app-shell {
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background-color: $theme-bg;
 }
 
+// Middle body takes all remaining height between header and footer.
 .app-main-container {
-  min-height: calc(100vh - 120px);
+  flex: 1 1 auto;
+  min-height: 0;
   background-color: $theme-bg;
 }
 
 .sidebar-wrapper {
   width: 260px;
   min-width: 260px;
+  min-height: 0;
+  overflow-y: auto;
   background-color: $theme-bg;
   border: none;
 }
 
+// Panel is a flex column so routed pages can stretch to fill the height.
 .panel-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
   background-color: $theme-bg;
-  overflow-y: auto;
 }

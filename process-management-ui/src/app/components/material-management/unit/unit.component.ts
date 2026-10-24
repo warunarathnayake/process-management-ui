@@ -1,6 +1,7 @@
 import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AutoPageSizeDirective } from '../../../shared/directives/auto-page-size.directive';
 
 export type MeasurementType =
   | 'Mass / Weight'
@@ -39,7 +40,7 @@ export interface UnitFormData {
 @Component({
   selector: 'app-unit',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AutoPageSizeDirective],
   templateUrl: './unit.component.html',
   styleUrls: ['./unit.component.scss']
 })

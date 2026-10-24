@@ -1,4 +1,4 @@
-<div class="user-management-page">
+<div class="user-management-page page-fill">
 
   <!-- Page Header -->
   <div class="page-header d-flex align-items-center justify-content-between mb-4">
@@ -48,7 +48,7 @@
 
   <!-- Users Table -->
   <div class="table-card shadow-sm" data-bs-theme="light">
-    <div class="table-responsive">
+    <div class="table-responsive" [appAutoPageSize]="pageSize" [autoPageSizeCurrentPage]="currentPage">
       <table class="table table-striped align-middle mb-0">
         <thead>
           <tr>

@@ -1,6 +1,7 @@
 import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AutoPageSizeDirective } from '../../../shared/directives/auto-page-size.directive';
 
 export interface MaterialCategory {
   id: number;
@@ -22,7 +23,7 @@ export interface MaterialCategoryFormData {
 @Component({
   selector: 'app-material-category',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AutoPageSizeDirective],
   templateUrl: './material-category.component.html',
   styleUrls: ['./material-category.component.scss']
 })

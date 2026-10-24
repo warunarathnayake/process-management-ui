@@ -1,4 +1,4 @@
-<div class="unit-management-page">
+<div class="unit-management-page page-fill">
 
   <!-- Page Header -->
   <div class="page-header d-flex align-items-center justify-content-between mb-4">
@@ -62,7 +62,7 @@
 
   <!-- Units Table -->
   <div class="table-card shadow-sm" data-bs-theme="light">
-    <div class="table-responsive">
+    <div class="table-responsive" [appAutoPageSize]="pageSize" [autoPageSizeCurrentPage]="currentPage">
       <table class="table table-striped align-middle mb-0">
         <thead>
           <tr>
