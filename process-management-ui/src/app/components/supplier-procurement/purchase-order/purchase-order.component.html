@@ -1,0 +1,906 @@
+<div class="purchase-order-page page-fill">
+
+  <!-- Page Header -->
+  <div class="page-header d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h4 class="page-title mb-1">
+        <i class="bi bi-cart-check me-2 text-black-50"></i>Purchase Orders
+      </h4>
+      <p class="page-subtitle mb-0">Create and track supplier purchase orders, delivery schedules, and goods receipts</p>
+    </div>
+    <button class="btn btn-outline-dark btn-sm px-3" (click)="openAddModal()">
+      <i class="bi bi-cart-plus me-1"></i> Create Purchase Order
+    </button>
+  </div>
+
+  <!-- Filters & Search Bar -->
+  <div class="filter-bar d-flex flex-wrap align-items-center gap-2 mb-3">
+    <!-- Search Input -->
+    <div class="search-wrapper flex-grow-1">
+      <span class="search-icon" aria-hidden="true">
+        <i class="bi bi-search"></i>
+      </span>
+      <input
+        type="text"
+        class="form-control form-control-sm search-input"
+        placeholder="Search by PO number, supplier, or material…"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="onSearch($event)"
+      />
+      <button
+        *ngIf="searchQuery()"
+        type="button"
+        class="btn btn-link btn-sm search-clear-btn"
+        (click)="onSearch('')"
+        title="Clear search">
+        <i class="bi bi-x-circle-fill"></i>
+      </button>
+    </div>
+
+    <!-- Supplier Filter -->
+    <div class="supplier-filter">
+      <select
+        class="form-select form-select-sm"
+        [ngModel]="supplierFilter()"
+        (ngModelChange)="setSupplierFilter($event)">
+        <option value="All">All Suppliers</option>
+        <option *ngFor="let s of suppliersCatalog" [value]="s.code">{{ s.name }}</option>
+      </select>
+    </div>
+
+    <!-- Status Filter Buttons -->
+    <div class="btn-group status-filter" role="group">
+      <button
+        *ngFor="let st of statusFilters"
+        type="button"
+        class="btn btn-outline-dark btn-sm"
+        [class.active]="statusFilter() === st"
+        (click)="setStatusFilter(st)"
+      >{{ st }}</button>
+    </div>
+  </div>
+
+  <!-- Purchase Orders Table -->
+  <div class="table-card shadow-sm" data-bs-theme="light">
+    <div class="table-responsive" [appAutoPageSize]="pageSize" [autoPageSizeCurrentPage]="currentPage">
+      <table class="table table-striped align-middle mb-0">
+        <thead>
+          <tr>
+            <th scope="col" style="width: 50px;">#</th>
+            <th scope="col">PO Number</th>
+            <th scope="col">Supplier</th>
+            <th scope="col">Total Amount</th>
+            <th scope="col">Status</th>
+            <th scope="col" class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Empty State -->
+          <tr *ngIf="filteredOrders().length === 0">
+            <td colspan="6" class="text-center py-5 text-muted">
+              <i class="bi bi-inbox fs-2 d-block mb-2"></i>No purchase orders found matching your criteria.
+            </td>
+          </tr>
+
+          <!-- Purchase Order Rows -->
+          <tr *ngFor="let po of paginatedOrders(); let i = index">
+            <th scope="row" class="fw-bold text-black">{{ (currentPage() - 1) * pageSize() + i + 1 }}</th>
+
+            <!-- PO Number & Order Date -->
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="avatar">
+                  <i class="bi bi-file-earmark-text"></i>
+                </div>
+                <div class="d-flex flex-column name-wrap">
+                  <span class="fw-semibold text-black">{{ po.poNumber }}</span>
+                  <span class="sub-text text-muted">Ordered {{ po.orderDate | date:'dd MMM yyyy' }}</span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Supplier -->
+            <td>
+              <div class="d-flex flex-column name-wrap">
+                <span class="fw-medium text-black ellipsis-text" [title]="po.supplierName">{{ po.supplierName }}</span>
+                <span class="sub-text text-muted">{{ po.supplierCode }} · {{ po.paymentTerms }}</span>
+              </div>
+            </td>
+
+            <!-- Total Amount -->
+            <td>
+              <span class="fw-bold text-black">{{ orderTotal(po) | currency:'USD':'symbol':'1.2-2' }}</span>
+            </td>
+
+            <!-- Status -->
+            <td>
+              <span class="po-status-badge" [ngClass]="statusBadgeClass(po.status)">
+                <i class="bi"
+                  [class.bi-file-earmark]="po.status === 'Draft'"
+                  [class.bi-check-circle-fill]="po.status === 'Approved' || po.status === 'Received'"
+                  [class.bi-hourglass-split]="po.status === 'Partially Received'"
+                  [class.bi-x-circle-fill]="po.status === 'Cancelled'"></i>
+                {{ po.status }}
+              </span>
+            </td>
+
+            <!-- Actions -->
+            <td class="text-center">
+              <button
+                class="btn btn-sm btn-link p-1 text-secondary action-btn"
+                title="View Details"
+                (click)="openViewModal(po)">
+                <i class="bi bi-eye fs-5"></i>
+              </button>
+              <button
+                class="btn btn-sm btn-link p-1 text-secondary action-btn"
+                title="Receive Stock (Goods Receipt)"
+                [disabled]="!canReceive(po)"
+                (click)="openReceiveModal(po)">
+                <i class="bi bi-card-checklist fs-5"></i>
+              </button>
+              <button
+                class="btn btn-sm btn-link p-1 text-secondary action-btn"
+                title="Edit Purchase Order"
+                [disabled]="!canEdit(po)"
+                (click)="openEditModal(po)">
+                <i class="bi bi-pencil-square fs-5"></i>
+              </button>
+              <button
+                class="btn btn-sm btn-link p-1 text-danger action-btn"
+                title="Delete Purchase Order"
+                [disabled]="!canDelete(po)"
+                (click)="deletePurchaseOrder(po)">
+                <i class="bi bi-trash3 fs-5"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Table Footer with Pagination -->
+    <div class="table-footer d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <span class="text-black-50 small">
+        Showing {{ showingFrom() }} to {{ showingTo() }} of {{ filteredOrders().length }} purchase orders
+      </span>
+      <nav aria-label="Purchase orders pagination" *ngIf="totalPages() > 1">
+        <ul class="pagination pagination-sm pagination-outline-dark mb-0">
+          <li class="page-item" [class.disabled]="currentPage() === 1">
+            <button
+              type="button"
+              class="page-link"
+              (click)="goToPage(currentPage() - 1)"
+              [disabled]="currentPage() === 1"
+              aria-label="Previous">
+              Previous
+            </button>
+          </li>
+          <li
+            *ngFor="let p of pageNumbers()"
+            class="page-item"
+            [class.active]="currentPage() === p">
+            <button type="button" class="page-link" (click)="goToPage(p)">{{ p }}</button>
+          </li>
+          <li class="page-item" [class.disabled]="currentPage() === totalPages()">
+            <button
+              type="button"
+              class="page-link"
+              (click)="goToPage(currentPage() + 1)"
+              [disabled]="currentPage() === totalPages()"
+              aria-label="Next">
+              Next
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+</div>
+
+<!-- Create / Edit Purchase Order Modal -->
+<div class="modal fade show d-block po-window-modal" tabindex="-1" *ngIf="showModal()" (click)="closeModal()" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-xl po-window-modal-dialog" (click)="$event.stopPropagation()">
+    <div class="modal-content shadow border-0">
+
+      <!-- Modal Header -->
+      <div class="modal-header border-0 pt-3 px-4 pb-0 d-block flex-shrink-0">
+        <h5 class="modal-title fs-5 fw-bold mb-1">
+          <i class="bi bi-cart-plus-fill me-2 text-black-50"></i>
+          {{ isEditMode() ? 'Edit Purchase Order' : 'Create Purchase Order' }}
+        </h5>
+        <p class="modal-subtitle mb-0">
+          {{ isEditMode() ? 'Update purchase order details, supplier terms, and ordered raw materials.' : 'Select a supplier and add raw materials, quantities, and unit prices.' }}
+        </p>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body px-4 py-2 po-form-modal-body">
+        <!-- Top Header Fields -->
+        <div class="row g-2 flex-shrink-0 mb-2">
+          <!-- PO Number -->
+          <div class="col-md-3">
+            <label class="form-label form-label-sm">PO Number</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-hash"></i></span>
+              <input
+                type="text"
+                class="form-control form-control-sm text-uppercase"
+                [(ngModel)]="formData.poNumber"
+              />
+            </div>
+          </div>
+
+          <!-- Supplier -->
+          <div class="col-md-5">
+            <label class="form-label form-label-sm">Supplier</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-truck"></i></span>
+              <select
+                class="form-select form-select-sm"
+                [(ngModel)]="formData.supplierCode"
+                (ngModelChange)="onSupplierChange($event)">
+                <option *ngFor="let s of suppliersCatalog" [value]="s.code">{{ s.name }} ({{ s.code }})</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Payment Terms -->
+          <div class="col-md-4">
+            <label class="form-label form-label-sm">Payment Terms</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
+              <select class="form-select form-select-sm" [(ngModel)]="formData.paymentTerms">
+                <option *ngFor="let t of paymentTermsList" [value]="t">{{ t }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Order Date -->
+          <div class="col-md-3">
+            <label class="form-label form-label-sm">Order Date</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+              <input
+                type="date"
+                class="form-control form-control-sm"
+                [(ngModel)]="formData.orderDate"
+              />
+            </div>
+          </div>
+
+          <!-- Expected Delivery Date -->
+          <div class="col-md-3">
+            <label class="form-label form-label-sm">Expected Delivery</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
+              <input
+                type="date"
+                class="form-control form-control-sm"
+                [(ngModel)]="formData.expectedDate"
+              />
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div class="col-md-6">
+            <label class="form-label form-label-sm">Notes / Remarks</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-chat-left-text"></i></span>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                placeholder="Delivery instructions, batch requirements, etc."
+                [(ngModel)]="formData.notes"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Line Items (Flex-fills remaining modal height) -->
+        <div class="po-items-section mb-2">
+          <div class="d-flex align-items-center justify-content-between mb-1 flex-shrink-0">
+            <label class="form-label form-label-sm mb-0">Order Line Items</label>
+            <button
+              type="button"
+              class="btn btn-outline-dark btn-sm py-1 px-2"
+              style="font-size: 0.75rem;"
+              (click)="addLineItem()">
+              <i class="bi bi-plus-circle me-1"></i> Add Item
+            </button>
+          </div>
+
+          <div class="po-items-wrap po-items-wrap-fill" data-bs-theme="light">
+            <div
+              class="po-items-body"
+              [appAutoPageSize]="itemsPageSize"
+              [autoPageSizeCurrentPage]="itemsPage"
+              [autoPageSizeRowHeight]="46">
+                <table class="table table-striped align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th scope="col" style="width: 42%;">Raw Material</th>
+                      <th scope="col" style="width: 22%;">Quantity</th>
+                      <th scope="col" style="width: 22%;">Unit Price ($)</th>
+                      <th scope="col" class="text-end" style="width: 10%;">Line Total</th>
+                      <th scope="col" class="text-center" style="width: 4%;"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let item of pagedFormItems(); let idx = index">
+                      <!-- Material Select -->
+                      <td>
+                        <select
+                          class="form-select form-select-sm"
+                          [ngModel]="item.materialCode"
+                          (ngModelChange)="onLineMaterialChange(lineIndex(idx), $event)">
+                          <option *ngFor="let m of materialsCatalog" [value]="m.code">
+                            {{ m.name }} ({{ m.code }} · {{ m.unit }})
+                          </option>
+                        </select>
+                      </td>
+
+                      <!-- Quantity -->
+                      <td>
+                        <div class="input-group input-group-sm">
+                          <input
+                            type="number"
+                            class="form-control form-control-sm"
+                            min="1"
+                            [(ngModel)]="item.orderedQty"
+                          />
+                          <span class="input-group-text unit-addon">{{ item.unit }}</span>
+                          <button
+                            class="btn btn-outline theme-secondary input-group-btn"
+                            type="button"
+                            title="Decrease"
+                            (click)="adjustLineQty(lineIndex(idx), -1, $event)">
+                            <i class="bi bi-dash-circle"></i>
+                          </button>
+                          <button
+                            class="btn btn-outline theme-secondary input-group-btn"
+                            type="button"
+                            title="Increase"
+                            (click)="adjustLineQty(lineIndex(idx), 1, $event)">
+                            <i class="bi bi-plus-circle"></i>
+                          </button>
+                        </div>
+                      </td>
+
+                      <!-- Unit Price -->
+                      <td>
+                        <div class="input-group input-group-sm">
+                          <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
+                          <input
+                            type="number"
+                            class="form-control form-control-sm"
+                            step="0.01"
+                            min="0"
+                            [(ngModel)]="item.unitPrice"
+                          />
+                          <button
+                            class="btn btn-outline theme-secondary input-group-btn"
+                            type="button"
+                            title="Decrease"
+                            (click)="adjustLinePrice(lineIndex(idx), -1, $event)">
+                            <i class="bi bi-dash-circle"></i>
+                          </button>
+                          <button
+                            class="btn btn-outline theme-secondary input-group-btn"
+                            type="button"
+                            title="Increase"
+                            (click)="adjustLinePrice(lineIndex(idx), 1, $event)">
+                            <i class="bi bi-plus-circle"></i>
+                          </button>
+                        </div>
+                      </td>
+
+                      <!-- Line Total -->
+                      <td class="text-end fw-semibold text-black">
+                        {{ (item.orderedQty || 0) * (item.unitPrice || 0) | currency:'USD':'symbol':'1.2-2' }}
+                      </td>
+
+                      <!-- Remove -->
+                      <td class="text-center">
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-link p-0 text-danger"
+                          title="Remove item"
+                          [disabled]="formData.items.length <= 1"
+                          (click)="removeLineItem(lineIndex(idx))">
+                          <i class="bi bi-trash3"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="po-items-footer d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <span class="text-black-50 small">
+                  Showing {{ itemsShowingFrom() }} to {{ itemsShowingTo() }} of {{ formData.items.length }} {{ formData.items.length === 1 ? 'item' : 'items' }}
+                </span>
+
+                <div class="d-flex align-items-center gap-3">
+                  <div>
+                    <span class="text-muted small me-2">Order Total:</span>
+                    <span class="fw-bold text-black fs-6">{{ formTotal() | currency:'USD':'symbol':'1.2-2' }}</span>
+                  </div>
+
+                  <nav aria-label="Order items pagination" *ngIf="itemsTotalPages() > 1">
+                    <ul class="pagination pagination-sm pagination-outline-dark mb-0">
+                      <li class="page-item" [class.disabled]="itemsPage() === 1">
+                        <button
+                          type="button"
+                          class="page-link"
+                          (click)="goToItemsPage(itemsPage() - 1)"
+                          [disabled]="itemsPage() === 1"
+                          aria-label="Previous">
+                          Previous
+                        </button>
+                      </li>
+                      <li
+                        *ngFor="let p of itemsPageNumbers()"
+                        class="page-item"
+                        [class.active]="itemsPage() === p">
+                        <button type="button" class="page-link" (click)="goToItemsPage(p)">{{ p }}</button>
+                      </li>
+                      <li class="page-item" [class.disabled]="itemsPage() === itemsTotalPages()">
+                        <button
+                          type="button"
+                          class="page-link"
+                          (click)="goToItemsPage(itemsPage() + 1)"
+                          [disabled]="itemsPage() === itemsTotalPages()"
+                          aria-label="Next">
+                          Next
+                        </button>
+                      </li>
+                    </ul>
+                  </nav>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        <!-- Status -->
+        <div class="flex-shrink-0">
+          <label class="form-label form-label-sm d-block">Order Status</label>
+          <div class="d-flex align-items-center gap-4 pt-1">
+            <div class="form-check form-check-inline mb-0">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="poStatus"
+                id="statusPoDraft"
+                value="Draft"
+                [(ngModel)]="formData.status"
+              />
+              <label class="form-check-label" for="statusPoDraft">Draft</label>
+            </div>
+            <div class="form-check form-check-inline mb-0">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="poStatus"
+                id="statusPoApproved"
+                value="Approved"
+                [(ngModel)]="formData.status"
+              />
+              <label class="form-check-label" for="statusPoApproved">Approved</label>
+            </div>
+            <div class="form-check form-check-inline mb-0" *ngIf="isEditMode()">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="poStatus"
+                id="statusPoCancelled"
+                value="Cancelled"
+                [(ngModel)]="formData.status"
+              />
+              <label class="form-check-label" for="statusPoCancelled">Cancelled</label>
+            </div>
+          </div>
+          <p class="modal-field-desc mt-1 mb-0">
+            {{ formData.status === 'Draft'
+              ? 'Draft orders can be edited freely and do not allow goods receipt until approved.'
+              : formData.status === 'Approved'
+                ? 'Approved orders are confirmed with the supplier and ready to receive incoming stock.'
+                : 'Cancelled orders are closed and cannot receive stock.' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer border-0 px-4 pb-3 pt-2 gap-2 flex-shrink-0">
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeModal()">
+          <i class="bi bi-x-circle"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="resetForm()">
+          <i class="bi bi-arrow-counterclockwise"></i> Reset
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="savePurchaseOrder()">
+          <i class="bi bi-check-circle"></i> Save
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="showModal()" (click)="closeModal()"></div>
+
+<!-- Receive Stock (Goods Receipt / GRN) Modal -->
+<div class="modal fade show d-block po-window-modal" tabindex="-1" *ngIf="showReceiveModal() && receivingPO() as rpo" (click)="closeReceiveModal()" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-xl po-window-modal-dialog" (click)="$event.stopPropagation()">
+    <div class="modal-content shadow border-0">
+
+      <!-- Modal Header -->
+      <div class="modal-header border-0 pt-3 px-4 pb-0 d-block flex-shrink-0">
+        <h5 class="modal-title fs-5 fw-bold mb-1">
+          <i class="bi bi-house-add-fill me-2 text-black-50"></i>
+          Receive Stock (Goods Receipt)
+        </h5>
+        <p class="modal-subtitle mb-0">
+          Record delivered quantities and lot expiry dates against purchase order {{ rpo.poNumber }}.
+        </p>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body px-4 py-2 po-form-modal-body">
+        <!-- PO Summary Box -->
+        <div class="po-summary-box p-3 rounded-3 mb-2 d-flex align-items-center justify-content-between flex-wrap gap-3 flex-shrink-0">
+          <div class="d-flex align-items-center gap-2">
+            <div class="avatar">
+              <i class="bi bi-file-earmark-text"></i>
+            </div>
+            <div>
+              <div class="fw-semibold text-black small">{{ rpo.poNumber }} · {{ rpo.supplierName }}</div>
+              <div class="sub-text text-muted">Ordered {{ rpo.orderDate | date:'dd MMM yyyy' }} · Expected {{ rpo.expectedDate | date:'dd MMM yyyy' }}</div>
+            </div>
+          </div>
+          <span class="po-status-badge" [ngClass]="statusBadgeClass(rpo.status)">{{ rpo.status }}</span>
+        </div>
+
+        <!-- Receive Items Table -->
+        <div class="po-items-section">
+          <div class="po-items-wrap po-items-wrap-fill" data-bs-theme="light">
+            <div
+              class="po-items-body"
+              [appAutoPageSize]="receivePageSize"
+              [autoPageSizeCurrentPage]="receivePage"
+              [autoPageSizeRowHeight]="46">
+              <table class="table table-striped align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th scope="col">Raw Material</th>
+                    <th scope="col" class="text-end">Ordered</th>
+                    <th scope="col" class="text-end">Received So Far</th>
+                    <th scope="col" style="width: 24%;">Receive Now</th>
+                    <th scope="col" style="width: 22%;">Expiry Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let rec of pagedReceiveItems(); let idx = index">
+                    <td>
+                      <div class="fw-medium text-black">{{ rec.materialName }}</div>
+                      <div class="sub-text text-muted">{{ rec.materialCode }} · {{ rec.unitPrice | currency:'USD':'symbol':'1.2-2' }} / {{ rec.unit }}</div>
+                    </td>
+                    <td class="text-end fw-medium">{{ rec.orderedQty | number }} {{ rec.unit }}</td>
+                    <td class="text-end">{{ rec.alreadyReceived | number }} {{ rec.unit }}</td>
+                    <td>
+                      <div class="input-group input-group-sm">
+                        <input
+                          type="number"
+                          class="form-control form-control-sm"
+                          min="0"
+                          [max]="rec.orderedQty - rec.alreadyReceived"
+                          [(ngModel)]="rec.receiveNow"
+                        />
+                        <span class="input-group-text unit-addon">{{ rec.unit }}</span>
+                        <button
+                          class="btn btn-outline theme-secondary input-group-btn"
+                          type="button"
+                          title="Decrease"
+                          (click)="adjustReceiveQty(receiveLineIndex(idx), -1, $event)">
+                          <i class="bi bi-dash-circle"></i>
+                        </button>
+                        <button
+                          class="btn btn-outline theme-secondary input-group-btn"
+                          type="button"
+                          title="Increase"
+                          (click)="adjustReceiveQty(receiveLineIndex(idx), 1, $event)">
+                          <i class="bi bi-plus-circle"></i>
+                        </button>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="input-group input-group-sm">
+                        <span class="input-group-text"><i class="bi bi-calendar-x"></i></span>
+                        <input
+                          type="date"
+                          class="form-control form-control-sm"
+                          [(ngModel)]="rec.expiryDate"
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="po-items-footer d-flex align-items-center justify-content-between flex-wrap gap-2">
+              <span class="text-black-50 small">
+                Showing {{ receiveShowingFrom() }} to {{ receiveShowingTo() }} of {{ receiveItems.length }} {{ receiveItems.length === 1 ? 'item' : 'items' }}
+              </span>
+
+              <nav aria-label="Receive items pagination" *ngIf="receiveTotalPages() > 1">
+                <ul class="pagination pagination-sm pagination-outline-dark mb-0">
+                  <li class="page-item" [class.disabled]="receivePage() === 1">
+                    <button
+                      type="button"
+                      class="page-link"
+                      (click)="goToReceivePage(receivePage() - 1)"
+                      [disabled]="receivePage() === 1"
+                      aria-label="Previous">
+                      Previous
+                    </button>
+                  </li>
+                  <li
+                    *ngFor="let p of receivePageNumbers()"
+                    class="page-item"
+                    [class.active]="receivePage() === p">
+                    <button type="button" class="page-link" (click)="goToReceivePage(p)">{{ p }}</button>
+                  </li>
+                  <li class="page-item" [class.disabled]="receivePage() === receiveTotalPages()">
+                    <button
+                      type="button"
+                      class="page-link"
+                      (click)="goToReceivePage(receivePage() + 1)"
+                      [disabled]="receivePage() === receiveTotalPages()"
+                      aria-label="Next">
+                      Next
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer border-0 px-4 pb-3 pt-2 gap-2 flex-shrink-0">
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeReceiveModal()">
+          <i class="bi bi-x-circle"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="resetReceiveForm()">
+          <i class="bi bi-arrow-counterclockwise"></i> Reset
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="saveReceiveStock()">
+          <i class="bi bi-check-circle"></i> Save
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="showReceiveModal()" (click)="closeReceiveModal()"></div>
+
+<!-- View Purchase Order Details Modal -->
+<div class="modal fade show d-block po-window-modal" tabindex="-1" *ngIf="showViewModal() && viewingPO() as vpo" (click)="closeViewModal()" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-xl po-window-modal-dialog" (click)="$event.stopPropagation()">
+    <div class="modal-content shadow border-0">
+
+      <!-- Modal Header -->
+      <div class="modal-header border-0 pt-3 px-4 pb-0 d-block flex-shrink-0">
+        <h5 class="modal-title fs-5 fw-bold mb-1">
+          <i class="bi bi-file-earmark-text me-2 text-black-50"></i>
+          Purchase Order Details
+        </h5>
+        <p class="modal-subtitle mb-0">
+          Summary of ordered items, delivery progress, and cost breakdown.
+        </p>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body px-4 py-2 po-form-modal-body">
+        <!-- PO Summary Box -->
+        <div class="po-summary-box p-3 rounded-3 mb-2 d-flex align-items-center justify-content-between flex-wrap gap-3 flex-shrink-0">
+          <div class="d-flex align-items-center gap-2">
+            <div class="avatar">
+              <i class="bi bi-file-earmark-text"></i>
+            </div>
+            <div>
+              <div class="fw-semibold text-black small">{{ vpo.poNumber }} · {{ vpo.supplierName }} ({{ vpo.supplierCode }})</div>
+              <div class="sub-text text-muted">
+                Ordered {{ vpo.orderDate | date:'dd MMM yyyy' }} · Expected {{ vpo.expectedDate | date:'dd MMM yyyy' }} · {{ vpo.paymentTerms }}
+              </div>
+              <div *ngIf="vpo.notes" class="sub-text text-muted mt-1">
+                <i class="bi bi-chat-left-text me-1"></i>{{ vpo.notes }}
+              </div>
+            </div>
+          </div>
+          <span class="po-status-badge" [ngClass]="statusBadgeClass(vpo.status)">{{ vpo.status }}</span>
+        </div>
+
+        <!-- Ordered Line Items Table -->
+        <div class="po-items-section mb-2">
+          <h6 class="form-section-title mb-1 flex-shrink-0">
+            <i class="bi bi-list-check me-2"></i>Ordered Items
+          </h6>
+          <div class="po-items-wrap po-items-wrap-fill" data-bs-theme="light">
+            <div
+              class="po-items-body"
+              [appAutoPageSize]="viewItemsPageSize"
+              [autoPageSizeCurrentPage]="viewItemsPage"
+              [autoPageSizeRowHeight]="46">
+              <table class="table table-striped align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th scope="col">Raw Material</th>
+                    <th scope="col" class="text-end">Ordered</th>
+                    <th scope="col" class="text-end">Total Received</th>
+                    <th scope="col" class="text-end">Remaining</th>
+                    <th scope="col" class="text-end">Unit Price</th>
+                    <th scope="col" class="text-end">Line Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of pagedViewItems()">
+                    <td>
+                      <div class="fw-medium text-black">{{ item.materialName }}</div>
+                      <div class="sub-text text-muted">{{ item.materialCode }}</div>
+                    </td>
+                    <td class="text-end">{{ item.orderedQty | number }} {{ item.unit }}</td>
+                    <td class="text-end fw-semibold">{{ item.receivedQty | number }} {{ item.unit }}</td>
+                    <td class="text-end">{{ (item.orderedQty - item.receivedQty) | number }} {{ item.unit }}</td>
+                    <td class="text-end">{{ item.unitPrice | currency:'USD':'symbol':'1.2-2' }}</td>
+                    <td class="text-end fw-bold">{{ item.orderedQty * item.unitPrice | currency:'USD':'symbol':'1.2-2' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="po-items-footer d-flex align-items-center justify-content-between flex-wrap gap-2">
+              <span class="text-black-50 small">
+                Showing {{ viewItemsShowingFrom() }} to {{ viewItemsShowingTo() }} of {{ vpo.items.length }} {{ vpo.items.length === 1 ? 'item' : 'items' }}
+              </span>
+              <div class="d-flex align-items-center gap-3">
+                <div>
+                  <span class="text-muted small me-2">Total Amount:</span>
+                  <span class="fw-bold text-black fs-6">{{ orderTotal(vpo) | currency:'USD':'symbol':'1.2-2' }}</span>
+                </div>
+                <nav aria-label="Ordered items pagination" *ngIf="viewItemsTotalPages() > 1">
+                  <ul class="pagination pagination-sm pagination-outline-dark mb-0">
+                    <li class="page-item" [class.disabled]="viewItemsPage() === 1">
+                      <button
+                        type="button"
+                        class="page-link"
+                        (click)="goToViewItemsPage(viewItemsPage() - 1)"
+                        [disabled]="viewItemsPage() === 1"
+                        aria-label="Previous">
+                        Previous
+                      </button>
+                    </li>
+                    <li
+                      *ngFor="let p of viewItemsPageNumbers()"
+                      class="page-item"
+                      [class.active]="viewItemsPage() === p">
+                      <button type="button" class="page-link" (click)="goToViewItemsPage(p)">{{ p }}</button>
+                    </li>
+                    <li class="page-item" [class.disabled]="viewItemsPage() === viewItemsTotalPages()">
+                      <button
+                        type="button"
+                        class="page-link"
+                        (click)="goToViewItemsPage(viewItemsPage() + 1)"
+                        [disabled]="viewItemsPage() === viewItemsTotalPages()"
+                        aria-label="Next">
+                        Next
+                      </button>
+                    </li>
+                  </ul>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Goods Receipts (Delivery History) Table -->
+        <div class="po-items-section">
+          <h6 class="form-section-title mb-1 flex-shrink-0">
+            <i class="bi bi-card-checklist me-2"></i>Goods Receipts (Delivery History)
+          </h6>
+          <div class="po-items-wrap po-items-wrap-fill" data-bs-theme="light">
+            <div
+              class="po-items-body"
+              [appAutoPageSize]="viewReceiptsPageSize"
+              [autoPageSizeCurrentPage]="viewReceiptsPage"
+              [autoPageSizeRowHeight]="46">
+              <table class="table table-striped align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th scope="col">GRN No.</th>
+                    <th scope="col">Raw Material</th>
+                    <th scope="col" class="text-end">Qty Received</th>
+                    <th scope="col">Received Date</th>
+                    <th scope="col">Expiry Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let grn of pagedViewReceipts()">
+                    <td><span class="code-badge">{{ grn.grnNumber }}</span></td>
+                    <td>
+                      <div class="fw-medium text-black">{{ grn.materialName }}</div>
+                      <div class="sub-text text-muted">{{ grn.materialCode }}</div>
+                    </td>
+                    <td class="text-end fw-semibold">{{ grn.receivedQty | number }} {{ grn.unit }}</td>
+                    <td>{{ grn.receivedDate | date:'dd MMM yyyy' }}</td>
+                    <td>{{ grn.expiryDate ? (grn.expiryDate | date:'dd MMM yyyy') : '—' }}</td>
+                  </tr>
+                  <tr *ngIf="vpo.receipts.length === 0" class="empty-row">
+                    <td colspan="5" class="text-center text-muted py-3">
+                      No stock receipts recorded yet for this purchase order.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="po-items-footer d-flex align-items-center justify-content-between flex-wrap gap-2">
+              <span class="text-black-50 small">
+                Showing {{ viewReceiptsShowingFrom() }} to {{ viewReceiptsShowingTo() }} of {{ vpo.receipts.length }} {{ vpo.receipts.length === 1 ? 'receipt' : 'receipts' }}
+              </span>
+              <nav aria-label="Goods receipts pagination" *ngIf="viewReceiptsTotalPages() > 1">
+                <ul class="pagination pagination-sm pagination-outline-dark mb-0">
+                  <li class="page-item" [class.disabled]="viewReceiptsPage() === 1">
+                    <button
+                      type="button"
+                      class="page-link"
+                      (click)="goToViewReceiptsPage(viewReceiptsPage() - 1)"
+                      [disabled]="viewReceiptsPage() === 1"
+                      aria-label="Previous">
+                      Previous
+                    </button>
+                  </li>
+                  <li
+                    *ngFor="let p of viewReceiptsPageNumbers()"
+                    class="page-item"
+                    [class.active]="viewReceiptsPage() === p">
+                    <button type="button" class="page-link" (click)="goToViewReceiptsPage(p)">{{ p }}</button>
+                  </li>
+                  <li class="page-item" [class.disabled]="viewReceiptsPage() === viewReceiptsTotalPages()">
+                    <button
+                      type="button"
+                      class="page-link"
+                      (click)="goToViewReceiptsPage(viewReceiptsPage() + 1)"
+                      [disabled]="viewReceiptsPage() === viewReceiptsTotalPages()"
+                      aria-label="Next">
+                      Next
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer border-0 px-4 pb-3 pt-2 gap-2 flex-shrink-0">
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeViewModal()">
+          <i class="bi bi-x-circle"></i> Close
+        </button>
+        <button
+          *ngIf="canReceive(vpo)"
+          type="button"
+          class="btn btn-outline-dark btn-sm modal-btn modal-btn-wide"
+          (click)="receiveFromView()">
+          <i class="bi bi-card-checklist"></i> Receive Stock
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="showViewModal()" (click)="closeViewModal()"></div>
+

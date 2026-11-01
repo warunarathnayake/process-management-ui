@@ -70,6 +70,16 @@ export const routes: Routes = [
         pathMatch: 'full'
       },
       {
+        path: 'purchase-orders',
+        loadComponent: () =>
+          import('./components/supplier-procurement/purchase-order/purchase-order.component').then(m => m.PurchaseOrderComponent)
+      },
+      {
+        path: 'purchase-order',
+        redirectTo: 'purchase-orders',
+        pathMatch: 'full'
+      },
+      {
         path: '',
         redirectTo: 'users',
         pathMatch: 'full'
@@ -127,6 +137,11 @@ export const routes: Routes = [
     path: 'supplier',
     loadComponent: () =>
       import('./components/supplier-procurement/supplier/supplier.component').then(m => m.SupplierComponent)
+  },
+  {
+    path: 'purchase-order',
+    loadComponent: () =>
+      import('./components/supplier-procurement/purchase-order/purchase-order.component').then(m => m.PurchaseOrderComponent)
   },
 
   // Catch-all route
