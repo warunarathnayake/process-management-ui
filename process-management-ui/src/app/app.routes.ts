@@ -60,6 +60,16 @@ export const routes: Routes = [
         pathMatch: 'full'
       },
       {
+        path: 'suppliers',
+        loadComponent: () =>
+          import('./components/supplier-procurement/supplier/supplier.component').then(m => m.SupplierComponent)
+      },
+      {
+        path: 'supplier',
+        redirectTo: 'suppliers',
+        pathMatch: 'full'
+      },
+      {
         path: '',
         redirectTo: 'users',
         pathMatch: 'full'
@@ -112,6 +122,11 @@ export const routes: Routes = [
     path: 'materials',
     redirectTo: 'material',
     pathMatch: 'full'
+  },
+  {
+    path: 'supplier',
+    loadComponent: () =>
+      import('./components/supplier-procurement/supplier/supplier.component').then(m => m.SupplierComponent)
   },
 
   // Catch-all route

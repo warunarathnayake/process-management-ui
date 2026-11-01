@@ -1,0 +1,379 @@
+<div class="supplier-page page-fill">
+
+  <!-- Page Header -->
+  <div class="page-header d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h4 class="page-title mb-1">
+        <i class="bi bi-truck me-2 text-black-50"></i>Suppliers
+      </h4>
+      <p class="page-subtitle mb-0">Manage raw material and packaging suppliers, contacts, and payment terms</p>
+    </div>
+    <button class="btn btn-outline-dark btn-sm px-3" (click)="openAddModal()">
+      <i class="bi bi-truck me-1"></i> Add Supplier
+    </button>
+  </div>
+
+  <!-- Filters & Search Bar -->
+  <div class="filter-bar d-flex flex-wrap align-items-center gap-2 mb-3">
+    <!-- Search Input -->
+    <div class="search-wrapper flex-grow-1">
+      <span class="search-icon" aria-hidden="true">
+        <i class="bi bi-search"></i>
+      </span>
+      <input
+        type="text"
+        class="form-control form-control-sm search-input"
+        placeholder="Search suppliers by name, code, contact, email, phone, or location…"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="onSearch($event)"
+      />
+      <button
+        *ngIf="searchQuery()"
+        type="button"
+        class="btn btn-link btn-sm search-clear-btn"
+        (click)="onSearch('')"
+        title="Clear search">
+        <i class="bi bi-x-circle-fill"></i>
+      </button>
+    </div>
+
+    <!-- Supply Category Filter -->
+    <div class="category-filter">
+      <select
+        class="form-select form-select-sm"
+        [ngModel]="categoryFilter()"
+        (ngModelChange)="setCategoryFilter($event)">
+        <option value="All">All Supply Categories</option>
+        <option *ngFor="let c of supplyCategories" [value]="c">{{ c }}</option>
+      </select>
+    </div>
+
+    <!-- Status Filter Buttons -->
+    <div class="btn-group status-filter" role="group">
+      <button
+        *ngFor="let s of ['All', 'Active', 'Inactive']"
+        type="button"
+        class="btn btn-outline-dark btn-sm"
+        [class.active]="statusFilter() === s"
+        (click)="setStatusFilter(s)"
+      >{{ s }}</button>
+    </div>
+  </div>
+
+  <!-- Suppliers Table -->
+  <div class="table-card shadow-sm" data-bs-theme="light">
+    <div class="table-responsive" [appAutoPageSize]="pageSize" [autoPageSizeCurrentPage]="currentPage">
+      <table class="table table-striped align-middle mb-0">
+        <thead>
+          <tr>
+            <th scope="col" style="width: 50px;">#</th>
+            <th scope="col">Supplier</th>
+            <th scope="col">Contact Person</th>
+            <th scope="col">Phone</th>
+            <th scope="col">Payment Terms</th>
+            <th scope="col">Status</th>
+            <th scope="col" class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Empty State -->
+          <tr *ngIf="filteredSuppliers().length === 0">
+            <td colspan="7" class="text-center py-5 text-muted">
+              <i class="bi bi-inbox fs-2 d-block mb-2"></i>No suppliers found matching your criteria.
+            </td>
+          </tr>
+
+          <!-- Supplier Rows -->
+          <tr *ngFor="let s of paginatedSuppliers(); let i = index">
+            <th scope="row" class="fw-bold text-black">{{ (currentPage() - 1) * pageSize() + i + 1 }}</th>
+
+            <!-- Supplier Name & Code -->
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="avatar">
+                  <i class="bi bi-truck"></i>
+                </div>
+                <div class="d-flex flex-column name-wrap">
+                  <span class="fw-medium text-black ellipsis-name" [title]="s.name">{{ s.name }}</span>
+                  <span class="code-text text-muted">{{ s.code }}</span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Contact Person & Email -->
+            <td>
+              <div class="d-flex flex-column name-wrap">
+                <span class="text-black fw-medium">{{ s.contactPerson }}</span>
+                <a class="email-link ellipsis-name" [href]="'mailto:' + s.email" [title]="s.email">{{ s.email }}</a>
+              </div>
+            </td>
+
+            <!-- Phone -->
+            <td>
+              <span class="text-black">{{ s.phone }}</span>
+            </td>
+
+            <!-- Payment Terms -->
+            <td>
+              <span class="text-black fw-medium">{{ s.paymentTerms }}</span>
+            </td>
+
+            <!-- Status -->
+            <td>
+              <span
+                class="status-badge"
+                [class.status-active]="s.status === 'Active'"
+                [class.status-inactive]="s.status === 'Inactive'"
+                (click)="toggleStatus(s)"
+                title="Click to toggle status"
+              >
+                <i class="bi" [class.bi-check-circle-fill]="s.status === 'Active'" [class.bi-x-circle-fill]="s.status === 'Inactive'"></i>
+                {{ s.status }}
+              </span>
+            </td>
+
+            <!-- Actions -->
+            <td class="text-center">
+              <button
+                class="btn btn-sm btn-link p-1 text-secondary"
+                title="Edit Supplier"
+                (click)="openEditModal(s)">
+                <i class="bi bi-pencil-square fs-5"></i>
+              </button>
+              <button
+                class="btn btn-sm btn-link p-1 text-danger"
+                title="Delete Supplier"
+                (click)="deleteSupplier(s)">
+                <i class="bi bi-trash3 fs-5"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Table Footer with Pagination -->
+    <div class="table-footer d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <span class="text-black-50 small">
+        Showing {{ showingFrom() }} to {{ showingTo() }} of {{ filteredSuppliers().length }} suppliers
+      </span>
+      <nav aria-label="Suppliers pagination" *ngIf="totalPages() > 1">
+        <ul class="pagination pagination-sm pagination-outline-dark mb-0">
+          <li class="page-item" [class.disabled]="currentPage() === 1">
+            <button
+              type="button"
+              class="page-link"
+              (click)="goToPage(currentPage() - 1)"
+              [disabled]="currentPage() === 1"
+              aria-label="Previous">
+              Previous
+            </button>
+          </li>
+          <li
+            *ngFor="let p of pageNumbers()"
+            class="page-item"
+            [class.active]="currentPage() === p">
+            <button type="button" class="page-link" (click)="goToPage(p)">{{ p }}</button>
+          </li>
+          <li class="page-item" [class.disabled]="currentPage() === totalPages()">
+            <button
+              type="button"
+              class="page-link"
+              (click)="goToPage(currentPage() + 1)"
+              [disabled]="currentPage() === totalPages()"
+              aria-label="Next">
+              Next
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+</div>
+
+<!-- Add / Edit Supplier Modal -->
+<div class="modal fade show d-block" tabindex="-1" *ngIf="showModal()" (click)="closeModal()" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered modal-lg" (click)="$event.stopPropagation()">
+    <div class="modal-content shadow border-0">
+
+      <!-- Modal Header -->
+      <div class="modal-header border-0 pt-4 px-4 pb-0 d-block">
+        <h5 class="modal-title fs-5 fw-bold mb-1">
+          <i class="bi bi-truck me-2 text-black-50"></i>
+          {{ isEditMode() ? 'Edit Supplier' : 'Add New Supplier' }}
+        </h5>
+        <p class="modal-subtitle mb-0">
+          {{ isEditMode() ? 'Update supplier details, contact information, and payment terms.' : 'Enter supplier details, contact information, and payment terms.' }}
+        </p>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body px-4 py-3">
+        <div class="row g-3">
+          <!-- Supplier Name -->
+          <div class="col-md-8">
+            <label class="form-label form-label-sm">Supplier Name</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-building"></i></span>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                placeholder="e.g. Shea Naturals Ltd."
+                [(ngModel)]="formData.name"
+                autofocus
+              />
+            </div>
+          </div>
+
+          <!-- Supplier Code -->
+          <div class="col-md-4">
+            <label class="form-label form-label-sm">Supplier Code</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-hash"></i></span>
+              <input
+                type="text"
+                class="form-control form-control-sm text-uppercase"
+                placeholder="e.g. SUP-011"
+                [(ngModel)]="formData.code"
+              />
+            </div>
+          </div>
+
+          <!-- Contact Person -->
+          <div class="col-md-4">
+            <label class="form-label form-label-sm">Contact Person</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-person"></i></span>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                placeholder="e.g. Amara Mensah"
+                [(ngModel)]="formData.contactPerson"
+              />
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="col-md-4">
+            <label class="form-label form-label-sm">Email</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+              <input
+                type="email"
+                class="form-control form-control-sm"
+                placeholder="e.g. sales@supplier.com"
+                [(ngModel)]="formData.email"
+              />
+            </div>
+          </div>
+
+          <!-- Phone -->
+          <div class="col-md-4">
+            <label class="form-label form-label-sm">Phone</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+              <input
+                type="tel"
+                class="form-control form-control-sm"
+                placeholder="e.g. +94 77 555 1234"
+                [(ngModel)]="formData.phone"
+              />
+            </div>
+          </div>
+
+          <!-- Payment Terms -->
+          <div class="col-md-4">
+            <label class="form-label form-label-sm">Payment Terms</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
+              <select class="form-select form-select-sm" [(ngModel)]="formData.paymentTerms">
+                <option *ngFor="let t of paymentTermsList" [value]="t">{{ t }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Address -->
+          <div class="col-md-8">
+            <label class="form-label form-label-sm">Address</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                placeholder="Street address, city, postal code, country"
+                [(ngModel)]="formData.address"
+              />
+            </div>
+          </div>
+
+          <!-- Supply Categories (Multi-select) -->
+          <div class="col-12">
+            <label class="form-label form-label-sm d-flex align-items-center justify-content-between">
+              <span>Supply Categories</span>
+              <span class="text-muted fw-normal" style="font-size: 0.72rem;">
+                {{ formData.supplyCategories.length }} selected
+              </span>
+            </label>
+            <div class="category-multi-select">
+              <button
+                *ngFor="let c of supplyCategories"
+                type="button"
+                class="category-option-btn"
+                [class.selected]="isCategorySelected(c)"
+                (click)="toggleSupplyCategory(c)">
+                <i class="bi" [class.bi-check-circle-fill]="isCategorySelected(c)" [class.bi-circle]="!isCategorySelected(c)"></i>
+                <span>{{ c }}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Status -->
+          <div class="col-12">
+            <label class="form-label form-label-sm d-block">Status</label>
+            <div class="d-flex align-items-center gap-4 pt-1">
+              <div class="form-check form-check-inline mb-0">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="supplierStatus"
+                  id="statusSupplierActive"
+                  value="Active"
+                  [(ngModel)]="formData.status"
+                />
+                <label class="form-check-label" for="statusSupplierActive">Active</label>
+              </div>
+              <div class="form-check form-check-inline mb-0">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="supplierStatus"
+                  id="statusSupplierInactive"
+                  value="Inactive"
+                  [(ngModel)]="formData.status"
+                />
+                <label class="form-check-label" for="statusSupplierInactive">Inactive</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer border-0 px-4 pb-4 pt-2 gap-2">
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeModal()">
+          <i class="bi bi-x-circle"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="resetForm()">
+          <i class="bi bi-arrow-counterclockwise"></i> Reset
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="saveSupplier()">
+          <i class="bi bi-check-circle"></i> Save
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="showModal()" (click)="closeModal()"></div>
+
