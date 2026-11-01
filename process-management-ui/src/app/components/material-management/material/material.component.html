@@ -1,0 +1,792 @@
+<div class="material-stock-page page-fill">
+
+  <!-- Page Header -->
+  <div class="page-header d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h4 class="page-title mb-1">
+        <i class="bi bi-boxes me-2 text-black-50"></i>Materials & Stock
+      </h4>
+      <p class="page-subtitle mb-0">Manage raw material inventory, stock levels, and reorder points</p>
+    </div>
+    <button class="btn btn-outline-dark btn-sm px-3" (click)="openAddModal()">
+      <i class="bi bi-box-seam me-1"></i> Add Material
+    </button>
+  </div>
+
+  <!-- Filters & Search Bar -->
+  <div class="filter-bar d-flex flex-wrap align-items-center gap-2 mb-3">
+    <!-- Search Input -->
+    <div class="search-wrapper flex-grow-1">
+      <span class="search-icon" aria-hidden="true">
+        <i class="bi bi-search"></i>
+      </span>
+      <input
+        type="text"
+        class="form-control form-control-sm search-input"
+        placeholder="Search materials by name, SKU/code, or category…"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="onSearch($event)"
+      />
+      <button
+        *ngIf="searchQuery()"
+        type="button"
+        class="btn btn-link btn-sm search-clear-btn"
+        (click)="onSearch('')"
+        title="Clear search">
+        <i class="bi bi-x-circle-fill"></i>
+      </button>
+    </div>
+
+    <!-- Category Filter Dropdown -->
+    <div class="category-filter">
+      <select
+        class="form-select form-select-sm"
+        [ngModel]="categoryFilter()"
+        (ngModelChange)="setCategoryFilter($event)">
+        <option value="All">All Categories</option>
+        <option *ngFor="let c of categoriesList" [value]="c">{{ c }}</option>
+      </select>
+    </div>
+
+    <!-- Status Filter Buttons -->
+    <div class="btn-group status-filter" role="group">
+      <button
+        *ngFor="let s of ['All', 'Active', 'Inactive']"
+        type="button"
+        class="btn btn-outline-dark btn-sm"
+        [class.active]="statusFilter() === s"
+        (click)="setStatusFilter(s)"
+      >{{ s }}</button>
+    </div>
+  </div>
+
+  <!-- Materials Table -->
+  <div class="table-card shadow-sm" data-bs-theme="light">
+    <div class="table-responsive" [appAutoPageSize]="pageSize" [autoPageSizeCurrentPage]="currentPage">
+      <table class="table table-striped align-middle mb-0">
+        <thead>
+          <tr>
+            <th scope="col" style="width: 50px;">#</th>
+            <th scope="col">Material Name</th>
+            <th scope="col">Category</th>
+            <th scope="col">Current Stock</th>
+            <th scope="col">Avg. Cost</th>
+            <th scope="col">Reorder Level</th>
+            <th scope="col">Status</th>
+            <th scope="col" class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Empty State -->
+          <tr *ngIf="filteredMaterials().length === 0">
+            <td colspan="8" class="text-center py-5 text-muted">
+              <i class="bi bi-inbox fs-2 d-block mb-2"></i>No materials found matching your criteria.
+            </td>
+          </tr>
+
+          <!-- Material Rows -->
+          <tr *ngFor="let m of paginatedMaterials(); let i = index">
+            <th scope="row" class="fw-bold text-black">{{ (currentPage() - 1) * pageSize() + i + 1 }}</th>
+
+            <!-- Material Name with Common Black Avatar -->
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="avatar">
+                  <i class="bi bi-boxes"></i>
+                </div>
+                <div class="d-flex flex-column material-name-wrap">
+                  <span class="fw-medium text-black material-name" [title]="m.name">{{ m.name }}</span>
+                  <span class="material-sku text-muted">{{ m.code }}</span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Category -->
+            <td>
+              <span class="category-chip" [title]="m.category">
+                {{ m.category }}
+              </span>
+            </td>
+
+            <!-- Current Stock & Stock Health Badge (stacked to keep the row compact) -->
+            <td>
+              <div class="d-flex flex-column align-items-start stock-cell">
+                <span>
+                  <span class="fw-bold text-black">{{ m.currentStock | number }}</span>
+                  <span class="text-muted small ms-1">{{ m.unit.split(' ')[1] || m.unit }}</span>
+                </span>
+                <span class="stock-badge" [ngClass]="getStockStatus(m).badgeClass">
+                  {{ getStockStatus(m).label }}
+                </span>
+              </div>
+            </td>
+
+            <!-- Weighted Average Cost (read-only) -->
+            <td>
+              <span class="text-black fw-medium">{{ m.avgCost | currency:'USD':'symbol':'1.2-2' }}</span>
+              <span class="text-muted small ms-1">/ {{ unitShort(m.unit) }}</span>
+            </td>
+
+            <!-- Reorder Level -->
+            <td>
+              <span class="text-black fw-medium">{{ m.minStock | number }}</span>
+              <span class="text-muted small ms-1">{{ m.unit.split(' ')[1] || m.unit }}</span>
+            </td>
+
+            <!-- Status -->
+            <td>
+              <span
+                class="status-badge"
+                [class.status-active]="m.status === 'Active'"
+                [class.status-inactive]="m.status === 'Inactive'"
+                (click)="toggleStatus(m)"
+                title="Click to toggle status"
+              >
+                <i class="bi" [class.bi-check-circle-fill]="m.status === 'Active'" [class.bi-x-circle-fill]="m.status === 'Inactive'"></i>
+                {{ m.status }}
+              </span>
+            </td>
+
+            <!-- Actions -->
+            <td class="text-center">
+              <button
+                class="btn btn-sm btn-link p-1 text-secondary"
+                title="Stock Adjustment"
+                (click)="openAdjustmentModal(m)">
+                <i class="bi bi-sliders fs-5"></i>
+              </button>
+              <button
+                class="btn btn-sm btn-link p-1 text-secondary"
+                title="Stock History"
+                (click)="openHistoryModal(m)">
+                <i class="bi bi-clock-history fs-5"></i>
+              </button>
+              <button
+                class="btn btn-sm btn-link p-1 text-secondary"
+                title="Edit Material"
+                (click)="openEditModal(m)">
+                <i class="bi bi-pencil-square fs-5"></i>
+              </button>
+              <button
+                class="btn btn-sm btn-link p-1 text-danger"
+                title="Delete Material"
+                (click)="deleteMaterial(m)">
+                <i class="bi bi-trash3 fs-5"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Table Footer with Pagination -->
+    <div class="table-footer d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <span class="text-black-50 small">
+        Showing {{ showingFrom() }} to {{ showingTo() }} of {{ filteredMaterials().length }} materials
+      </span>
+      <nav aria-label="Materials pagination" *ngIf="totalPages() > 1">
+        <ul class="pagination pagination-sm pagination-outline-dark mb-0">
+          <li class="page-item" [class.disabled]="currentPage() === 1">
+            <button
+              type="button"
+              class="page-link"
+              (click)="goToPage(currentPage() - 1)"
+              [disabled]="currentPage() === 1"
+              aria-label="Previous">
+              Previous
+            </button>
+          </li>
+          <li
+            *ngFor="let p of pageNumbers()"
+            class="page-item"
+            [class.active]="currentPage() === p">
+            <button type="button" class="page-link" (click)="goToPage(p)">{{ p }}</button>
+          </li>
+          <li class="page-item" [class.disabled]="currentPage() === totalPages()">
+            <button
+              type="button"
+              class="page-link"
+              (click)="goToPage(currentPage() + 1)"
+              [disabled]="currentPage() === totalPages()"
+              aria-label="Next">
+              Next
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+</div>
+
+<!-- Add / Edit Material Modal -->
+<div class="modal fade show d-block" tabindex="-1" *ngIf="showModal()" (click)="closeModal()" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered modal-lg" (click)="$event.stopPropagation()">
+    <div class="modal-content shadow border-0">
+
+      <!-- Modal Header -->
+      <div class="modal-header border-0 pt-4 px-4 pb-0 d-block">
+        <h5 class="modal-title fs-5 fw-bold mb-1">
+          <i class="bi bi-box-seam-fill me-2 text-black-50"></i>
+          {{ isEditMode() ? 'Edit Material & Stock' : 'Add New Raw Material' }}
+        </h5>
+        <p class="modal-subtitle mb-0">
+          {{ isEditMode() ? 'Update raw material specifications and reorder parameters.' : 'Enter raw material specifications, opening stock, and reorder parameters.' }}
+        </p>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body px-4 py-3">
+        <div class="row g-3">
+          <!-- Material Name -->
+          <div class="col-md-7">
+            <label class="form-label form-label-sm">Material Name</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-box-seam"></i></span>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                placeholder="e.g. Organic Shea Butter (Unrefined)"
+                [(ngModel)]="formData.name"
+                autofocus
+              />
+            </div>
+          </div>
+
+          <!-- Code / SKU -->
+          <div class="col-md-5">
+            <label class="form-label form-label-sm">Material Code / SKU</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-upc"></i></span>
+              <input
+                type="text"
+                class="form-control form-control-sm text-uppercase"
+                placeholder="e.g. RM-OBW-001"
+                [(ngModel)]="formData.code"
+              />
+            </div>
+          </div>
+
+          <!-- Category -->
+          <div class="col-md-7">
+            <label class="form-label form-label-sm">Category</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-tags"></i></span>
+              <select class="form-select form-select-sm" [(ngModel)]="formData.category">
+                <option *ngFor="let c of categoriesList" [value]="c">{{ c }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Unit of Measure -->
+          <div class="col-md-5">
+            <label class="form-label form-label-sm">Unit of Measure</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-flask"></i></span>
+              <select class="form-select form-select-sm" [(ngModel)]="formData.unit">
+                <option *ngFor="let u of unitsList" [value]="u">{{ u }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Add Mode: Opening Stock & Opening Unit Cost (recorded once as the initial balance) -->
+          <ng-container *ngIf="!isEditMode()">
+            <div class="col-md-4">
+              <label class="form-label form-label-sm">Opening Stock</label>
+              <div class="input-group input-group-sm">
+                <span class="input-group-text"><i class="bi bi-layers"></i></span>
+                <input
+                  type="number"
+                  class="form-control form-control-sm"
+                  placeholder="0"
+                  min="0"
+                  [(ngModel)]="formData.openingStock"
+                />
+                <button
+                  class="btn btn-outline theme-secondary input-group-btn"
+                  type="button"
+                  title="Decrease"
+                  (click)="adjustNumber('openingStock', -1, $event)">
+                  <i class="bi bi-dash-circle"></i>
+                </button>
+                <button
+                  class="btn btn-outline theme-secondary input-group-btn"
+                  type="button"
+                  title="Increase"
+                  (click)="adjustNumber('openingStock', 1, $event)">
+                  <i class="bi bi-plus-circle"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label form-label-sm">Opening Unit Cost ($)</label>
+              <div class="input-group input-group-sm">
+                <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
+                <input
+                  type="number"
+                  class="form-control form-control-sm"
+                  placeholder="0.00"
+                  step="0.01"
+                  min="0"
+                  [(ngModel)]="formData.openingCost"
+                />
+                <button
+                  class="btn btn-outline theme-secondary input-group-btn"
+                  type="button"
+                  title="Decrease"
+                  (click)="adjustNumber('openingCost', -1, $event)">
+                  <i class="bi bi-dash-circle"></i>
+                </button>
+                <button
+                  class="btn btn-outline theme-secondary input-group-btn"
+                  type="button"
+                  title="Increase"
+                  (click)="adjustNumber('openingCost', 1, $event)">
+                  <i class="bi bi-plus-circle"></i>
+                </button>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- Edit Mode: Current Stock & Avg. Cost are read-only (maintained by the stock ledger) -->
+          <ng-container *ngIf="isEditMode() && selectedMaterial() as sel">
+            <div class="col-md-4">
+              <label class="form-label form-label-sm">Current Stock</label>
+              <div class="input-group input-group-sm readonly-group" title="Updated via Goods Receipts and Stock Adjustments">
+                <span class="input-group-text"><i class="bi bi-layers"></i></span>
+                <input type="text" class="form-control form-control-sm" [value]="(sel.currentStock | number) + ' ' + unitShort(sel.unit)" disabled />
+                <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label form-label-sm">Avg. Cost Per Unit ($)</label>
+              <div class="input-group input-group-sm readonly-group" title="Weighted average, recalculated on each Goods Receipt">
+                <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
+                <input type="text" class="form-control form-control-sm" [value]="sel.avgCost | number:'1.2-2'" disabled />
+                <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- Reorder Level -->
+          <div class="col-md-4">
+            <label class="form-label form-label-sm">Reorder Level (Min Stock)</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-exclamation-triangle"></i></span>
+              <input
+                type="number"
+                class="form-control form-control-sm"
+                placeholder="10"
+                min="0"
+                [(ngModel)]="formData.minStock"
+              />
+              <button
+                class="btn btn-outline theme-secondary input-group-btn"
+                type="button"
+                title="Decrease"
+                (click)="adjustNumber('minStock', -1, $event)">
+                <i class="bi bi-dash-circle"></i>
+              </button>
+              <button
+                class="btn btn-outline theme-secondary input-group-btn"
+                type="button"
+                title="Increase"
+                (click)="adjustNumber('minStock', 1, $event)">
+                <i class="bi bi-plus-circle"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Add Mode: Opening Lot Expiry Date -->
+          <div class="col-md-4" *ngIf="!isEditMode()">
+            <label class="form-label form-label-sm">Opening Stock Expiry Date</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-calendar-x"></i></span>
+              <input
+                type="date"
+                class="form-control form-control-sm"
+                [(ngModel)]="formData.openingExpiry"
+              />
+            </div>
+          </div>
+
+          <!-- Stock Info Hint -->
+          <div class="col-12">
+            <div class="stock-hint">
+              <i class="bi bi-info-circle me-1"></i>
+              <ng-container *ngIf="isEditMode(); else addHint">
+                Stock and average cost are read-only. They update automatically through Goods Receipts and Stock Adjustments.
+              </ng-container>
+              <ng-template #addHint>
+                Opening stock is recorded once as the initial balance. Later changes come from Goods Receipts and Stock Adjustments.
+              </ng-template>
+            </div>
+          </div>
+
+          <!-- Status -->
+          <div class="col-12">
+            <label class="form-label form-label-sm d-block">Status</label>
+            <div class="d-flex align-items-center gap-4 pt-1">
+              <div class="form-check form-check-inline mb-0">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="materialStatus"
+                  id="statusMaterialActive"
+                  value="Active"
+                  [(ngModel)]="formData.status"
+                />
+                <label class="form-check-label" for="statusMaterialActive">Active</label>
+              </div>
+              <div class="form-check form-check-inline mb-0">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="materialStatus"
+                  id="statusMaterialInactive"
+                  value="Inactive"
+                  [(ngModel)]="formData.status"
+                />
+                <label class="form-check-label" for="statusMaterialInactive">Inactive</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer border-0 px-4 pb-4 pt-2 gap-2">
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeModal()">
+          <i class="bi bi-x-circle"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="resetForm()">
+          <i class="bi bi-arrow-counterclockwise"></i> Reset
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="saveMaterial()">
+          <i class="bi bi-check-circle"></i> Save
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="showModal()" (click)="closeModal()"></div>
+
+<!-- Stock Adjustment Modal -->
+<div class="modal fade show d-block" tabindex="-1" *ngIf="showAdjustmentModal() && adjustmentMaterial() as am" (click)="closeAdjustmentModal()" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+    <div class="modal-content shadow border-0">
+
+      <!-- Modal Header -->
+      <div class="modal-header border-0 pt-4 px-4 pb-0 d-block">
+        <h5 class="modal-title fs-5 fw-bold mb-1">
+          <i class="bi bi-sliders me-2 text-black-50"></i>
+          Stock Adjustment
+        </h5>
+        <p class="modal-subtitle mb-0">
+          Correct stock for count differences, damage, expiry, or other non-purchase changes.
+        </p>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body px-4 py-3">
+        <!-- Material Summary Box -->
+        <div class="stock-summary-box p-3 rounded-3 mb-3 d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <div class="avatar">
+              <i class="bi bi-boxes"></i>
+            </div>
+            <div>
+              <div class="fw-semibold text-black small">{{ am.name }}</div>
+              <div class="material-sku text-muted">{{ am.code }} · {{ am.category }}</div>
+            </div>
+          </div>
+          <div class="text-end">
+            <div class="summary-label">Current Stock</div>
+            <div class="fw-bold text-black">
+              {{ am.currentStock | number }} <span class="text-muted small fw-normal">{{ unitShort(am.unit) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Adjustment Type -->
+        <div class="mb-3">
+          <label class="form-label form-label-sm d-block">Adjustment Type</label>
+          <div class="btn-group w-100 adjust-direction" role="group">
+            <button
+              type="button"
+              class="btn btn-outline-dark btn-sm"
+              [class.active]="adjustmentForm.direction === 'In'"
+              (click)="setAdjustmentDirection('In')">
+              <i class="bi bi-plus-circle me-1"></i> Increase Stock
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-dark btn-sm"
+              [class.active]="adjustmentForm.direction === 'Out'"
+              (click)="setAdjustmentDirection('Out')">
+              <i class="bi bi-dash-circle me-1"></i> Decrease Stock
+            </button>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <!-- Quantity -->
+          <div class="col-md-6">
+            <label class="form-label form-label-sm">Quantity ({{ unitShort(am.unit) }})</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-layers"></i></span>
+              <input
+                type="number"
+                class="form-control form-control-sm"
+                placeholder="0"
+                min="0"
+                [(ngModel)]="adjustmentForm.quantity"
+                autofocus
+              />
+              <button
+                class="btn btn-outline theme-secondary input-group-btn"
+                type="button"
+                title="Decrease"
+                (click)="adjustAdjustmentQty(-1, $event)">
+                <i class="bi bi-dash-circle"></i>
+              </button>
+              <button
+                class="btn btn-outline theme-secondary input-group-btn"
+                type="button"
+                title="Increase"
+                (click)="adjustAdjustmentQty(1, $event)">
+                <i class="bi bi-plus-circle"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Reason -->
+          <div class="col-md-6">
+            <label class="form-label form-label-sm">Reason</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-question-circle"></i></span>
+              <select class="form-select form-select-sm" [(ngModel)]="adjustmentForm.reason">
+                <option *ngFor="let r of adjustmentReasons" [value]="r">{{ r }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Expiry Date (stock increases only) -->
+          <div class="col-md-6" *ngIf="adjustmentForm.direction === 'In'">
+            <label class="form-label form-label-sm">Expiry Date</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-calendar-x"></i></span>
+              <input
+                type="date"
+                class="form-control form-control-sm"
+                [(ngModel)]="adjustmentForm.expiryDate"
+              />
+            </div>
+          </div>
+
+          <!-- Remarks -->
+          <div [class.col-md-6]="adjustmentForm.direction === 'In'" class="col-12">
+            <label class="form-label form-label-sm">Remarks</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-chat-left-text"></i></span>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                [placeholder]="adjustmentForm.reason === 'Other' ? 'Required — describe the reason' : 'Optional notes'"
+                [(ngModel)]="adjustmentForm.remarks"
+                (keydown.enter)="saveAdjustment()"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- New Balance Preview -->
+        <div class="d-flex align-items-center justify-content-between px-1 pt-1">
+          <span class="text-muted small">New Stock Balance:</span>
+          <span class="fw-bold" [class.text-danger]="adjustedBalance() < 0" [class.text-black]="adjustedBalance() >= 0">
+            {{ adjustedBalance() | number }} {{ unitShort(am.unit) }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer border-0 px-4 pb-4 pt-2 gap-2">
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeAdjustmentModal()">
+          <i class="bi bi-x-circle"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="resetAdjustmentForm()">
+          <i class="bi bi-arrow-counterclockwise"></i> Reset
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="saveAdjustment()">
+          <i class="bi bi-check-circle"></i> Save
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="showAdjustmentModal()" (click)="closeAdjustmentModal()"></div>
+
+<!-- Stock History Modal -->
+<div class="modal fade show d-block" tabindex="-1" *ngIf="showHistoryModal() && historyLiveMaterial() as hm" (click)="closeHistoryModal()" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered modal-xl" (click)="$event.stopPropagation()">
+    <div class="modal-content shadow border-0">
+
+      <!-- Modal Header -->
+      <div class="modal-header border-0 pt-4 px-4 pb-0 d-block">
+        <h5 class="modal-title fs-5 fw-bold mb-1">
+          <i class="bi bi-clock-history me-2 text-black-50"></i>
+          Stock History
+        </h5>
+        <p class="modal-subtitle mb-0">
+          Complete audit trail of every stock movement for this material.
+        </p>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body px-4 py-3">
+        <!-- Material Summary Box -->
+        <div class="stock-summary-box p-3 rounded-3 mb-3 d-flex align-items-center justify-content-between flex-wrap gap-3">
+          <div class="d-flex align-items-center gap-2">
+            <div class="avatar">
+              <i class="bi bi-boxes"></i>
+            </div>
+            <div>
+              <div class="fw-semibold text-black small">{{ hm.name }}</div>
+              <div class="material-sku text-muted">{{ hm.code }} · {{ hm.category }}</div>
+            </div>
+          </div>
+          <div class="d-flex gap-4 text-end">
+            <div>
+              <div class="summary-label">Current Stock</div>
+              <div class="fw-bold text-black">
+                {{ hm.currentStock | number }} <span class="text-muted small fw-normal">{{ unitShort(hm.unit) }}</span>
+              </div>
+            </div>
+            <div>
+              <div class="summary-label">Avg. Cost</div>
+              <div class="fw-bold text-black">{{ hm.avgCost | currency:'USD':'symbol':'1.2-2' }}</div>
+            </div>
+            <div>
+              <div class="summary-label">Stock Value</div>
+              <div class="fw-bold text-black">{{ hm.currentStock * hm.avgCost | currency:'USD':'symbol':'1.2-2' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Movement Ledger -->
+        <div class="history-table-wrap" data-bs-theme="light">
+          <div class="history-table-body">
+            <table class="table table-striped align-middle mb-0">
+              <thead>
+                <tr>
+                  <th scope="col">Date &amp; Time</th>
+                  <th scope="col">Type</th>
+                  <th scope="col">Reference</th>
+                  <th scope="col" class="text-end">Quantity</th>
+                  <th scope="col" class="text-end">Unit Cost</th>
+                  <th scope="col" class="text-end">Balance</th>
+                  <th scope="col">Expiry Date</th>
+                  <th scope="col">Reason / Remarks</th>
+                  <th scope="col">User</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="historyMovements().length === 0" class="empty-row">
+                  <td colspan="9" class="text-center py-4 text-muted">
+                    <i class="bi bi-inbox fs-3 d-block mb-1"></i>No stock movements recorded yet.
+                  </td>
+                </tr>
+                <tr *ngFor="let mv of pagedHistoryMovements()">
+                  <td>{{ mv.date | date:'dd MMM yyyy, HH:mm' }}</td>
+                  <td>
+                    <span class="movement-badge" [ngClass]="movementBadgeClass(mv.type)">{{ mv.type }}</span>
+                  </td>
+                  <td class="fw-semibold reference-cell">{{ mv.reference }}</td>
+                  <td class="text-end fw-bold" [class.qty-in]="mv.quantity > 0" [class.qty-out]="mv.quantity < 0">
+                    {{ mv.quantity > 0 ? '+' : '' }}{{ mv.quantity | number }}
+                  </td>
+                  <td class="text-end">{{ mv.unitCost | currency:'USD':'symbol':'1.2-2' }}</td>
+                  <td class="text-end fw-semibold">{{ mv.balanceAfter | number }}</td>
+                  <td>
+                    <ng-container *ngIf="mv.expiryDate as exp; else noExpiry">
+                      <div class="expiry-cell" [ngClass]="'expiry-' + expiryStatus(exp)">
+                        <span class="fw-medium">{{ exp | date:'dd MMM yyyy' }}</span>
+                        <span class="expiry-badge" *ngIf="expiryStatus(exp) === 'expired'">
+                          <i class="bi bi-exclamation-octagon-fill"></i> Expired
+                        </span>
+                        <span class="expiry-badge" *ngIf="expiryStatus(exp) === 'soon'">
+                          <i class="bi bi-hourglass-split"></i> {{ daysToExpiry(exp) }}d left
+                        </span>
+                      </div>
+                    </ng-container>
+                    <ng-template #noExpiry><span class="text-muted">—</span></ng-template>
+                  </td>
+                  <td class="remarks-cell" [title]="(mv.reason ? mv.reason : '') + (mv.reason && mv.remarks ? ' · ' : '') + (mv.remarks ? mv.remarks : '')">
+                    <span *ngIf="mv.reason" class="fw-medium">{{ mv.reason }}</span>
+                    <span *ngIf="mv.reason && mv.remarks"> · </span>
+                    <span *ngIf="mv.remarks" class="text-muted">{{ mv.remarks }}</span>
+                    <span *ngIf="!mv.reason && !mv.remarks" class="text-muted">—</span>
+                  </td>
+                  <td class="text-muted">{{ mv.user }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- History Pagination Footer -->
+          <div class="history-footer d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <span class="text-black-50 small">
+              Showing {{ historyShowingFrom() }} to {{ historyShowingTo() }} of {{ historyMovements().length }} movements
+            </span>
+            <nav aria-label="Stock history pagination" *ngIf="historyTotalPages() > 1">
+              <ul class="pagination pagination-sm pagination-outline-dark mb-0">
+                <li class="page-item" [class.disabled]="historyPage() === 1">
+                  <button
+                    type="button"
+                    class="page-link"
+                    (click)="goToHistoryPage(historyPage() - 1)"
+                    [disabled]="historyPage() === 1"
+                    aria-label="Previous">
+                    Previous
+                  </button>
+                </li>
+                <li
+                  *ngFor="let p of historyPageNumbers()"
+                  class="page-item"
+                  [class.active]="historyPage() === p">
+                  <button type="button" class="page-link" (click)="goToHistoryPage(p)">{{ p }}</button>
+                </li>
+                <li class="page-item" [class.disabled]="historyPage() === historyTotalPages()">
+                  <button
+                    type="button"
+                    class="page-link"
+                    (click)="goToHistoryPage(historyPage() + 1)"
+                    [disabled]="historyPage() === historyTotalPages()"
+                    aria-label="Next">
+                    Next
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer border-0 px-4 pb-4 pt-2 gap-2">
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeHistoryModal()">
+          <i class="bi bi-x-circle"></i> Close
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn modal-btn-wide" (click)="adjustFromHistory()">
+          <i class="bi bi-sliders"></i> Adjust Stock
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="showHistoryModal()" (click)="closeHistoryModal()"></div>
