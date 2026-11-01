@@ -355,6 +355,9 @@
                 <label class="form-check-label" for="statusSupplierInactive">Inactive</label>
               </div>
             </div>
+            <p class="modal-field-desc mt-2 mb-0">
+              {{ formData.status === 'Active' ? 'Active suppliers can be selected when creating new purchase orders.' : 'Inactive suppliers cannot be selected for new purchase orders.' }}
+            </p>
           </div>
         </div>
       </div>
