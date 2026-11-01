@@ -452,6 +452,9 @@
                 <label class="form-check-label" for="statusMaterialInactive">Inactive</label>
               </div>
             </div>
+            <p class="modal-field-desc mt-2 mb-0">
+              {{ formData.status === 'Active' ? 'Active materials can be ordered on purchase orders and issued to production.' : 'Inactive materials cannot be used in new purchase orders or production batches.' }}
+            </p>
           </div>
         </div>
       </div>
