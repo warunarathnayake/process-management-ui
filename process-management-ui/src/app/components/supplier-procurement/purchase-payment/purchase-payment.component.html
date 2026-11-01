@@ -1,0 +1,642 @@
+<div class="purchase-payment-page page-fill">
+
+  <!-- Page Header -->
+  <div class="page-header d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h4 class="page-title mb-1">
+        <i class="bi bi-credit-card-2-front me-2 text-black-50"></i>Purchase Payments
+      </h4>
+      <p class="page-subtitle mb-0">Record supplier payments, track payment methods, and monitor purchase order balances</p>
+    </div>
+    <button class="btn btn-outline-dark btn-sm px-3" (click)="openAddModal()">
+      <i class="bi bi-plus-circle me-1"></i> Record Payment
+    </button>
+  </div>
+
+  <!-- Filters & Search Bar -->
+  <div class="filter-bar d-flex flex-wrap align-items-center gap-2 mb-3">
+    <!-- Search Input -->
+    <div class="search-wrapper flex-grow-1">
+      <span class="search-icon" aria-hidden="true">
+        <i class="bi bi-search"></i>
+      </span>
+      <input
+        type="text"
+        class="form-control form-control-sm search-input"
+        placeholder="Search by payment number, PO number, supplier, or cheque/reference…"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="onSearch($event)"
+      />
+      <button
+        *ngIf="searchQuery()"
+        type="button"
+        class="btn btn-link btn-sm search-clear-btn"
+        (click)="onSearch('')"
+        title="Clear search">
+        <i class="bi bi-x-circle-fill"></i>
+      </button>
+    </div>
+
+    <!-- Payment Method Filter Dropdown -->
+    <div class="method-filter">
+      <select
+        class="form-select form-select-sm"
+        [ngModel]="methodFilter()"
+        (ngModelChange)="setMethodFilter($event)">
+        <option value="All">All Payment Methods</option>
+        <option *ngFor="let m of paymentMethods" [value]="m">{{ m }}</option>
+      </select>
+    </div>
+
+    <!-- Status Filter Buttons -->
+    <div class="btn-group status-filter" role="group">
+      <button
+        *ngFor="let s of statusFilters"
+        type="button"
+        class="btn btn-outline-dark btn-sm"
+        [class.active]="statusFilter() === s"
+        (click)="setStatusFilter(s)"
+      >{{ s }}</button>
+    </div>
+  </div>
+
+  <!-- Purchase Payments Table -->
+  <div class="table-card shadow-sm" data-bs-theme="light">
+    <div class="table-responsive" [appAutoPageSize]="pageSize" [autoPageSizeCurrentPage]="currentPage">
+      <table class="table table-striped align-middle mb-0">
+        <thead>
+          <tr>
+            <th scope="col" style="width: 50px;">#</th>
+            <th scope="col">Payment No.</th>
+            <th scope="col">PO Number</th>
+            <th scope="col">Payment Method</th>
+            <th scope="col">Amount Paid</th>
+            <th scope="col">Status</th>
+            <th scope="col" class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Empty State -->
+          <tr *ngIf="filteredPayments().length === 0">
+            <td colspan="7" class="text-center py-5 text-muted">
+              <i class="bi bi-inbox fs-2 d-block mb-2"></i>No purchase payments found matching your criteria.
+            </td>
+          </tr>
+
+          <!-- Payment Rows -->
+          <tr *ngFor="let p of paginatedPayments(); let i = index">
+            <th scope="row" class="fw-bold text-black">{{ (currentPage() - 1) * pageSize() + i + 1 }}</th>
+
+            <!-- Payment Number & Date -->
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="avatar">
+                  <i class="bi bi-credit-card-2-front"></i>
+                </div>
+                <div class="d-flex flex-column name-wrap">
+                  <span class="fw-semibold text-black">{{ p.paymentNumber }}</span>
+                  <span class="sub-text text-muted">Paid {{ p.paymentDate | date:'dd MMM yyyy' }}</span>
+                </div>
+              </div>
+            </td>
+
+            <!-- PO Number & Supplier -->
+            <td>
+              <div class="d-flex flex-column name-wrap">
+                <span class="fw-semibold text-black">{{ p.poNumber }}</span>
+                <span class="sub-text text-muted ellipsis-text" [title]="p.supplierName + ' (' + p.supplierCode + ')'">
+                  {{ p.supplierName }} · {{ p.supplierCode }}
+                </span>
+              </div>
+            </td>
+
+            <!-- Payment Method & Reference -->
+            <td>
+              <div class="d-flex flex-column align-items-start name-wrap gap-1">
+                <span class="method-chip">
+                  <i class="bi me-1" [ngClass]="methodIcon(p.paymentMethod)"></i>{{ p.paymentMethod }}
+                </span>
+                <span class="sub-text text-muted ellipsis-text" [title]="p.referenceNumber + ' · ' + p.bankOrAccount">
+                  {{ p.referenceNumber }} · {{ p.bankOrAccount }}
+                </span>
+              </div>
+            </td>
+
+            <!-- Amount Paid & PO Balance -->
+            <td>
+              <div class="d-flex flex-column name-wrap">
+                <span class="fw-bold text-black">{{ p.amount | currency:'USD':'symbol':'1.2-2' }}</span>
+                <span class="sub-text text-muted">
+                  PO Bal: {{ poRemainingBalance(p.poNumber) | currency:'USD':'symbol':'1.2-2' }}
+                </span>
+              </div>
+            </td>
+
+            <!-- Status -->
+            <td>
+              <span class="pay-status-badge" [ngClass]="statusBadgeClass(p.status)">
+                <i class="bi"
+                   [class.bi-check-circle-fill]="p.status === 'Completed'"
+                   [class.bi-hourglass-split]="p.status === 'Pending Clearing'"
+                   [class.bi-slash-circle]="p.status === 'Voided'"></i>
+                {{ p.status }}
+              </span>
+            </td>
+
+            <!-- Actions (4 buttons on every row; unrelated actions disabled) -->
+            <td class="text-center">
+              <button
+                class="btn btn-sm btn-link p-1 text-secondary action-btn"
+                title="View Payment & PO Ledger"
+                (click)="openViewModal(p)">
+                <i class="bi bi-eye fs-5"></i>
+              </button>
+              <button
+                class="btn btn-sm btn-link p-1 text-secondary action-btn"
+                title="Mark Payment Cleared"
+                [disabled]="!canClear(p)"
+                (click)="markAsCleared(p)">
+                <i class="bi bi-check2-circle fs-5"></i>
+              </button>
+              <button
+                class="btn btn-sm btn-link p-1 text-secondary action-btn"
+                title="Edit"
+                [disabled]="!canEdit(p)"
+                (click)="openEditModal(p)">
+                <i class="bi bi-pencil-square fs-5"></i>
+              </button>
+              <button
+                class="btn btn-sm btn-link p-1 text-danger action-btn"
+                title="Delete"
+                [disabled]="!canDelete(p)"
+                (click)="deletePayment(p)">
+                <i class="bi bi-trash3 fs-5"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Table Footer & Pagination -->
+    <div class="table-footer d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <span class="text-black-50 small">
+        Showing {{ showingFrom() }} to {{ showingTo() }} of {{ filteredPayments().length }} payments
+      </span>
+
+      <nav aria-label="Purchase payments pagination" *ngIf="totalPages() > 1">
+        <ul class="pagination pagination-sm pagination-outline-dark mb-0">
+          <li class="page-item" [class.disabled]="currentPage() === 1">
+            <button
+              type="button"
+              class="page-link"
+              (click)="goToPage(currentPage() - 1)"
+              [disabled]="currentPage() === 1"
+              aria-label="Previous">
+              Previous
+            </button>
+          </li>
+
+          <li
+            *ngFor="let page of pageNumbers()"
+            class="page-item"
+            [class.active]="currentPage() === page">
+            <button
+              type="button"
+              class="page-link"
+              (click)="goToPage(page)">
+              {{ page }}
+            </button>
+          </li>
+
+          <li class="page-item" [class.disabled]="currentPage() === totalPages()">
+            <button
+              type="button"
+              class="page-link"
+              (click)="goToPage(currentPage() + 1)"
+              [disabled]="currentPage() === totalPages()"
+              aria-label="Next">
+              Next
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<!-- Record / Edit Purchase Payment Modal -->
+<div class="modal fade show d-block" tabindex="-1" *ngIf="showModal()" (click)="closeModal()" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered modal-lg" (click)="$event.stopPropagation()">
+    <div class="modal-content shadow border-0">
+
+      <!-- Modal Header -->
+      <div class="modal-header border-0 pt-4 px-4 pb-0 d-block">
+        <h5 class="modal-title fs-5 fw-bold mb-1">
+          <i class="bi bi-credit-card-2-front me-2 text-black-50"></i>
+          {{ isEditMode() ? 'Edit Purchase Payment' : 'Record Purchase Payment' }}
+        </h5>
+        <p class="modal-subtitle mb-0">
+          {{ isEditMode() ? 'Update payment method, reference details, or settlement status.' : 'Select a purchase order and record a full or partial supplier payment.' }}
+        </p>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body px-4 py-3">
+        <!-- PO Financial Summary Box -->
+        <div class="po-summary-box p-3 rounded-3 mb-3 d-flex align-items-center justify-content-between flex-wrap gap-3" *ngIf="formSelectedPo() as spo">
+          <div class="d-flex align-items-center gap-2">
+            <div class="avatar">
+              <i class="bi bi-file-earmark-text"></i>
+            </div>
+            <div>
+              <div class="fw-semibold text-black small">{{ spo.poNumber }} · {{ spo.supplierName }} ({{ spo.supplierCode }})</div>
+              <div class="sub-text text-muted">Ordered {{ spo.orderDate | date:'dd MMM yyyy' }} · Terms: {{ spo.paymentTerms }}</div>
+            </div>
+          </div>
+          <div class="d-flex gap-4 text-end">
+            <div>
+              <div class="summary-label">PO Total</div>
+              <div class="fw-bold text-black">{{ spo.totalAmount | currency:'USD':'symbol':'1.2-2' }}</div>
+            </div>
+            <div>
+              <div class="summary-label">Already Paid</div>
+              <div class="fw-bold text-black">{{ poPaidTotal(spo.poNumber, formEditingExcludeId()) | currency:'USD':'symbol':'1.2-2' }}</div>
+            </div>
+            <div>
+              <div class="summary-label">Balance Due</div>
+              <div class="fw-bold text-black">{{ formMaxPayable() | currency:'USD':'symbol':'1.2-2' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <!-- Payment Number -->
+          <div class="col-md-4">
+            <label class="form-label form-label-sm">Payment No.</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-hash"></i></span>
+              <input
+                type="text"
+                class="form-control form-control-sm text-uppercase"
+                [(ngModel)]="formData.paymentNumber"
+              />
+            </div>
+          </div>
+
+          <!-- Purchase Order Select -->
+          <div class="col-md-8">
+            <label class="form-label form-label-sm">Purchase Order</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-file-earmark-text"></i></span>
+              <select
+                class="form-select form-select-sm"
+                [(ngModel)]="formData.poNumber"
+                (ngModelChange)="onPoChange($event)">
+                <option *ngFor="let po of purchaseOrdersCatalog" [value]="po.poNumber">
+                  {{ po.poNumber }} — {{ po.supplierName }} (Total: {{ po.totalAmount | currency:'USD':'symbol':'1.2-2' }})
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Payment Date -->
+          <div class="col-md-4">
+            <label class="form-label form-label-sm">Payment Date</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+              <input
+                type="date"
+                class="form-control form-control-sm"
+                [(ngModel)]="formData.paymentDate"
+              />
+            </div>
+          </div>
+
+          <!-- Payment Method -->
+          <div class="col-md-4">
+            <label class="form-label form-label-sm">Payment Method</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-wallet2"></i></span>
+              <select class="form-select form-select-sm" [(ngModel)]="formData.paymentMethod">
+                <option *ngFor="let m of paymentMethods" [value]="m">{{ m }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Reference / Cheque / Transaction Number -->
+          <div class="col-md-4">
+            <label class="form-label form-label-sm">{{ referenceLabel(formData.paymentMethod) }}</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-receipt"></i></span>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                [placeholder]="referencePlaceholder(formData.paymentMethod)"
+                [(ngModel)]="formData.referenceNumber"
+              />
+            </div>
+          </div>
+
+          <!-- Bank / Account Name -->
+          <div class="col-md-6">
+            <label class="form-label form-label-sm">Bank / Account</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-bank2"></i></span>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                placeholder="e.g. HSBC Corporate USD, Petty Cash"
+                [(ngModel)]="formData.bankOrAccount"
+              />
+            </div>
+          </div>
+
+          <!-- Amount Paid -->
+          <div class="col-md-6">
+            <div class="d-flex align-items-center justify-content-between">
+              <label class="form-label form-label-sm">Amount Paid ($)</label>
+              <button
+                type="button"
+                class="btn btn-link btn-sm p-0 text-decoration-none balance-fill-btn"
+                *ngIf="formMaxPayable() > 0"
+                (click)="fillFullBalance()">
+                Pay Full Balance ({{ formMaxPayable() | currency:'USD':'symbol':'1.2-2' }})
+              </button>
+            </div>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
+              <input
+                type="number"
+                class="form-control form-control-sm"
+                step="0.01"
+                min="0"
+                [max]="formMaxPayable()"
+                [(ngModel)]="formData.amount"
+              />
+              <button
+                class="btn btn-outline theme-secondary input-group-btn"
+                type="button"
+                title="Decrease"
+                (click)="adjustAmount(-10, $event)">
+                <i class="bi bi-dash-circle"></i>
+              </button>
+              <button
+                class="btn btn-outline theme-secondary input-group-btn"
+                type="button"
+                title="Increase"
+                (click)="adjustAmount(10, $event)">
+                <i class="bi bi-plus-circle"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Notes / Remarks -->
+          <div class="col-12">
+            <label class="form-label form-label-sm">Notes / Remarks</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-chat-left-text"></i></span>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                placeholder="Installment details, invoice reference, or clearing instructions"
+                [(ngModel)]="formData.notes"
+              />
+            </div>
+          </div>
+
+          <!-- Payment Status -->
+          <div class="col-12">
+            <label class="form-label form-label-sm d-block">Payment Status</label>
+            <div class="d-flex align-items-center gap-4 pt-1">
+              <div class="form-check form-check-inline mb-0">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="payStatus"
+                  id="statusPayCompleted"
+                  value="Completed"
+                  [(ngModel)]="formData.status"
+                />
+                <label class="form-check-label" for="statusPayCompleted">Completed</label>
+              </div>
+              <div class="form-check form-check-inline mb-0">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="payStatus"
+                  id="statusPayPending"
+                  value="Pending Clearing"
+                  [(ngModel)]="formData.status"
+                />
+                <label class="form-check-label" for="statusPayPending">Pending Clearing</label>
+              </div>
+              <div class="form-check form-check-inline mb-0" *ngIf="isEditMode()">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="payStatus"
+                  id="statusPayVoided"
+                  value="Voided"
+                  [(ngModel)]="formData.status"
+                />
+                <label class="form-check-label" for="statusPayVoided">Voided</label>
+              </div>
+            </div>
+            <p class="modal-field-desc mt-2 mb-0">
+              {{ formData.status === 'Completed'
+                ? 'Completed payments are settled and deducted from the purchase order balance.'
+                : formData.status === 'Pending Clearing'
+                  ? 'Pending Clearing is used for issued cheques or wire transfers awaiting bank confirmation.'
+                  : 'Voided payments are cancelled and excluded from the purchase order paid total.' }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer border-0 px-4 pb-4 pt-2 gap-2">
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeModal()">
+          <i class="bi bi-x-circle"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="resetForm()">
+          <i class="bi bi-arrow-counterclockwise"></i> Reset
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="savePayment()">
+          <i class="bi bi-check-circle"></i> Save
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="showModal()" (click)="closeModal()"></div>
+
+<!-- View Purchase Payment & PO Payment Ledger Modal (Window-Height Responsive) -->
+<div class="modal fade show d-block po-window-modal" tabindex="-1" *ngIf="showViewModal() && viewingPayment() as vp" (click)="closeViewModal()" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-xl po-window-modal-dialog" (click)="$event.stopPropagation()">
+    <div class="modal-content shadow border-0">
+
+      <!-- Modal Header -->
+      <div class="modal-header border-0 pt-3 px-4 pb-0 d-block flex-shrink-0">
+        <h5 class="modal-title fs-5 fw-bold mb-1">
+          <i class="bi bi-credit-card-2-front me-2 text-black-50"></i>
+          Purchase Payment &amp; PO Ledger
+        </h5>
+        <p class="modal-subtitle mb-0">
+          Voucher details for {{ vp.paymentNumber }} and complete payment history for {{ vp.poNumber }}.
+        </p>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body px-4 py-2 po-form-modal-body">
+        <!-- Payment & PO Summary Box -->
+        <div class="po-summary-box p-3 rounded-3 mb-2 d-flex align-items-center justify-content-between flex-wrap gap-3 flex-shrink-0">
+          <div class="d-flex align-items-center gap-2">
+            <div class="avatar">
+              <i class="bi bi-credit-card-2-front"></i>
+            </div>
+            <div>
+              <div class="fw-semibold text-black small">
+                {{ vp.paymentNumber }} · {{ vp.poNumber }} — {{ vp.supplierName }} ({{ vp.supplierCode }})
+              </div>
+              <div class="sub-text text-muted">
+                {{ vp.paymentMethod }} ({{ vp.referenceNumber }}) · {{ vp.bankOrAccount }} · Paid {{ vp.paymentDate | date:'dd MMM yyyy' }}
+              </div>
+              <div *ngIf="vp.notes" class="sub-text text-muted mt-1">
+                <i class="bi bi-chat-left-text me-1"></i>{{ vp.notes }}
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex align-items-center gap-4 text-end" *ngIf="getPoRef(vp.poNumber) as vpo">
+            <div>
+              <div class="summary-label">PO Total</div>
+              <div class="fw-bold text-black">{{ vpo.totalAmount | currency:'USD':'symbol':'1.2-2' }}</div>
+            </div>
+            <div>
+              <div class="summary-label">Total Paid</div>
+              <div class="fw-bold text-black">{{ poPaidTotal(vp.poNumber) | currency:'USD':'symbol':'1.2-2' }}</div>
+            </div>
+            <div>
+              <div class="summary-label">Balance Due</div>
+              <div class="fw-bold text-black">{{ poRemainingBalance(vp.poNumber) | currency:'USD':'symbol':'1.2-2' }}</div>
+            </div>
+            <span class="pay-status-badge" [ngClass]="statusBadgeClass(vp.status)">{{ vp.status }}</span>
+          </div>
+        </div>
+
+        <!-- PO Payment History (Installment Ledger) Table -->
+        <div class="po-items-section">
+          <h6 class="form-section-title mb-1 flex-shrink-0">
+            <i class="bi bi-clock-history me-2"></i>Payment Installments for {{ vp.poNumber }}
+          </h6>
+          <div class="po-items-wrap po-items-wrap-fill" data-bs-theme="light">
+            <div
+              class="po-items-body"
+              [appAutoPageSize]="ledgerPageSize"
+              [autoPageSizeCurrentPage]="ledgerPage"
+              [autoPageSizeRowHeight]="46">
+              <table class="table table-striped align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th scope="col">Payment No.</th>
+                    <th scope="col">Payment Date</th>
+                    <th scope="col">Method</th>
+                    <th scope="col">Reference / Bank</th>
+                    <th scope="col">Remarks</th>
+                    <th scope="col" class="text-end">Amount</th>
+                    <th scope="col">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of pagedPoPaymentHistory()" [class.table-active]="item.id === vp.id">
+                    <td>
+                      <span class="code-badge">{{ item.paymentNumber }}</span>
+                    </td>
+                    <td>{{ item.paymentDate | date:'dd MMM yyyy' }}</td>
+                    <td>
+                      <span class="method-chip">
+                        <i class="bi me-1" [ngClass]="methodIcon(item.paymentMethod)"></i>{{ item.paymentMethod }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="fw-medium text-black">{{ item.referenceNumber }}</div>
+                      <div class="sub-text text-muted">{{ item.bankOrAccount }}</div>
+                    </td>
+                    <td>
+                      <span class="text-muted small">{{ item.notes || '—' }}</span>
+                    </td>
+                    <td class="text-end fw-bold">{{ item.amount | currency:'USD':'symbol':'1.2-2' }}</td>
+                    <td>
+                      <span class="pay-status-badge" [ngClass]="statusBadgeClass(item.status)">{{ item.status }}</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="po-items-footer d-flex align-items-center justify-content-between flex-wrap gap-2">
+              <span class="text-black-50 small">
+                Showing {{ ledgerShowingFrom() }} to {{ ledgerShowingTo() }} of {{ poPaymentHistory().length }} {{ poPaymentHistory().length === 1 ? 'payment' : 'payments' }}
+              </span>
+              <div class="d-flex align-items-center gap-3">
+                <div>
+                  <span class="text-muted small me-2">Total Paid on {{ vp.poNumber }}:</span>
+                  <span class="fw-bold text-black fs-6">{{ poPaidTotal(vp.poNumber) | currency:'USD':'symbol':'1.2-2' }}</span>
+                </div>
+                <nav aria-label="Payment ledger pagination" *ngIf="ledgerTotalPages() > 1">
+                  <ul class="pagination pagination-sm pagination-outline-dark mb-0">
+                    <li class="page-item" [class.disabled]="ledgerPage() === 1">
+                      <button
+                        type="button"
+                        class="page-link"
+                        (click)="goToLedgerPage(ledgerPage() - 1)"
+                        [disabled]="ledgerPage() === 1"
+                        aria-label="Previous">
+                        Previous
+                      </button>
+                    </li>
+                    <li
+                      *ngFor="let p of ledgerPageNumbers()"
+                      class="page-item"
+                      [class.active]="ledgerPage() === p">
+                      <button type="button" class="page-link" (click)="goToLedgerPage(p)">{{ p }}</button>
+                    </li>
+                    <li class="page-item" [class.disabled]="ledgerPage() === ledgerTotalPages()">
+                      <button
+                        type="button"
+                        class="page-link"
+                        (click)="goToLedgerPage(ledgerPage() + 1)"
+                        [disabled]="ledgerPage() === ledgerTotalPages()"
+                        aria-label="Next">
+                        Next
+                      </button>
+                    </li>
+                  </ul>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer border-0 px-4 pb-3 pt-2 gap-2 flex-shrink-0">
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeViewModal()">
+          <i class="bi bi-x-circle"></i> Close
+        </button>
+        <button
+          *ngIf="canClear(vp)"
+          type="button"
+          class="btn btn-outline-dark btn-sm modal-btn modal-btn-wide"
+          (click)="markAsCleared(vp)">
+          <i class="bi bi-check2-circle"></i> Mark Cleared
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="showViewModal()" (click)="closeViewModal()"></div>
+
