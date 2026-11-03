@@ -90,6 +90,16 @@ export const routes: Routes = [
         pathMatch: 'full'
       },
       {
+        path: 'product-categories',
+        loadComponent: () =>
+          import('./components/product-item-management/product-category/product-category.component').then(m => m.ProductCategoryComponent)
+      },
+      {
+        path: 'product-category',
+        redirectTo: 'product-categories',
+        pathMatch: 'full'
+      },
+      {
         path: '',
         redirectTo: 'users',
         pathMatch: 'full'
@@ -157,6 +167,11 @@ export const routes: Routes = [
     path: 'purchase-payment',
     loadComponent: () =>
       import('./components/supplier-procurement/purchase-payment/purchase-payment.component').then(m => m.PurchasePaymentComponent)
+  },
+  {
+    path: 'product-category',
+    loadComponent: () =>
+      import('./components/product-item-management/product-category/product-category.component').then(m => m.ProductCategoryComponent)
   },
 
   // Catch-all route
