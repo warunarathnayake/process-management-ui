@@ -1,0 +1,1115 @@
+<div class="product-catalog-page page-fill">
+
+  <!-- Page Header -->
+  <div class="page-header d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h4 class="page-title mb-1">
+        <i class="bi bi-box-seam me-2 text-black-50"></i>Products &amp; Catalog
+      </h4>
+      <p class="page-subtitle mb-0">Manage finished goods, batch numbers, lot expiry dates, variant pricing, and stock levels</p>
+    </div>
+    <button class="btn btn-outline-dark btn-sm px-3" (click)="openAddModal()">
+      <i class="bi bi-plus-circle me-1"></i> Add Product
+    </button>
+  </div>
+
+  <!-- Filters & Search Bar -->
+  <div class="filter-bar d-flex flex-wrap align-items-center gap-2 mb-3">
+    <!-- Search Input -->
+    <div class="search-wrapper flex-grow-1">
+      <span class="search-icon" aria-hidden="true">
+        <i class="bi bi-search"></i>
+      </span>
+      <input
+        type="text"
+        class="form-control form-control-sm search-input"
+        placeholder="Search products by name, SKU, barcode, batch number, or category…"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="onSearch($event)"
+      />
+      <button
+        *ngIf="searchQuery()"
+        type="button"
+        class="btn btn-link btn-sm search-clear-btn"
+        (click)="onSearch('')"
+        title="Clear search">
+        <i class="bi bi-x-circle-fill"></i>
+      </button>
+    </div>
+
+    <!-- Category Filter Dropdown -->
+    <div class="category-filter">
+      <select
+        class="form-select form-select-sm"
+        [ngModel]="categoryFilter()"
+        (ngModelChange)="setCategoryFilter($event)">
+        <option value="All">All Categories</option>
+        <option *ngFor="let c of categoriesList" [value]="c">{{ c }}</option>
+      </select>
+    </div>
+
+    <!-- Status Filter Buttons -->
+    <div class="btn-group status-filter" role="group">
+      <button
+        *ngFor="let s of ['All', 'Active', 'Inactive']"
+        type="button"
+        class="btn btn-outline-dark btn-sm"
+        [class.active]="statusFilter() === s"
+        (click)="setStatusFilter(s)"
+      >{{ s }}</button>
+    </div>
+  </div>
+
+  <!-- Products Table Card -->
+  <div class="table-card shadow-sm" data-bs-theme="light">
+    <div class="table-responsive" [appAutoPageSize]="pageSize" [autoPageSizeCurrentPage]="currentPage">
+      <table class="table table-striped align-middle mb-0">
+        <thead>
+          <tr>
+            <th scope="col" style="width: 50px;">#</th>
+            <th scope="col">Product Name</th>
+            <th scope="col">Category</th>
+            <th scope="col">Packaging Unit</th>
+            <th scope="col" class="text-end">Stock Level</th>
+            <th scope="col">Status</th>
+            <th scope="col" class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Empty State -->
+          <tr *ngIf="filteredProducts().length === 0">
+            <td colspan="7" class="text-center py-5 text-muted">
+              <i class="bi bi-inbox fs-2 d-block mb-2"></i>No products found matching your criteria.
+            </td>
+          </tr>
+
+          <!-- Product Rows -->
+          <tr *ngFor="let p of paginatedProducts(); let i = index">
+            <th scope="row" class="fw-bold text-black">{{ (currentPage() - 1) * pageSize() + i + 1 }}</th>
+
+            <!-- Product Name with Avatar -->
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="avatar">
+                  <i class="bi bi-box-seam"></i>
+                </div>
+                <div class="d-flex flex-column name-wrap">
+                  <span class="fw-semibold text-black product-title" [title]="p.name">{{ p.name }}</span>
+                  <span class="sub-text text-muted">
+                    <span class="sku-tag">{{ p.sku }}</span>
+                    <span *ngIf="p.barcode"> · {{ p.barcode }}</span>
+                  </span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Category -->
+            <td>
+              <span class="category-chip" [title]="p.category">
+                {{ p.category }}
+              </span>
+            </td>
+
+            <!-- Packaging Unit -->
+            <td>
+              <span class="text-black fw-medium small">{{ p.unit }}</span>
+            </td>
+
+            <!-- Stock Level -->
+            <td class="text-end">
+              <span class="fw-bold" [class.text-danger]="p.currentStock === 0" [class.text-black]="p.currentStock > 0">
+                {{ p.currentStock | number }}
+              </span>
+              <span class="text-muted small ms-1">units</span>
+            </td>
+
+            <!-- Status -->
+            <td>
+              <span
+                class="status-badge"
+                [class.status-active]="p.status === 'Active'"
+                [class.status-inactive]="p.status === 'Inactive'"
+                (click)="toggleStatus(p)"
+                title="Click to toggle status"
+              >
+                <i class="bi" [class.bi-check-circle-fill]="p.status === 'Active'" [class.bi-x-circle-fill]="p.status === 'Inactive'"></i>
+                {{ p.status }}
+              </span>
+            </td>
+
+            <!-- Actions -->
+            <td class="text-center">
+              <button
+                class="btn btn-sm btn-link p-1 text-secondary action-btn"
+                title="View Details & Batches"
+                (click)="openViewModal(p)">
+                <i class="bi bi-eye fs-5"></i>
+              </button>
+              <button
+                class="btn btn-sm btn-link p-1 text-secondary action-btn"
+                title="Add New Batch"
+                (click)="openAddBatchModal(p)">
+                <i class="bi bi-plus-circle fs-5"></i>
+              </button>
+              <button
+                class="btn btn-sm btn-link p-1 text-secondary action-btn"
+                title="Edit Product"
+                (click)="openEditModal(p)">
+                <i class="bi bi-pencil-square fs-5"></i>
+              </button>
+              <button
+                class="btn btn-sm btn-link p-1 text-danger action-btn"
+                title="Delete Product"
+                (click)="deleteProduct(p)">
+                <i class="bi bi-trash3 fs-5"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Table Footer with Pagination -->
+    <div class="table-footer d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <span class="text-black-50 small">
+        Showing {{ showingFrom() }} to {{ showingTo() }} of {{ filteredProducts().length }} products
+      </span>
+
+      <nav aria-label="Products pagination" *ngIf="totalPages() > 1">
+        <ul class="pagination pagination-sm pagination-outline-dark mb-0">
+          <li class="page-item" [class.disabled]="currentPage() === 1">
+            <button
+              type="button"
+              class="page-link"
+              (click)="goToPage(currentPage() - 1)"
+              [disabled]="currentPage() === 1"
+              aria-label="Previous">
+              Previous
+            </button>
+          </li>
+
+          <li
+            *ngFor="let page of pageNumbers()"
+            class="page-item"
+            [class.active]="currentPage() === page">
+            <button
+              type="button"
+              class="page-link"
+              (click)="goToPage(page)">
+              {{ page }}
+            </button>
+          </li>
+
+          <li class="page-item" [class.disabled]="currentPage() === totalPages()">
+            <button
+              type="button"
+              class="page-link"
+              (click)="goToPage(currentPage() + 1)"
+              [disabled]="currentPage() === totalPages()"
+              aria-label="Next">
+              Next
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<!-- Add / Edit Product Modal -->
+<div class="modal fade show d-block" tabindex="-1" *ngIf="showModal()" (click)="closeModal()" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered modal-lg product-form-dialog" (click)="$event.stopPropagation()">
+    <div class="modal-content shadow border-0">
+
+      <!-- Modal Header -->
+      <div class="modal-header border-0 pt-3 px-4 pb-0 d-block">
+        <h5 class="modal-title fs-5 fw-bold mb-1">
+          <i class="bi bi-box-seam-fill me-2 text-black-50"></i>
+          {{ isEditMode() ? 'Edit Product' : 'Add New Product' }}
+        </h5>
+        <p class="modal-subtitle mb-0">
+          {{ isEditMode() ? 'Update catalog specifications, batch details, pricing, and stock settings.' : 'Enter product information, initial batch details, and pricing to register in the catalog.' }}
+        </p>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body px-4 py-2">
+        <div class="row g-2">
+          <!-- Product Name -->
+          <div class="col-md-5">
+            <label class="form-label form-label-sm">Product Name</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-tag"></i></span>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                placeholder="e.g. Rosewater Hydrating Face Mist"
+                [(ngModel)]="formData.name"
+                autofocus
+              />
+            </div>
+          </div>
+
+          <!-- SKU / Code -->
+          <div class="col-md-4">
+            <label class="form-label form-label-sm">Product SKU / Code</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-hash"></i></span>
+              <input
+                type="text"
+                class="form-control form-control-sm text-uppercase"
+                placeholder="e.g. PRD-SKN-001"
+                [(ngModel)]="formData.sku"
+              />
+            </div>
+          </div>
+
+          <!-- Barcode / UPC -->
+          <div class="col-md-3">
+            <label class="form-label form-label-sm">Barcode / UPC</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                placeholder="e.g. 8934001001"
+                [(ngModel)]="formData.barcode"
+              />
+            </div>
+          </div>
+
+          <!-- Category -->
+          <div class="col-md-4">
+            <label class="form-label form-label-sm">Category</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-tags"></i></span>
+              <select class="form-select form-select-sm" [(ngModel)]="formData.category">
+                <option *ngFor="let cat of categoriesList" [value]="cat">{{ cat }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Unit / Packaging -->
+          <div class="col-md-3">
+            <label class="form-label form-label-sm">Packaging Unit</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-box"></i></span>
+              <select class="form-select form-select-sm" [(ngModel)]="formData.unit">
+                <option *ngFor="let u of packagingUnits" [value]="u">{{ u }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="col-md-5">
+            <label class="form-label form-label-sm">Description &amp; Specifications</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-card-text"></i></span>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                placeholder="Key active ingredients, skin type, or packaging specs"
+                [(ngModel)]="formData.description"
+              />
+            </div>
+          </div>
+
+          <!-- Batch Section Separator -->
+          <div class="col-12 pt-1">
+            <h6 class="form-section-title mb-0">
+              <i class="bi bi-qr-code me-2"></i>Batch &amp; Lot Tracking
+            </h6>
+          </div>
+
+          <!-- Batch Number -->
+          <div class="col-md-6">
+            <label class="form-label form-label-sm">Batch / Lot Number</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-upc"></i></span>
+              <input
+                type="text"
+                class="form-control form-control-sm text-uppercase"
+                placeholder="e.g. BAT-2026-001"
+                [(ngModel)]="formData.batchNumber"
+              />
+            </div>
+          </div>
+
+          <!-- Manufacturing Date -->
+          <div class="col-md-6">
+            <label class="form-label form-label-sm">Manufacturing Date (MFD)</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
+              <input
+                type="date"
+                class="form-control form-control-sm"
+                [(ngModel)]="formData.mfgDate"
+                (change)="onProductMfgDateChange()"
+              />
+            </div>
+          </div>
+
+          <!-- Expiry Date Configuration Box -->
+          <div class="col-12">
+            <div class="expiry-config-box">
+              <div class="expiry-box-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <span class="expiry-box-title">
+                  <i class="bi bi-calendar2-range me-1"></i>Expiry Date Configuration
+                </span>
+                <div class="d-flex align-items-center gap-4">
+                  <div class="form-check form-check-inline mb-0">
+                    <input
+                      type="radio"
+                      class="form-check-input"
+                      name="prodExpiryMode"
+                      id="prodExpModeYears"
+                      value="years"
+                      [checked]="formData.expiryMode === 'years'"
+                      (change)="setProductExpiryMode('years')"
+                    />
+                    <label class="form-check-label" for="prodExpModeYears">No. of Years (from MFD)</label>
+                  </div>
+                  <div class="form-check form-check-inline mb-0">
+                    <input
+                      type="radio"
+                      class="form-check-input"
+                      name="prodExpiryMode"
+                      id="prodExpModeExact"
+                      value="exact"
+                      [checked]="formData.expiryMode === 'exact'"
+                      (change)="setProductExpiryMode('exact')"
+                    />
+                    <label class="form-check-label" for="prodExpModeExact">Exact Date</label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mode: Years from MFD -->
+              <div class="row g-2 mt-1" *ngIf="formData.expiryMode === 'years'">
+                <div class="col-md-6">
+                  <label class="form-label form-label-sm">No. of Years (from MFD)</label>
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-text"><i class="bi bi-hourglass-split"></i></span>
+                    <input
+                      type="number"
+                      class="form-control form-control-sm"
+                      min="0.5"
+                      max="10"
+                      step="0.5"
+                      placeholder="e.g. 2"
+                      [(ngModel)]="formData.expiryYears"
+                      (ngModelChange)="onProductExpiryYearsChange()"
+                    />
+                    <span class="input-group-text">Years</span>
+                    <button
+                      class="btn btn-outline theme-secondary input-group-btn"
+                      type="button"
+                      title="Decrease"
+                      (click)="adjustProductExpiryYears(-0.5, $event)">
+                      <i class="bi bi-dash-circle"></i>
+                    </button>
+                    <button
+                      class="btn btn-outline theme-secondary input-group-btn"
+                      type="button"
+                      title="Increase"
+                      (click)="adjustProductExpiryYears(0.5, $event)">
+                      <i class="bi bi-plus-circle"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label form-label-sm">Calculated Expiry Date</label>
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-text"><i class="bi bi-calendar2-check"></i></span>
+                    <input
+                      type="date"
+                      class="form-control form-control-sm readonly-date-input"
+                      [ngModel]="formData.expiryDate"
+                      readonly
+                      tabindex="-1"
+                    />
+                    <span class="input-group-text calc-tag">Auto</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mode: Exact Date -->
+              <div class="row g-2 mt-1" *ngIf="formData.expiryMode === 'exact'">
+                <div class="col-md-6">
+                  <label class="form-label form-label-sm">Exact Expiry Date</label>
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-text"><i class="bi bi-calendar-x"></i></span>
+                    <input
+                      type="date"
+                      class="form-control form-control-sm"
+                      [(ngModel)]="formData.expiryDate"
+                      (change)="onProductExactExpiryChange()"
+                    />
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label form-label-sm">Calculated Shelf Life</label>
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-text"><i class="bi bi-clock-history"></i></span>
+                    <input
+                      type="text"
+                      class="form-control form-control-sm readonly-date-input"
+                      [value]="getCalculatedYearsText(formData.mfgDate, formData.expiryDate)"
+                      readonly
+                      tabindex="-1"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pricing & Stock Section Separator -->
+          <div class="col-12 pt-1">
+            <h6 class="form-section-title mb-0">
+              <i class="bi bi-currency-dollar me-2"></i>Pricing &amp; Stock Levels
+            </h6>
+          </div>
+
+          <!-- Selling Price -->
+          <div class="col-md-3">
+            <label class="form-label form-label-sm">Selling Price ($)</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-tag"></i></span>
+              <input
+                type="number"
+                class="form-control form-control-sm"
+                step="0.50"
+                min="0"
+                [(ngModel)]="formData.sellingPrice"
+              />
+              <button
+                class="btn btn-outline theme-secondary input-group-btn"
+                type="button"
+                title="Decrease"
+                (click)="adjustFormSellingPrice(-1, $event)">
+                <i class="bi bi-dash-circle"></i>
+              </button>
+              <button
+                class="btn btn-outline theme-secondary input-group-btn"
+                type="button"
+                title="Increase"
+                (click)="adjustFormSellingPrice(1, $event)">
+                <i class="bi bi-plus-circle"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Cost Price -->
+          <div class="col-md-3">
+            <label class="form-label form-label-sm">Cost Price ($)</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-cash-stack"></i></span>
+              <input
+                type="number"
+                class="form-control form-control-sm"
+                step="0.50"
+                min="0"
+                [(ngModel)]="formData.costPrice"
+              />
+              <button
+                class="btn btn-outline theme-secondary input-group-btn"
+                type="button"
+                title="Decrease"
+                (click)="adjustFormCostPrice(-1, $event)">
+                <i class="bi bi-dash-circle"></i>
+              </button>
+              <button
+                class="btn btn-outline theme-secondary input-group-btn"
+                type="button"
+                title="Increase"
+                (click)="adjustFormCostPrice(1, $event)">
+                <i class="bi bi-plus-circle"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Current Stock -->
+          <div class="col-md-3">
+            <label class="form-label form-label-sm">Initial Stock (units)</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-boxes"></i></span>
+              <input
+                type="number"
+                class="form-control form-control-sm"
+                min="0"
+                [(ngModel)]="formData.currentStock"
+              />
+              <button
+                class="btn btn-outline theme-secondary input-group-btn"
+                type="button"
+                title="Decrease"
+                (click)="adjustFormStock(-5, $event)">
+                <i class="bi bi-dash-circle"></i>
+              </button>
+              <button
+                class="btn btn-outline theme-secondary input-group-btn"
+                type="button"
+                title="Increase"
+                (click)="adjustFormStock(5, $event)">
+                <i class="bi bi-plus-circle"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Reorder Level -->
+          <div class="col-md-3">
+            <label class="form-label form-label-sm">Reorder Level (units)</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-bell"></i></span>
+              <input
+                type="number"
+                class="form-control form-control-sm"
+                min="0"
+                [(ngModel)]="formData.minStock"
+              />
+              <button
+                class="btn btn-outline theme-secondary input-group-btn"
+                type="button"
+                title="Decrease"
+                (click)="adjustFormMinStock(-5, $event)">
+                <i class="bi bi-dash-circle"></i>
+              </button>
+              <button
+                class="btn btn-outline theme-secondary input-group-btn"
+                type="button"
+                title="Increase"
+                (click)="adjustFormMinStock(5, $event)">
+                <i class="bi bi-plus-circle"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Status -->
+          <div class="col-12 pt-1">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+              <div class="d-flex align-items-center gap-3">
+                <label class="form-label form-label-sm mb-0">Product Status</label>
+                <div class="d-flex align-items-center gap-3">
+                  <div class="form-check form-check-inline mb-0">
+                    <input
+                      class="form-check-input"
+                      type="radio"
+                      name="productStatus"
+                      id="statusProductActive"
+                      value="Active"
+                      [(ngModel)]="formData.status"
+                    />
+                    <label class="form-check-label" for="statusProductActive">Active</label>
+                  </div>
+                  <div class="form-check form-check-inline mb-0">
+                    <input
+                      class="form-check-input"
+                      type="radio"
+                      name="productStatus"
+                      id="statusProductInactive"
+                      value="Inactive"
+                      [(ngModel)]="formData.status"
+                    />
+                    <label class="form-check-label" for="statusProductInactive">Inactive</label>
+                  </div>
+                </div>
+              </div>
+              <span class="modal-field-desc mb-0">
+                {{ formData.status === 'Active'
+                  ? 'Available in the active sales catalog.'
+                  : 'Hidden from the active sales catalog.' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer border-0 px-4 pb-3 pt-1 gap-2">
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeModal()">
+          <i class="bi bi-x-circle"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="resetForm()">
+          <i class="bi bi-arrow-counterclockwise"></i> Reset
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="saveProduct()">
+          <i class="bi bi-check-circle"></i> Save
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="showModal()" (click)="closeModal()"></div>
+
+<!-- View Product Details & Batches Modal -->
+<div class="modal fade show d-block" tabindex="-1" *ngIf="showViewModal() && viewingProduct() as vp" (click)="closeViewModal()" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered modal-xl" (click)="$event.stopPropagation()">
+    <div class="modal-content shadow border-0">
+
+      <!-- Modal Header -->
+      <div class="modal-header border-0 pt-4 px-4 pb-0 d-block">
+        <h5 class="modal-title fs-5 fw-bold mb-1">
+          <i class="bi bi-box-seam me-2 text-black-50"></i>
+          Product Specifications &amp; Batch Ledger
+        </h5>
+        <p class="modal-subtitle mb-0">
+          Complete catalog overview, production batches, expiry dates, and variant pricing.
+        </p>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body px-4 py-3">
+        <!-- Hero Box -->
+        <div class="product-summary-box p-3 rounded-3 mb-3 d-flex align-items-center justify-content-between flex-wrap gap-3">
+          <div class="d-flex align-items-center gap-2">
+            <div class="avatar">
+              <i class="bi bi-box-seam"></i>
+            </div>
+            <div>
+              <div class="fw-semibold text-black fs-6">{{ vp.name }}</div>
+              <div class="sub-text text-muted">
+                <span class="code-badge me-1">{{ vp.sku }}</span> · {{ vp.category }} · {{ vp.unit }}
+              </div>
+            </div>
+          </div>
+          <span
+            class="status-badge"
+            [class.status-active]="vp.status === 'Active'"
+            [class.status-inactive]="vp.status === 'Inactive'"
+          >
+            <i class="bi" [class.bi-check-circle-fill]="vp.status === 'Active'" [class.bi-x-circle-fill]="vp.status === 'Inactive'"></i>
+            {{ vp.status }}
+          </span>
+        </div>
+
+        <!-- 4-Card Financials & Inventory Metric Strip -->
+        <div class="row g-2 mb-3">
+          <!-- Selling Price (shows range if variant across batches) -->
+          <div class="col-sm-6 col-md-3">
+            <div class="metric-card p-3 rounded-3 h-100">
+              <div class="metric-label text-muted small">Selling Price</div>
+              <div class="fw-bold text-black fs-5">{{ priceDisplay(vp) }}</div>
+              <div class="sub-text text-muted">Catalog / Variant Price</div>
+            </div>
+          </div>
+
+          <!-- Unit Cost (shows range if variant across batches) -->
+          <div class="col-sm-6 col-md-3">
+            <div class="metric-card p-3 rounded-3 h-100">
+              <div class="metric-label text-muted small">Unit Cost</div>
+              <div class="fw-bold text-black fs-5">{{ costDisplay(vp) }}</div>
+              <div class="sub-text text-muted">Batch Production Cost</div>
+            </div>
+          </div>
+
+          <!-- Nearest Expiry Date -->
+          <div class="col-sm-6 col-md-3">
+            <div class="metric-card p-3 rounded-3 h-100">
+              <div class="metric-label text-muted small">Nearest Expiry</div>
+              <div class="fw-bold text-black fs-5">
+                {{ nearestExpiryDate(vp) ? (nearestExpiryDate(vp) | date:'dd MMM yyyy') : '—' }}
+              </div>
+              <div class="mt-1" *ngIf="nearestExpiryDate(vp) as nExp">
+                <span class="expiry-badge expiry-expired" *ngIf="expiryStatus(nExp) === 'expired'">
+                  <i class="bi bi-exclamation-octagon-fill"></i> Expired
+                </span>
+                <span class="expiry-badge expiry-soon" *ngIf="expiryStatus(nExp) === 'soon'">
+                  <i class="bi bi-hourglass-split"></i> {{ daysToExpiry(nExp) }}d left
+                </span>
+                <span class="expiry-badge expiry-ok" *ngIf="expiryStatus(nExp) === 'ok'">
+                  <i class="bi bi-check-circle"></i> Good
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Total Stock -->
+          <div class="col-sm-6 col-md-3">
+            <div class="metric-card p-3 rounded-3 h-100">
+              <div class="metric-label text-muted small">Total Finished Stock</div>
+              <div class="fw-bold text-black fs-5">{{ vp.currentStock | number }} <span class="fs-6 fw-normal text-muted">units</span></div>
+              <div class="sub-text text-muted">Across {{ (vp.batches || []).length }} batch(es)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Batches & Expiry Ledger Table -->
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <h6 class="form-section-title mb-0">
+            <i class="bi bi-layers me-2"></i>Product Batches &amp; Expiry Ledger
+          </h6>
+          <button type="button" class="btn btn-outline-dark btn-sm py-1 px-2" style="font-size: 0.75rem;" (click)="openAddBatchModal(vp)">
+            <i class="bi bi-plus-circle me-1"></i> Add Batch
+          </button>
+        </div>
+
+        <div class="batches-table-wrap mb-3" data-bs-theme="light">
+          <table class="table table-striped align-middle mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Batch No.</th>
+                <th scope="col">Mfg Date</th>
+                <th scope="col">Expiry Date</th>
+                <th scope="col" class="text-end">Unit Cost</th>
+                <th scope="col" class="text-end">Selling Price</th>
+                <th scope="col" class="text-end">Quantity</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let b of vp.batches">
+                <td>
+                  <span class="code-badge">{{ b.batchNumber }}</span>
+                </td>
+                <td>{{ b.mfgDate | date:'dd MMM yyyy' }}</td>
+                <td>
+                  <div class="d-flex align-items-center gap-1">
+                    <span class="fw-medium">{{ b.expiryDate | date:'dd MMM yyyy' }}</span>
+                    <span class="expiry-badge expiry-expired ms-1" *ngIf="expiryStatus(b.expiryDate) === 'expired'">
+                      <i class="bi bi-exclamation-octagon-fill"></i> Expired
+                    </span>
+                    <span class="expiry-badge expiry-soon ms-1" *ngIf="expiryStatus(b.expiryDate) === 'soon'">
+                      <i class="bi bi-hourglass-split"></i> {{ daysToExpiry(b.expiryDate) }}d
+                    </span>
+                  </div>
+                </td>
+                <td class="text-end fw-medium">{{ b.costPrice | currency:'USD':'symbol':'1.2-2' }}</td>
+                <td class="text-end fw-bold">{{ b.sellingPrice | currency:'USD':'symbol':'1.2-2' }}</td>
+                <td class="text-end fw-bold" [class.text-danger]="b.quantity === 0">
+                  {{ b.quantity | number }} units
+                </td>
+                <td>
+                  <span class="batch-status-badge" [ngClass]="'batch-' + (b.status ? b.status.toLowerCase() : 'active')">
+                    {{ b.status }}
+                  </span>
+                </td>
+              </tr>
+              <tr *ngIf="!vp.batches || vp.batches.length === 0">
+                <td colspan="7" class="text-center py-3 text-muted">
+                  No production batches recorded yet for this product.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Detailed Specifications Grid -->
+        <div class="specs-grid p-3 rounded-3 mb-3">
+          <div class="row g-3">
+            <div class="col-sm-6 col-md-3">
+              <div class="text-muted small fw-medium">Barcode / UPC</div>
+              <div class="text-black fw-semibold">{{ vp.barcode || '—' }}</div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <div class="text-muted small fw-medium">Packaging Unit</div>
+              <div class="text-black fw-semibold">{{ vp.unit }}</div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <div class="text-muted small fw-medium">Reorder Level</div>
+              <div class="text-black fw-semibold">{{ vp.minStock | number }} units</div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <div class="text-muted small fw-medium">Created Date</div>
+              <div class="text-black fw-semibold">{{ vp.createdAt ? (vp.createdAt | date:'dd MMM yyyy') : '—' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Description / Formulation Notes -->
+        <div class="p-3 rounded-3 description-box" *ngIf="vp.description">
+          <div class="fw-semibold text-black small mb-1">
+            <i class="bi bi-card-text me-1 text-muted"></i> Product Description &amp; Specifications
+          </div>
+          <div class="text-secondary small">{{ vp.description }}</div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer border-0 px-4 pb-4 pt-2 gap-2">
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeViewModal()">
+          <i class="bi bi-x-circle"></i> Close
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn modal-btn-wide" (click)="openAddBatchModal(vp)">
+          <i class="bi bi-plus-circle"></i> Add Batch
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="editFromView()">
+          <i class="bi bi-pencil-square"></i> Edit
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="showViewModal()" (click)="closeViewModal()"></div>
+
+<!-- Add Batch Modal -->
+<div class="modal fade show d-block" tabindex="-1" *ngIf="showBatchModal() && batchProduct() as bp" (click)="closeBatchModal()" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered batch-form-dialog" (click)="$event.stopPropagation()">
+    <div class="modal-content shadow border-0">
+
+      <!-- Modal Header -->
+      <div class="modal-header border-0 pt-4 px-4 pb-0 d-block">
+        <h5 class="modal-title fs-5 fw-bold mb-1">
+          <i class="bi bi-plus-circle-fill me-2 text-black-50"></i>
+          Add Production Batch
+        </h5>
+        <p class="modal-subtitle mb-0">
+          Record a new batch with variant selling price, cost, and expiry date for {{ bp.name }} ({{ bp.sku }}).
+        </p>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body px-4 py-3">
+        <div class="row g-3">
+          <!-- Batch Number -->
+          <div class="col-md-6">
+            <label class="form-label form-label-sm">Batch / Lot Number</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-upc"></i></span>
+              <input
+                type="text"
+                class="form-control form-control-sm text-uppercase"
+                placeholder="e.g. BAT-2026-021"
+                [(ngModel)]="batchFormData.batchNumber"
+                autofocus
+              />
+            </div>
+          </div>
+
+          <!-- Manufacturing Date -->
+          <div class="col-md-6">
+            <label class="form-label form-label-sm">Manufacturing Date (MFD)</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
+              <input
+                type="date"
+                class="form-control form-control-sm"
+                [(ngModel)]="batchFormData.mfgDate"
+                (change)="onBatchMfgDateChange()"
+              />
+            </div>
+          </div>
+
+          <!-- Expiry Date Configuration Box -->
+          <div class="col-12">
+            <div class="expiry-config-box">
+              <div class="expiry-box-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <span class="expiry-box-title">
+                  <i class="bi bi-calendar2-range me-1"></i>Expiry Date Configuration
+                </span>
+                <div class="d-flex align-items-center gap-4">
+                  <div class="form-check form-check-inline mb-0">
+                    <input
+                      type="radio"
+                      class="form-check-input"
+                      name="batchExpiryMode"
+                      id="batchExpModeYears"
+                      value="years"
+                      [checked]="batchFormData.expiryMode === 'years'"
+                      (change)="setBatchExpiryMode('years')"
+                    />
+                    <label class="form-check-label" for="batchExpModeYears">No. of Years (from MFD)</label>
+                  </div>
+                  <div class="form-check form-check-inline mb-0">
+                    <input
+                      type="radio"
+                      class="form-check-input"
+                      name="batchExpiryMode"
+                      id="batchExpModeExact"
+                      value="exact"
+                      [checked]="batchFormData.expiryMode === 'exact'"
+                      (change)="setBatchExpiryMode('exact')"
+                    />
+                    <label class="form-check-label" for="batchExpModeExact">Exact Date</label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mode: Years from MFD -->
+              <div class="row g-3 mt-1" *ngIf="batchFormData.expiryMode === 'years'">
+                <div class="col-md-6">
+                  <label class="form-label form-label-sm">No. of Years (from MFD)</label>
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-text"><i class="bi bi-hourglass-split"></i></span>
+                    <input
+                      type="number"
+                      class="form-control form-control-sm"
+                      min="0.5"
+                      max="10"
+                      step="0.5"
+                      placeholder="e.g. 2"
+                      [(ngModel)]="batchFormData.expiryYears"
+                      (ngModelChange)="onBatchExpiryYearsChange()"
+                    />
+                    <span class="input-group-text">Years</span>
+                    <button
+                      class="btn btn-outline theme-secondary input-group-btn"
+                      type="button"
+                      title="Decrease"
+                      (click)="adjustBatchExpiryYears(-0.5, $event)">
+                      <i class="bi bi-dash-circle"></i>
+                    </button>
+                    <button
+                      class="btn btn-outline theme-secondary input-group-btn"
+                      type="button"
+                      title="Increase"
+                      (click)="adjustBatchExpiryYears(0.5, $event)">
+                      <i class="bi bi-plus-circle"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label form-label-sm">Calculated Expiry Date</label>
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-text"><i class="bi bi-calendar2-check"></i></span>
+                    <input
+                      type="date"
+                      class="form-control form-control-sm readonly-date-input"
+                      [ngModel]="batchFormData.expiryDate"
+                      readonly
+                      tabindex="-1"
+                    />
+                    <span class="input-group-text calc-tag">Auto</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mode: Exact Date -->
+              <div class="row g-3 mt-1" *ngIf="batchFormData.expiryMode === 'exact'">
+                <div class="col-md-6">
+                  <label class="form-label form-label-sm">Exact Expiry Date</label>
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-text"><i class="bi bi-calendar-x"></i></span>
+                    <input
+                      type="date"
+                      class="form-control form-control-sm"
+                      [(ngModel)]="batchFormData.expiryDate"
+                      (change)="onBatchExactExpiryChange()"
+                    />
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label form-label-sm">Calculated Shelf Life</label>
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-text"><i class="bi bi-clock-history"></i></span>
+                    <input
+                      type="text"
+                      class="form-control form-control-sm readonly-date-input"
+                      [value]="getCalculatedYearsText(batchFormData.mfgDate, batchFormData.expiryDate)"
+                      readonly
+                      tabindex="-1"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Batch Quantity -->
+          <div class="col-12">
+            <label class="form-label form-label-sm">Batch Quantity (units)</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-boxes"></i></span>
+              <input
+                type="number"
+                class="form-control form-control-sm"
+                min="1"
+                [(ngModel)]="batchFormData.quantity"
+              />
+              <button
+                class="btn btn-outline theme-secondary input-group-btn"
+                type="button"
+                title="Decrease"
+                (click)="adjustBatchQuantity(-10, $event)">
+                <i class="bi bi-dash-circle"></i>
+              </button>
+              <button
+                class="btn btn-outline theme-secondary input-group-btn"
+                type="button"
+                title="Increase"
+                (click)="adjustBatchQuantity(10, $event)">
+                <i class="bi bi-plus-circle"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Variant Unit Cost -->
+          <div class="col-md-6">
+            <label class="form-label form-label-sm">Batch Unit Cost ($)</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-cash-stack"></i></span>
+              <input
+                type="number"
+                class="form-control form-control-sm"
+                step="0.50"
+                min="0"
+                [(ngModel)]="batchFormData.costPrice"
+              />
+              <button
+                class="btn btn-outline theme-secondary input-group-btn"
+                type="button"
+                title="Decrease"
+                (click)="adjustBatchCost(-0.5, $event)">
+                <i class="bi bi-dash-circle"></i>
+              </button>
+              <button
+                class="btn btn-outline theme-secondary input-group-btn"
+                type="button"
+                title="Increase"
+                (click)="adjustBatchCost(0.5, $event)">
+                <i class="bi bi-plus-circle"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Variant Selling Price -->
+          <div class="col-md-6">
+            <label class="form-label form-label-sm">Batch Selling Price ($)</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-tag"></i></span>
+              <input
+                type="number"
+                class="form-control form-control-sm"
+                step="0.50"
+                min="0"
+                [(ngModel)]="batchFormData.sellingPrice"
+              />
+              <button
+                class="btn btn-outline theme-secondary input-group-btn"
+                type="button"
+                title="Decrease"
+                (click)="adjustBatchSelling(-0.5, $event)">
+                <i class="bi bi-dash-circle"></i>
+              </button>
+              <button
+                class="btn btn-outline theme-secondary input-group-btn"
+                type="button"
+                title="Increase"
+                (click)="adjustBatchSelling(0.5, $event)">
+                <i class="bi bi-plus-circle"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer border-0 px-4 pb-4 pt-2 gap-2">
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeBatchModal()">
+          <i class="bi bi-x-circle"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn modal-btn-wide" (click)="saveNewBatch()">
+          <i class="bi bi-check-circle"></i> Save Batch
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="showBatchModal()" (click)="closeBatchModal()"></div>
