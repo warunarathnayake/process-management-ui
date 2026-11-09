@@ -48,6 +48,17 @@
       </select>
     </div>
 
+    <!-- Product Type (General vs Private Label) Filter Buttons -->
+    <div class="btn-group label-filter" role="group">
+      <button
+        *ngFor="let l of ['All', 'General', 'Private Label']"
+        type="button"
+        class="btn btn-outline-dark btn-sm"
+        [class.active]="labelFilter() === l"
+        (click)="setLabelFilter($any(l))"
+      >{{ l }}</button>
+    </div>
+
     <!-- Status Filter Buttons -->
     <div class="btn-group status-filter" role="group">
       <button
@@ -94,7 +105,10 @@
                   <i class="bi bi-box-seam"></i>
                 </div>
                 <div class="d-flex flex-column name-wrap">
-                  <span class="fw-semibold text-black product-title" [title]="p.name">{{ p.name }}</span>
+                  <div class="d-flex align-items-center gap-1">
+                    <span class="fw-semibold text-black product-title" [title]="p.name">{{ p.name }}</span>
+                    <i *ngIf="p.isPrivateLabel" class="bi bi-award-fill private-label-icon" title="Private Label Product"></i>
+                  </div>
                   <span class="sub-text text-muted">
                     <span class="sku-tag">{{ p.sku }}</span>
                     <span *ngIf="p.barcode"> · {{ p.barcode }}</span>
@@ -587,11 +601,53 @@
             </div>
           </div>
 
-          <!-- Status -->
-          <div class="col-12 pt-1">
-            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-              <div class="d-flex align-items-center gap-3">
-                <label class="form-label form-label-sm mb-0">Product Status</label>
+          <!-- Product Type (General vs Private Label) -->
+          <div class="col-md-6 pt-1">
+            <div class="radio-config-box h-100">
+              <div class="d-flex align-items-center justify-content-between gap-3">
+                <label class="form-label form-label-sm mb-0">
+                  <i class="bi bi-award me-1 text-muted"></i>Product Type
+                </label>
+                <div class="d-flex align-items-center gap-3">
+                  <div class="form-check form-check-inline mb-0">
+                    <input
+                      class="form-check-input"
+                      type="radio"
+                      name="productType"
+                      id="typeProductGeneral"
+                      [value]="false"
+                      [(ngModel)]="formData.isPrivateLabel"
+                    />
+                    <label class="form-check-label" for="typeProductGeneral">General</label>
+                  </div>
+                  <div class="form-check form-check-inline mb-0">
+                    <input
+                      class="form-check-input"
+                      type="radio"
+                      name="productType"
+                      id="typeProductPrivateLabel"
+                      [value]="true"
+                      [(ngModel)]="formData.isPrivateLabel"
+                    />
+                    <label class="form-check-label" for="typeProductPrivateLabel">Private Label</label>
+                  </div>
+                </div>
+              </div>
+              <p class="modal-field-desc mt-1 mb-0">
+                {{ formData.isPrivateLabel
+                  ? 'Manufactured for a client brand under contract.'
+                  : 'Standard in-house catalog product.' }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Product Status -->
+          <div class="col-md-6 pt-1">
+            <div class="radio-config-box h-100">
+              <div class="d-flex align-items-center justify-content-between gap-3">
+                <label class="form-label form-label-sm mb-0">
+                  <i class="bi bi-toggle-on me-1 text-muted"></i>Product Status
+                </label>
                 <div class="d-flex align-items-center gap-3">
                   <div class="form-check form-check-inline mb-0">
                     <input
@@ -617,11 +673,11 @@
                   </div>
                 </div>
               </div>
-              <span class="modal-field-desc mb-0">
+              <p class="modal-field-desc mt-1 mb-0">
                 {{ formData.status === 'Active'
                   ? 'Available in the active sales catalog.'
                   : 'Hidden from the active sales catalog.' }}
-              </span>
+              </p>
             </div>
           </div>
         </div>
@@ -670,7 +726,12 @@
               <i class="bi bi-box-seam"></i>
             </div>
             <div>
-              <div class="fw-semibold text-black fs-6">{{ vp.name }}</div>
+              <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="fw-semibold text-black fs-6">{{ vp.name }}</span>
+                <span *ngIf="vp.isPrivateLabel" class="private-label-badge" title="Private Label Product">
+                  <i class="bi bi-award-fill"></i> Private Label
+                </span>
+              </div>
               <div class="sub-text text-muted">
                 <span class="code-badge me-1">{{ vp.sku }}</span> · {{ vp.category }} · {{ vp.unit }}
               </div>

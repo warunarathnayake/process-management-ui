@@ -240,6 +240,33 @@
   }
 }
 
+// ── Private Label Icon & Badge ───────────────────────────────────────────────
+.private-label-icon {
+  color: #7c3aed;
+  font-size: 0.92rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.private-label-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #6d28d9;
+  background-color: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  padding: 0.14rem 0.5rem;
+  border-radius: 20px;
+  white-space: nowrap;
+
+  i {
+    font-size: 0.68rem;
+  }
+}
+
 // ── Code Badge ───────────────────────────────────────────────────────────────
 .code-badge {
   display: inline-block;
@@ -527,7 +554,14 @@
     }
   }
 
-  // ── Expiry Date Configuration Box & Radio Buttons ──────────────────────────
+  // ── Expiry Date & Radio Configuration Boxes ────────────────────────────────
+  .radio-config-box {
+    background: $bg-surface-subtle;
+    border: 1px solid $border-light;
+    border-radius: 8px;
+    padding: 0.5rem 0.85rem 0.6rem;
+  }
+
   .expiry-config-box {
     background: $bg-surface-subtle;
     border: 1px solid $border-light;

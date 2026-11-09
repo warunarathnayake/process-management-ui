@@ -28,6 +28,7 @@ export interface Product {
   costPrice: number;
   currentStock: number;
   minStock: number;
+  isPrivateLabel?: boolean;
   status: 'Active' | 'Inactive';
   description?: string;
   createdAt?: string;
@@ -48,6 +49,7 @@ export interface ProductFormData {
   costPrice: number | null;
   currentStock: number | null;
   minStock: number | null;
+  isPrivateLabel: boolean;
   status: 'Active' | 'Inactive';
   description: string;
 }
@@ -113,6 +115,7 @@ export class ProductComponent {
   // ── Filters & Search ───────────────────────────────────────────────────────
   searchQuery    = signal('');
   categoryFilter = signal('All');
+  labelFilter    = signal<'All' | 'General' | 'Private Label'>('All');
   statusFilter   = signal('All');
 
   // ── Pagination State ───────────────────────────────────────────────────────
@@ -146,6 +149,7 @@ export class ProductComponent {
       costPrice: 6.20,
       currentStock: 350,
       minStock: 60,
+      isPrivateLabel: true,
       status: 'Active',
       description: 'Refreshing organic rose damascena toner with glycerin and aloe vera.',
       createdAt: '2026-01-10',
@@ -165,6 +169,7 @@ export class ProductComponent {
       costPrice: 7.10,
       currentStock: 420,
       minStock: 80,
+      isPrivateLabel: true,
       status: 'Active',
       description: 'Blemish and sebum control formula with high-purity Vitamin B3 and zinc PCA.',
       createdAt: '2026-01-12',
@@ -201,6 +206,7 @@ export class ProductComponent {
       costPrice: 5.40,
       currentStock: 260,
       minStock: 45,
+      isPrivateLabel: true,
       status: 'Active',
       description: 'Rich, non-greasy body moisturizer whipped with Ghanaian unrefined shea butter.',
       createdAt: '2026-01-18',
@@ -237,6 +243,7 @@ export class ProductComponent {
       costPrice: 6.80,
       currentStock: 95,
       minStock: 30,
+      isPrivateLabel: true,
       status: 'Active',
       description: 'Intense deep conditioner for damaged cuticles with hydrolyzed vegetable keratin.',
       createdAt: '2026-01-25',
@@ -310,6 +317,7 @@ export class ProductComponent {
       costPrice: 16.00,
       currentStock: 85,
       minStock: 25,
+      isPrivateLabel: true,
       status: 'Active',
       description: 'Artisanal perfume blend featuring sambac jasmine, smoked oud, and amber woods.',
       createdAt: '2026-02-10',
@@ -346,6 +354,7 @@ export class ProductComponent {
       costPrice: 4.60,
       currentStock: 110,
       minStock: 30,
+      isPrivateLabel: true,
       status: 'Active',
       description: 'Fast-absorbing jojoba and grapeseed beard oil with natural Mysore sandalwood notes.',
       createdAt: '2026-02-18',
@@ -413,6 +422,7 @@ export class ProductComponent {
   filteredProducts = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
     const cat = this.categoryFilter();
+    const lbl = this.labelFilter();
     const st = this.statusFilter();
 
     return this.products().filter(p => {
@@ -424,9 +434,13 @@ export class ProductComponent {
         p.batches?.some(b => b.batchNumber.toLowerCase().includes(q));
 
       const matchCat = cat === 'All' || p.category === cat;
+      const matchLabel =
+        lbl === 'All' ||
+        (lbl === 'Private Label' && !!p.isPrivateLabel) ||
+        (lbl === 'General' && !p.isPrivateLabel);
       const matchStatus = st === 'All' || p.status === st;
 
-      return matchSearch && matchCat && matchStatus;
+      return matchSearch && matchCat && matchLabel && matchStatus;
     });
   });
 
@@ -507,6 +521,7 @@ export class ProductComponent {
       costPrice: 6.00,
       currentStock: 100,
       minStock: 30,
+      isPrivateLabel: false,
       status: 'Active',
       description: ''
     };
@@ -640,6 +655,11 @@ export class ProductComponent {
 
   setCategoryFilter(cat: string): void {
     this.categoryFilter.set(cat);
+    this.currentPage.set(1);
+  }
+
+  setLabelFilter(label: 'All' | 'General' | 'Private Label'): void {
+    this.labelFilter.set(label);
     this.currentPage.set(1);
   }
 
@@ -854,6 +874,7 @@ export class ProductComponent {
       costPrice: product.costPrice,
       currentStock: product.currentStock,
       minStock: product.minStock,
+      isPrivateLabel: !!product.isPrivateLabel,
       status: product.status,
       description: product.description || ''
     };
@@ -956,6 +977,7 @@ export class ProductComponent {
             costPrice,
             currentStock,
             minStock,
+            isPrivateLabel: !!this.formData.isPrivateLabel,
             status: this.formData.status,
             description: this.formData.description.trim() || undefined
           };
@@ -986,6 +1008,7 @@ export class ProductComponent {
         costPrice,
         currentStock,
         minStock,
+        isPrivateLabel: !!this.formData.isPrivateLabel,
         status: this.formData.status,
         description: this.formData.description.trim() || undefined,
         createdAt: this.todayIso()
