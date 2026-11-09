@@ -110,6 +110,16 @@ export const routes: Routes = [
         pathMatch: 'full'
       },
       {
+        path: 'packaging-units',
+        loadComponent: () =>
+          import('./components/product-item-management/packaging-unit/packaging-unit.component').then(m => m.PackagingUnitComponent)
+      },
+      {
+        path: 'packaging-unit',
+        redirectTo: 'packaging-units',
+        pathMatch: 'full'
+      },
+      {
         path: '',
         redirectTo: 'users',
         pathMatch: 'full'
@@ -187,6 +197,11 @@ export const routes: Routes = [
     path: 'product-category',
     loadComponent: () =>
       import('./components/product-item-management/product-category/product-category.component').then(m => m.ProductCategoryComponent)
+  },
+  {
+    path: 'packaging-unit',
+    loadComponent: () =>
+      import('./components/product-item-management/packaging-unit/packaging-unit.component').then(m => m.PackagingUnitComponent)
   },
 
   // Catch-all route

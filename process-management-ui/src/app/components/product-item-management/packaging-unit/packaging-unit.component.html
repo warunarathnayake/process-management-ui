@@ -1,0 +1,364 @@
+<div class="packaging-unit-page page-fill">
+
+  <!-- Page Header -->
+  <div class="page-header d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h4 class="page-title mb-1">
+        <i class="bi bi-box-seam-fill me-2 text-black-50"></i>Packaging Units
+      </h4>
+      <p class="page-subtitle mb-0">Manage finished product container types, net capacities, and packaging formats</p>
+    </div>
+    <button class="btn btn-outline-dark btn-sm px-3" (click)="openAddModal()">
+      <i class="bi bi-box-seam me-1"></i> Add Packaging Unit
+    </button>
+  </div>
+
+  <!-- Filters & Search Bar -->
+  <div class="filter-bar d-flex flex-wrap align-items-center gap-2 mb-3">
+    <!-- Search Input -->
+    <div class="search-wrapper flex-grow-1">
+      <span class="search-icon" aria-hidden="true">
+        <i class="bi bi-search"></i>
+      </span>
+      <input
+        type="text"
+        class="form-control form-control-sm search-input"
+        placeholder="Search packaging units by name, container type, or capacity…"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="onSearch($event)"
+      />
+      <button
+        *ngIf="searchQuery()"
+        type="button"
+        class="btn btn-link btn-sm search-clear-btn"
+        (click)="onSearch('')"
+        title="Clear search">
+        <i class="bi bi-x-circle-fill"></i>
+      </button>
+    </div>
+
+    <!-- Container Type Filter Dropdown -->
+    <div class="type-filter">
+      <select
+        class="form-select form-select-sm"
+        [ngModel]="typeFilter()"
+        (ngModelChange)="setTypeFilter($event)">
+        <option value="All">All Container Types</option>
+        <option *ngFor="let t of containerTypes()" [value]="t">{{ t }}</option>
+      </select>
+    </div>
+
+    <!-- Status Filter Buttons -->
+    <div class="btn-group status-filter" role="group">
+      <button
+        *ngFor="let s of ['All', 'Active', 'Inactive']"
+        type="button"
+        class="btn btn-outline-dark btn-sm"
+        [class.active]="statusFilter() === s"
+        (click)="setStatusFilter(s)"
+      >{{ s }}</button>
+    </div>
+  </div>
+
+  <!-- Packaging Units Table -->
+  <div class="table-card shadow-sm" data-bs-theme="light">
+    <div class="table-responsive" [appAutoPageSize]="pageSize" [autoPageSizeCurrentPage]="currentPage">
+      <table class="table table-striped align-middle mb-0">
+        <thead>
+          <tr>
+            <th scope="col" style="width: 70px;">#</th>
+            <th scope="col" style="width: 260px;">Packaging Unit Name</th>
+            <th scope="col" style="width: 220px;">Container Type</th>
+            <th scope="col" style="width: 160px;">Net Capacity</th>
+            <th scope="col" style="width: 180px;">Assigned Products</th>
+            <th scope="col" style="width: 120px;">Status</th>
+            <th scope="col" class="text-center" style="width: 120px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Empty State -->
+          <tr *ngIf="filteredUnits().length === 0">
+            <td colspan="7" class="text-center py-5 text-muted">
+              <i class="bi bi-inbox fs-2 d-block mb-2"></i>No packaging units found matching your criteria.
+            </td>
+          </tr>
+
+          <!-- Rows -->
+          <tr *ngFor="let unit of paginatedUnits(); let i = index">
+            <th scope="row" class="fw-bold text-black">{{ (currentPage() - 1) * pageSize() + i + 1 }}</th>
+
+            <!-- Packaging Unit Name with Circular Avatar Icon -->
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="avatar">
+                  <i class="bi" [ngClass]="getTypeIcon(unit.containerType)"></i>
+                </div>
+                <span class="fw-medium text-black">{{ unit.name }}</span>
+              </div>
+            </td>
+
+            <!-- Container Type -->
+            <td>
+              <span class="type-badge" [ngClass]="getTypeBadgeClass(unit.containerType)">
+                <i class="bi me-1" [ngClass]="getTypeIcon(unit.containerType)"></i>
+                {{ unit.containerType }}
+              </span>
+            </td>
+
+            <!-- Net Capacity -->
+            <td>
+              <span class="capacity-chip">{{ unit.capacity }}</span>
+            </td>
+
+            <!-- Assigned Products -->
+            <td>
+              <span class="material-count-chip">
+                <i class="bi bi-box-seam me-1 text-secondary"></i>
+                {{ unit.productsCount || 0 }} {{ (unit.productsCount === 1) ? 'product' : 'products' }}
+              </span>
+            </td>
+
+            <!-- Status -->
+            <td>
+              <span
+                class="status-badge"
+                [class.status-active]="unit.status === 'Active'"
+                [class.status-inactive]="unit.status === 'Inactive'"
+                (click)="toggleStatus(unit)"
+                title="Click to toggle status"
+              >
+                <i class="bi" [class.bi-check-circle-fill]="unit.status === 'Active'" [class.bi-x-circle-fill]="unit.status === 'Inactive'"></i>
+                {{ unit.status }}
+              </span>
+            </td>
+
+            <!-- Actions -->
+            <td class="text-center">
+              <button
+                class="btn btn-sm btn-link p-1 text-secondary"
+                title="Edit Packaging Unit"
+                (click)="openEditModal(unit)">
+                <i class="bi bi-pencil-square fs-5"></i>
+              </button>
+              <button
+                class="btn btn-sm btn-link p-1 text-danger"
+                title="Delete Packaging Unit"
+                (click)="deleteUnit(unit)">
+                <i class="bi bi-trash3 fs-5"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Table Footer with Pagination -->
+    <div class="table-footer d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <span class="text-black-50 small">
+        Showing {{ showingFrom() }} to {{ showingTo() }} of {{ filteredUnits().length }} packaging units
+      </span>
+      <nav aria-label="Packaging units pagination" *ngIf="totalPages() > 1">
+        <ul class="pagination pagination-sm pagination-outline-dark mb-0">
+          <li class="page-item" [class.disabled]="currentPage() === 1">
+            <button
+              type="button"
+              class="page-link"
+              (click)="goToPage(currentPage() - 1)"
+              [disabled]="currentPage() === 1"
+              aria-label="Previous">
+              Previous
+            </button>
+          </li>
+          <li
+            *ngFor="let p of pageNumbers()"
+            class="page-item"
+            [class.active]="currentPage() === p">
+            <button type="button" class="page-link" (click)="goToPage(p)">{{ p }}</button>
+          </li>
+          <li class="page-item" [class.disabled]="currentPage() === totalPages()">
+            <button
+              type="button"
+              class="page-link"
+              (click)="goToPage(currentPage() + 1)"
+              [disabled]="currentPage() === totalPages()"
+              aria-label="Next">
+              Next
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+</div>
+
+<!-- Add / Edit Packaging Unit Modal -->
+<div class="modal fade show d-block" tabindex="-1" *ngIf="showModal()" (click)="closeModal()" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+    <div class="modal-content shadow border-0">
+
+      <!-- Modal Header -->
+      <div class="modal-header border-0 pt-4 px-4 pb-0 d-block">
+        <h5 class="modal-title fs-5 fw-bold mb-1">
+          <i class="bi bi-box-seam-fill me-2 text-black-50"></i>
+          {{ isEditMode() ? 'Edit Packaging Unit' : 'Add New Packaging Unit' }}
+        </h5>
+        <p class="modal-subtitle mb-0">
+          {{ isEditMode() ? 'Update container type and net capacity details for product catalog assignment.' : 'Enter container type and net capacity details for finished product packaging.' }}
+        </p>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body px-4 py-3">
+        <!-- Packaging Unit Name -->
+        <div class="mb-3">
+          <label class="form-label form-label-sm">Packaging Unit Name</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text"><i class="bi bi-tag"></i></span>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              placeholder="e.g. Dropper Bottle (30ml), Jar (50g)"
+              [(ngModel)]="formData.name"
+              autofocus
+            />
+          </div>
+        </div>
+
+        <!-- Container Type -->
+        <div class="mb-3">
+          <label class="form-label form-label-sm">Container Type</label>
+
+          <!-- Standard Container Type Selector + Inline Add / Edit / Delete Buttons -->
+          <div class="input-group input-group-sm" *ngIf="containerTypeMode() === 'select'">
+            <span class="input-group-text"><i class="bi bi-box"></i></span>
+            <select class="form-select form-select-sm" [(ngModel)]="formData.containerType">
+              <option *ngFor="let t of containerTypes()" [value]="t">{{ t }}</option>
+            </select>
+            <button
+              type="button"
+              class="btn btn-outline theme-secondary input-group-btn"
+              title="Add New Container Type"
+              (click)="startAddContainerType()">
+              <i class="bi bi-plus-circle"></i>
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline theme-secondary input-group-btn"
+              title="Edit Selected Container Type"
+              (click)="startEditContainerType()">
+              <i class="bi bi-pencil-square"></i>
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline theme-secondary input-group-btn text-danger"
+              title="Delete Selected Container Type"
+              (click)="deleteSelectedContainerType()">
+              <i class="bi bi-trash3"></i>
+            </button>
+          </div>
+
+          <!-- Inline Add / Edit Container Type Input -->
+          <div class="input-group input-group-sm" *ngIf="containerTypeMode() !== 'select'">
+            <span class="input-group-text">
+              <i class="bi" [class.bi-plus-square]="containerTypeMode() === 'add'" [class.bi-pencil-square]="containerTypeMode() === 'edit'"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              [placeholder]="containerTypeMode() === 'add' ? 'Enter new container type (e.g. Spray Bottle, Roll-On)' : 'Rename container type'"
+              [(ngModel)]="containerTypeInput"
+              (keydown.enter)="confirmContainerTypeAction()"
+              (keydown.escape)="cancelContainerTypeAction()"
+              autofocus
+            />
+            <button
+              type="button"
+              class="btn btn-outline theme-secondary input-group-btn"
+              [title]="containerTypeMode() === 'add' ? 'Save Container Type' : 'Update Container Type'"
+              (click)="confirmContainerTypeAction()">
+              <i class="bi bi-check-circle"></i>
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline theme-secondary input-group-btn"
+              title="Cancel"
+              (click)="cancelContainerTypeAction()">
+              <i class="bi bi-x-circle"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Net Capacity -->
+        <div class="mb-3">
+          <label class="form-label form-label-sm">Net Capacity / Volume</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text"><i class="bi bi-flask"></i></span>
+            <input
+              type="number"
+              min="0"
+              step="any"
+              class="form-control form-control-sm"
+              placeholder="e.g. 30, 50, 250"
+              [(ngModel)]="formData.capacityValue"
+              (keydown.enter)="saveUnit()"
+            />
+            <select
+              class="form-select form-select-sm capacity-unit-select"
+              [(ngModel)]="formData.capacityUnit"
+              title="Measurement Unit">
+              <option *ngFor="let u of measurementUnits" [value]="u.code">{{ u.label }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Status -->
+        <div class="mb-2">
+          <label class="form-label form-label-sm d-block">Status</label>
+          <div class="d-flex align-items-center gap-4 pt-1">
+            <div class="form-check form-check-inline mb-0">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="packagingUnitStatus"
+                id="statusPackagingActive"
+                value="Active"
+                [(ngModel)]="formData.status"
+              />
+              <label class="form-check-label" for="statusPackagingActive">Active</label>
+            </div>
+            <div class="form-check form-check-inline mb-0">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="packagingUnitStatus"
+                id="statusPackagingInactive"
+                value="Inactive"
+                [(ngModel)]="formData.status"
+              />
+              <label class="form-check-label" for="statusPackagingInactive">Inactive</label>
+            </div>
+          </div>
+          <p class="modal-field-desc mt-2 mb-0">
+            {{ formData.status === 'Active' ? 'Active packaging units can be assigned to products in the catalog.' : 'Inactive packaging units cannot be assigned to new products.' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer border-0 px-4 pb-4 pt-0 gap-2">
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeModal()">
+          <i class="bi bi-x-circle"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="resetForm()">
+          <i class="bi bi-arrow-counterclockwise"></i> Reset
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="saveUnit()">
+          <i class="bi bi-check-circle"></i> Save
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="showModal()" (click)="closeModal()"></div>

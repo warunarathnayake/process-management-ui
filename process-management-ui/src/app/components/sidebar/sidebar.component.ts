@@ -89,6 +89,7 @@ export class SidebarComponent implements OnInit {
           children: [
             { id: 'products', label: 'Products & Catalog', route: '/products' },
             { id: 'product-categories', label: 'Product Categories', route: '/product-categories' },
+            { id: 'packaging-units', label: 'Packaging Units', route: '/packaging-units' },
             { id: 'product-pricing', label: 'Product Pricing', route: '/product-pricing' },
             { id: 'private-label', label: 'Private Label Products', route: '/private-label-products' }
           ]
