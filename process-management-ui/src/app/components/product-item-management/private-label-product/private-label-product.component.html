@@ -1,0 +1,314 @@
+<div class="private-label-page page-fill">
+
+  <!-- Page Header -->
+  <div class="page-header d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h4 class="page-title mb-1">
+        <i class="bi bi-award-fill me-2 text-black-50"></i>Private Label Products
+      </h4>
+      <p class="page-subtitle mb-0">Manage client brand mappings linked to catalog products and customer accounts</p>
+    </div>
+    <button class="btn btn-outline-dark btn-sm px-3" (click)="openAddModal()">
+      <i class="bi bi-award me-1"></i> Add Private Label Product
+    </button>
+  </div>
+
+  <!-- Filters & Search Bar -->
+  <div class="filter-bar d-flex flex-wrap align-items-center gap-2 mb-3">
+    <!-- Search Input -->
+    <div class="search-wrapper flex-grow-1">
+      <span class="search-icon" aria-hidden="true">
+        <i class="bi bi-search"></i>
+      </span>
+      <input
+        type="text"
+        class="form-control form-control-sm search-input"
+        placeholder="Search by brand name, product name, SKU, or customer…"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="onSearch($event)"
+      />
+      <button
+        *ngIf="searchQuery()"
+        type="button"
+        class="btn btn-link btn-sm search-clear-btn"
+        (click)="onSearch('')"
+        title="Clear search">
+        <i class="bi bi-x-circle-fill"></i>
+      </button>
+    </div>
+
+    <!-- Customer Filter Dropdown -->
+    <div class="customer-filter">
+      <select
+        class="form-select form-select-sm"
+        [ngModel]="customerFilter()"
+        (ngModelChange)="setCustomerFilter($event)">
+        <option value="All">All Customers</option>
+        <option *ngFor="let c of customersList" [value]="c.id">{{ c.name }} ({{ c.code }})</option>
+      </select>
+    </div>
+
+    <!-- Status Filter Buttons -->
+    <div class="btn-group status-filter" role="group">
+      <button
+        *ngFor="let s of ['All', 'Active', 'Inactive']"
+        type="button"
+        class="btn btn-outline-dark btn-sm"
+        [class.active]="statusFilter() === s"
+        (click)="setStatusFilter(s)"
+      >{{ s }}</button>
+    </div>
+  </div>
+
+  <!-- Private Label Products Table -->
+  <div class="table-card shadow-sm" data-bs-theme="light">
+    <div class="table-responsive" [appAutoPageSize]="pageSize" [autoPageSizeCurrentPage]="currentPage">
+      <table class="table table-striped align-middle mb-0">
+        <thead>
+          <tr>
+            <th scope="col" style="width: 65px;">#</th>
+            <th scope="col" style="width: 240px;">Brand Name</th>
+            <th scope="col" style="width: 290px;">Product</th>
+            <th scope="col" style="width: 180px;">Category</th>
+            <th scope="col" style="width: 250px;">Customer</th>
+            <th scope="col" style="width: 115px;">Status</th>
+            <th scope="col" class="text-center" style="width: 110px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Empty State -->
+          <tr *ngIf="filteredItems().length === 0">
+            <td colspan="7" class="text-center py-5 text-muted">
+              <i class="bi bi-inbox fs-2 d-block mb-2"></i>No private label products found matching your criteria.
+            </td>
+          </tr>
+
+          <!-- Rows -->
+          <tr *ngFor="let item of paginatedItems(); let i = index">
+            <th scope="row" class="fw-bold text-black">{{ (currentPage() - 1) * pageSize() + i + 1 }}</th>
+
+            <!-- Brand Name -->
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="avatar">
+                  <i class="bi bi-award"></i>
+                </div>
+                <span class="fw-medium text-black">{{ item.brandName }}</span>
+              </div>
+            </td>
+
+            <!-- Product (from product_id) -->
+            <td>
+              <ng-container *ngIf="getProduct(item.productId) as prod">
+                <div class="d-flex flex-column">
+                  <span class="fw-medium text-black">{{ prod.name }}</span>
+                  <div class="d-flex align-items-center gap-2 mt-1">
+                    <span class="sku-chip">{{ prod.sku }}</span>
+                    <span class="unit-chip">
+                      <i class="bi bi-box-seam me-1"></i>{{ prod.unit }}
+                    </span>
+                  </div>
+                </div>
+              </ng-container>
+            </td>
+
+            <!-- Category (from product_id) -->
+            <td>
+              <ng-container *ngIf="getProduct(item.productId) as prod">
+                <span class="cat-badge" [ngClass]="getCategoryBadgeClass(prod.category)">
+                  <i class="bi me-1" [ngClass]="getCategoryIcon(prod.category)"></i>
+                  {{ prod.category }}
+                </span>
+              </ng-container>
+            </td>
+
+            <!-- Customer (from customer_id) -->
+            <td>
+              <ng-container *ngIf="getCustomer(item.customerId) as cust">
+                <div class="d-flex flex-column">
+                  <span class="fw-medium text-black">{{ cust.name }}</span>
+                  <span class="customer-code-text">{{ cust.code }}</span>
+                </div>
+              </ng-container>
+            </td>
+
+            <!-- Status -->
+            <td>
+              <span
+                class="status-badge"
+                [class.status-active]="item.status === 'Active'"
+                [class.status-inactive]="item.status === 'Inactive'"
+                (click)="toggleStatus(item)"
+                title="Click to toggle status"
+              >
+                <i class="bi" [class.bi-check-circle-fill]="item.status === 'Active'" [class.bi-x-circle-fill]="item.status === 'Inactive'"></i>
+                {{ item.status }}
+              </span>
+            </td>
+
+            <!-- Actions -->
+            <td class="text-center">
+              <button
+                class="btn btn-sm btn-link p-1 text-secondary"
+                title="Edit Private Label Product"
+                (click)="openEditModal(item)">
+                <i class="bi bi-pencil-square fs-5"></i>
+              </button>
+              <button
+                class="btn btn-sm btn-link p-1 text-danger"
+                title="Delete Private Label Product"
+                (click)="deleteItem(item)">
+                <i class="bi bi-trash3 fs-5"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Table Footer with Pagination -->
+    <div class="table-footer d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <span class="text-black-50 small">
+        Showing {{ showingFrom() }} to {{ showingTo() }} of {{ filteredItems().length }} private label products
+      </span>
+      <nav aria-label="Private label products pagination" *ngIf="totalPages() > 1">
+        <ul class="pagination pagination-sm pagination-outline-dark mb-0">
+          <li class="page-item" [class.disabled]="currentPage() === 1">
+            <button
+              type="button"
+              class="page-link"
+              (click)="goToPage(currentPage() - 1)"
+              [disabled]="currentPage() === 1"
+              aria-label="Previous">
+              Previous
+            </button>
+          </li>
+          <li
+            *ngFor="let p of pageNumbers()"
+            class="page-item"
+            [class.active]="currentPage() === p">
+            <button type="button" class="page-link" (click)="goToPage(p)">{{ p }}</button>
+          </li>
+          <li class="page-item" [class.disabled]="currentPage() === totalPages()">
+            <button
+              type="button"
+              class="page-link"
+              (click)="goToPage(currentPage() + 1)"
+              [disabled]="currentPage() === totalPages()"
+              aria-label="Next">
+              Next
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+</div>
+
+<!-- Add / Edit Private Label Product Modal -->
+<div class="modal fade show d-block" tabindex="-1" *ngIf="showModal()" (click)="closeModal()" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+    <div class="modal-content shadow border-0">
+
+      <!-- Modal Header -->
+      <div class="modal-header border-0 pt-4 px-4 pb-0 d-block">
+        <h5 class="modal-title fs-5 fw-bold mb-1">
+          <i class="bi bi-award-fill me-2 text-black-50"></i>
+          {{ isEditMode() ? 'Edit Private Label Product' : 'Add Private Label Product' }}
+        </h5>
+        <p class="modal-subtitle mb-0">
+          {{ isEditMode() ? 'Update the catalog product, customer account, or custom brand name.' : 'Link a catalog product to a customer account under their custom brand name.' }}
+        </p>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body px-4 py-3">
+        <!-- Customer (customer_id) -->
+        <div class="mb-3">
+          <label class="form-label form-label-sm">Customer</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text"><i class="bi bi-people"></i></span>
+            <select class="form-select form-select-sm" [(ngModel)]="formData.customerId">
+              <option *ngFor="let c of customersList" [ngValue]="c.id">{{ c.name }} ({{ c.code }})</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Product (product_id) -->
+        <div class="mb-3">
+          <label class="form-label form-label-sm">Product</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text"><i class="bi bi-box2"></i></span>
+            <select class="form-select form-select-sm" [(ngModel)]="formData.productId">
+              <option *ngFor="let p of productsList" [ngValue]="p.id">{{ p.name }} ({{ p.sku }} — {{ p.unit }})</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Brand Name (brand_name) -->
+        <div class="mb-3">
+          <label class="form-label form-label-sm">Brand Name</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text"><i class="bi bi-award"></i></span>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              placeholder="e.g. Ceylon Dew Botanics, PureGlow DermaLab"
+              [(ngModel)]="formData.brandName"
+              (keydown.enter)="saveItem()"
+              autofocus
+            />
+          </div>
+        </div>
+
+        <!-- Status -->
+        <div class="mb-2">
+          <label class="form-label form-label-sm d-block">Status</label>
+          <div class="d-flex align-items-center gap-4 pt-1">
+            <div class="form-check form-check-inline mb-0">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="privateLabelStatus"
+                id="statusPrivateLabelActive"
+                value="Active"
+                [(ngModel)]="formData.status"
+              />
+              <label class="form-check-label" for="statusPrivateLabelActive">Active</label>
+            </div>
+            <div class="form-check form-check-inline mb-0">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="privateLabelStatus"
+                id="statusPrivateLabelInactive"
+                value="Inactive"
+                [(ngModel)]="formData.status"
+              />
+              <label class="form-check-label" for="statusPrivateLabelInactive">Inactive</label>
+            </div>
+          </div>
+          <p class="modal-field-desc mt-2 mb-0">
+            {{ formData.status === 'Active' ? 'Active private label mappings can be used in customer sales orders.' : 'Inactive private label mappings are archived from new sales orders.' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer border-0 px-4 pb-4 pt-0 gap-2">
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeModal()">
+          <i class="bi bi-x-circle"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="resetForm()">
+          <i class="bi bi-arrow-counterclockwise"></i> Reset
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="saveItem()">
+          <i class="bi bi-check-circle"></i> Save
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="showModal()" (click)="closeModal()"></div>

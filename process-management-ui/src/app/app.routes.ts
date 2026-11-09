@@ -120,6 +120,16 @@ export const routes: Routes = [
         pathMatch: 'full'
       },
       {
+        path: 'private-label-products',
+        loadComponent: () =>
+          import('./components/product-item-management/private-label-product/private-label-product.component').then(m => m.PrivateLabelProductComponent)
+      },
+      {
+        path: 'private-label-product',
+        redirectTo: 'private-label-products',
+        pathMatch: 'full'
+      },
+      {
         path: '',
         redirectTo: 'users',
         pathMatch: 'full'
@@ -202,6 +212,11 @@ export const routes: Routes = [
     path: 'packaging-unit',
     loadComponent: () =>
       import('./components/product-item-management/packaging-unit/packaging-unit.component').then(m => m.PackagingUnitComponent)
+  },
+  {
+    path: 'private-label-product',
+    loadComponent: () =>
+      import('./components/product-item-management/private-label-product/private-label-product.component').then(m => m.PrivateLabelProductComponent)
   },
 
   // Catch-all route
