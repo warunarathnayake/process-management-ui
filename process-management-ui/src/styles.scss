@@ -155,3 +155,35 @@ body {
     }
   }
 }
+
+// ── Table Footer Action Legend ─────────────────────────────
+.action-legend {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  font-size: 0.75rem;
+  color: $dark-secondary;
+
+  .legend-label {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.68rem;
+    color: $dark-muted;
+  }
+
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-weight: 500;
+    color: $dark-secondary;
+    white-space: nowrap;
+
+    i {
+      font-size: 0.88rem;
+      line-height: 1;
+    }
+  }
+}

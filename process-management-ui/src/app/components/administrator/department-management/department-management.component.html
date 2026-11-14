@@ -88,10 +88,16 @@
 
             <!-- Actions -->
             <td class="text-center">
-              <button class="btn btn-sm btn-link p-1 text-secondary" title="Edit Department" (click)="openEditModal(dept)">
+              <button
+                class="btn btn-sm btn-link p-1 text-secondary"
+                aria-label="Edit Department"
+                (click)="openEditModal(dept)">
                 <i class="bi bi-pencil-square fs-5"></i>
               </button>
-              <button class="btn btn-sm btn-link p-1 text-danger" title="Delete Department" (click)="deleteDepartment(dept)">
+              <button
+                class="btn btn-sm btn-link p-1 text-danger"
+                aria-label="Delete Department"
+                (click)="deleteDepartment(dept)">
                 <i class="bi bi-trash3 fs-5"></i>
               </button>
             </td>
@@ -100,11 +106,22 @@
       </table>
     </div>
 
-    <!-- Table Footer with Pagination -->
+    <!-- Table Footer with Legend & Pagination -->
     <div class="table-footer d-flex align-items-center justify-content-between flex-wrap gap-2">
       <span class="text-black-50 small">
         Showing {{ showingFrom() }} to {{ showingTo() }} of {{ filteredDepartments().length }} departments
       </span>
+
+      <div class="action-legend" aria-label="Table actions legend">
+        <span class="legend-label">Actions:</span>
+        <span class="legend-item">
+          <i class="bi bi-pencil-square text-secondary"></i> Edit Department
+        </span>
+        <span class="legend-item">
+          <i class="bi bi-trash3 text-danger"></i> Delete Department
+        </span>
+      </div>
+
       <nav aria-label="Department pagination" *ngIf="totalPages() > 1">
         <ul class="pagination pagination-sm pagination-outline-dark mb-0">
           <li class="page-item" [class.disabled]="currentPage() === 1">

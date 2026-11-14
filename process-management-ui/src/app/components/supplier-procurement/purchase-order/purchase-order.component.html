@@ -128,27 +128,27 @@
             <td class="text-center">
               <button
                 class="btn btn-sm btn-link p-1 text-secondary action-btn"
-                title="View Details"
+                aria-label="View Details"
                 (click)="openViewModal(po)">
                 <i class="bi bi-eye fs-5"></i>
               </button>
               <button
                 class="btn btn-sm btn-link p-1 text-secondary action-btn"
-                title="Receive Stock (Goods Receipt)"
+                aria-label="Receive Stock (Goods Receipt)"
                 [disabled]="!canReceive(po)"
                 (click)="openReceiveModal(po)">
                 <i class="bi bi-card-checklist fs-5"></i>
               </button>
               <button
                 class="btn btn-sm btn-link p-1 text-secondary action-btn"
-                title="Edit Purchase Order"
+                aria-label="Edit Purchase Order"
                 [disabled]="!canEdit(po)"
                 (click)="openEditModal(po)">
                 <i class="bi bi-pencil-square fs-5"></i>
               </button>
               <button
                 class="btn btn-sm btn-link p-1 text-danger action-btn"
-                title="Delete Purchase Order"
+                aria-label="Delete Purchase Order"
                 [disabled]="!canDelete(po)"
                 (click)="deletePurchaseOrder(po)">
                 <i class="bi bi-trash3 fs-5"></i>
@@ -159,11 +159,28 @@
       </table>
     </div>
 
-    <!-- Table Footer with Pagination -->
+    <!-- Table Footer with Legend & Pagination -->
     <div class="table-footer d-flex align-items-center justify-content-between flex-wrap gap-2">
       <span class="text-black-50 small">
         Showing {{ showingFrom() }} to {{ showingTo() }} of {{ filteredOrders().length }} purchase orders
       </span>
+
+      <div class="action-legend" aria-label="Table actions legend">
+        <span class="legend-label">Actions:</span>
+        <span class="legend-item">
+          <i class="bi bi-eye text-secondary"></i> View Details
+        </span>
+        <span class="legend-item">
+          <i class="bi bi-card-checklist text-secondary"></i> Receive Stock
+        </span>
+        <span class="legend-item">
+          <i class="bi bi-pencil-square text-secondary"></i> Edit Purchase Order
+        </span>
+        <span class="legend-item">
+          <i class="bi bi-trash3 text-danger"></i> Delete Purchase Order
+        </span>
+      </div>
+
       <nav aria-label="Purchase orders pagination" *ngIf="totalPages() > 1">
         <ul class="pagination pagination-sm pagination-outline-dark mb-0">
           <li class="page-item" [class.disabled]="currentPage() === 1">
@@ -406,7 +423,7 @@
                         <button
                           type="button"
                           class="btn btn-sm btn-link p-0 text-danger"
-                          title="Remove item"
+                          aria-label="Remove Item"
                           [disabled]="formData.items.length <= 1"
                           (click)="removeLineItem(lineIndex(idx))">
                           <i class="bi bi-trash3"></i>
@@ -421,6 +438,13 @@
                 <span class="text-black-50 small">
                   Showing {{ itemsShowingFrom() }} to {{ itemsShowingTo() }} of {{ formData.items.length }} {{ formData.items.length === 1 ? 'item' : 'items' }}
                 </span>
+
+                <div class="action-legend" aria-label="Order items actions legend">
+                  <span class="legend-label">Action:</span>
+                  <span class="legend-item">
+                    <i class="bi bi-trash3 text-danger"></i> Remove Item
+                  </span>
+                </div>
 
                 <div class="d-flex align-items-center gap-3">
                   <div>

@@ -147,27 +147,27 @@
             <td class="text-center">
               <button
                 class="btn btn-sm btn-link p-1 text-secondary action-btn"
-                title="View Payment & PO Ledger"
+                aria-label="View Payment & PO Ledger"
                 (click)="openViewModal(p)">
                 <i class="bi bi-eye fs-5"></i>
               </button>
               <button
                 class="btn btn-sm btn-link p-1 text-secondary action-btn"
-                title="Mark Payment Cleared"
+                aria-label="Mark Payment Cleared"
                 [disabled]="!canClear(p)"
                 (click)="markAsCleared(p)">
                 <i class="bi bi-check2-circle fs-5"></i>
               </button>
               <button
                 class="btn btn-sm btn-link p-1 text-secondary action-btn"
-                title="Edit"
+                aria-label="Edit Payment"
                 [disabled]="!canEdit(p)"
                 (click)="openEditModal(p)">
                 <i class="bi bi-pencil-square fs-5"></i>
               </button>
               <button
                 class="btn btn-sm btn-link p-1 text-danger action-btn"
-                title="Delete"
+                aria-label="Delete Payment"
                 [disabled]="!canDelete(p)"
                 (click)="deletePayment(p)">
                 <i class="bi bi-trash3 fs-5"></i>
@@ -178,11 +178,27 @@
       </table>
     </div>
 
-    <!-- Table Footer & Pagination -->
+    <!-- Table Footer with Legend & Pagination -->
     <div class="table-footer d-flex align-items-center justify-content-between flex-wrap gap-2">
       <span class="text-black-50 small">
         Showing {{ showingFrom() }} to {{ showingTo() }} of {{ filteredPayments().length }} payments
       </span>
+
+      <div class="action-legend" aria-label="Table actions legend">
+        <span class="legend-label">Actions:</span>
+        <span class="legend-item">
+          <i class="bi bi-eye text-secondary"></i> View Payment &amp; PO Ledger
+        </span>
+        <span class="legend-item">
+          <i class="bi bi-check2-circle text-secondary"></i> Mark Payment Cleared
+        </span>
+        <span class="legend-item">
+          <i class="bi bi-pencil-square text-secondary"></i> Edit Payment
+        </span>
+        <span class="legend-item">
+          <i class="bi bi-trash3 text-danger"></i> Delete Payment
+        </span>
+      </div>
 
       <nav aria-label="Purchase payments pagination" *ngIf="totalPages() > 1">
         <ul class="pagination pagination-sm pagination-outline-dark mb-0">

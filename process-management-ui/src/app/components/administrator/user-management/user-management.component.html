@@ -93,10 +93,16 @@
             </td>
             <td class="text-black small">{{ user.createdAt }}</td>
             <td class="text-center">
-              <button class="btn btn-sm btn-link p-1 text-secondary" title="Edit" (click)="openEditModal(user)">
+              <button
+                class="btn btn-sm btn-link p-1 text-secondary"
+                aria-label="Edit User"
+                (click)="openEditModal(user)">
                 <i class="bi bi-pencil-square fs-5"></i>
               </button>
-              <button class="btn btn-sm btn-link p-1 text-danger" title="Delete" (click)="deleteUser(user.id)">
+              <button
+                class="btn btn-sm btn-link p-1 text-danger"
+                aria-label="Delete User"
+                (click)="deleteUser(user.id)">
                 <i class="bi bi-trash3 fs-5"></i>
               </button>
             </td>
@@ -108,6 +114,17 @@
       <span class="text-black-50 small">
         Showing {{ showingFrom() }} to {{ showingTo() }} of {{ filteredUsers().length }} users
       </span>
+
+      <div class="action-legend" aria-label="Table actions legend">
+        <span class="legend-label">Actions:</span>
+        <span class="legend-item">
+          <i class="bi bi-pencil-square text-secondary"></i> Edit User
+        </span>
+        <span class="legend-item">
+          <i class="bi bi-trash3 text-danger"></i> Delete User
+        </span>
+      </div>
+
       <nav aria-label="Table pagination" *ngIf="totalPages() > 1">
         <ul class="pagination pagination-sm pagination-outline-dark mb-0">
           <li class="page-item" [class.disabled]="currentPage() === 1">
