@@ -1,52 +1,39 @@
-<div class="dashboard-page page-fill" data-bs-theme="light">
+<div class="dashboard-page" data-bs-theme="light">
 
-  <!-- Page Header -->
-  <div class="page-header d-flex align-items-center justify-content-between mb-3">
-    <div>
-      <h4 class="page-title mb-1">
-        <i class="bi bi-grid-1x2-fill me-2 text-black-50"></i>Operations Dashboard
-      </h4>
-      <p class="page-subtitle mb-0">
-        Real-time overview of raw materials, supplier procurement, production batches, and finished goods catalog
-      </p>
-    </div>
+  <!-- 1. 4-Card KPI Strip -->
+  <div class="kpi-grid">
+    <a
+      *ngFor="let kpi of kpis"
+      [routerLink]="kpi.route"
+      class="kpi-card shadow-sm text-decoration-none">
+      <div class="d-flex align-items-start justify-content-between gap-2">
+        <div class="min-w-0">
+          <div class="kpi-label text-truncate" [title]="kpi.label">{{ kpi.label }}</div>
+          <div class="kpi-value text-truncate">{{ kpi.value }}</div>
+        </div>
+        <div class="avatar avatar-kpi">
+          <i class="bi" [ngClass]="kpi.icon"></i>
+        </div>
+      </div>
+      <div class="d-flex align-items-center justify-content-between gap-2 mt-auto pt-1">
+        <span class="kpi-subtext text-muted text-truncate" [title]="kpi.subtext">{{ kpi.subtext }}</span>
+        <span class="trend-badge flex-shrink-0" [ngClass]="'trend-' + kpi.trendType">
+          {{ kpi.trend }}
+        </span>
+      </div>
+    </a>
   </div>
 
-  <!-- 4-Card KPI Strip -->
-  <div class="row g-3 mb-3 kpi-row">
-    <div class="col-12 col-sm-6 col-xl-3" *ngFor="let kpi of kpis">
-      <a [routerLink]="kpi.route" class="kpi-card shadow-sm text-decoration-none">
-        <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
-          <div>
-            <div class="kpi-label">{{ kpi.label }}</div>
-            <div class="kpi-value">{{ kpi.value }}</div>
-          </div>
-          <div class="avatar">
-            <i class="bi" [ngClass]="kpi.icon"></i>
-          </div>
-        </div>
-        <div class="d-flex align-items-center justify-content-between gap-2 mt-auto pt-1">
-          <span class="kpi-subtext text-muted">{{ kpi.subtext }}</span>
-          <span class="trend-badge" [ngClass]="'trend-' + kpi.trendType">
-            {{ kpi.trend }}
-          </span>
-        </div>
-      </a>
-    </div>
-  </div>
+  <!-- 3. Main Content Grid (Strictly Constrained Above Footer) -->
+  <div class="dashboard-main-grid">
 
-  <!-- Main Content Grid (Fills Remaining Window Height) -->
-  <div class="row g-3 dashboard-main-grid">
-
-    <!-- Left Column (7 cols): Recent Procurement & Payment Activity + Quick Shortcuts -->
-    <div class="col-12 col-xl-7 d-flex flex-column gap-3 grid-col">
-
-      <!-- Tabbed Activity Table Card -->
-      <div class="panel-card shadow-sm flex-grow-1 d-flex flex-column">
+    <!-- Left Column (7fr): Recent Procurement & Settlement Activity -->
+    <div class="grid-col-left">
+      <div class="panel-card shadow-sm">
         <div class="panel-card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
-          <div class="d-flex align-items-center gap-2">
+          <div class="d-flex align-items-center gap-2 min-w-0">
             <i class="bi bi-activity text-black-50"></i>
-            <h6 class="panel-title mb-0">Recent Procurement &amp; Settlement Activity</h6>
+            <h6 class="panel-title mb-0 text-truncate">Recent Procurement &amp; Settlement Activity</h6>
           </div>
 
           <div class="btn-group btn-group-sm" role="group" aria-label="Activity view switch">
@@ -67,63 +54,62 @@
           </div>
         </div>
 
-        <!-- Tab 1: Recent Purchase Orders -->
-        <div class="table-responsive flex-grow-1" *ngIf="activeLedgerTab() === 'po'">
-          <table class="table table-striped align-middle mb-0">
+        <!-- Tabbed Table Wrapper (Measured by ResizeObserver) -->
+        <div class="table-responsive" #ledgerWrap>
+          <!-- Tab 1: Recent Purchase Orders -->
+          <table class="table table-striped align-middle mb-0" *ngIf="activeLedgerTab() === 'po'">
             <thead>
               <tr>
-                <th scope="col">PO Number</th>
-                <th scope="col">Supplier</th>
-                <th scope="col">Expected</th>
-                <th scope="col" class="text-end">Total</th>
-                <th scope="col">Status</th>
+                <th scope="col" style="width: 21%;">PO Number</th>
+                <th scope="col" style="width: 30%;">Supplier</th>
+                <th scope="col" style="width: 16%;">Expected</th>
+                <th scope="col" class="text-end" style="width: 15%;">Total</th>
+                <th scope="col" style="width: 18%;">Status</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let po of recentPurchaseOrders">
+              <tr *ngFor="let po of visiblePurchaseOrders()">
                 <td>
                   <span class="code-badge">{{ po.poNumber }}</span>
                 </td>
-                <td>
-                  <div class="fw-semibold text-black">{{ po.supplierName }}</div>
-                  <div class="sub-text text-muted">{{ po.supplierCode }} · Ordered {{ po.orderDate | date:'dd MMM' }}</div>
+                <td class="text-truncate">
+                  <div class="fw-semibold text-black text-truncate" [title]="po.supplierName">{{ po.supplierName }}</div>
+                  <div class="sub-text text-muted text-truncate">{{ po.supplierCode }} · {{ po.orderDate | date:'dd MMM' }}</div>
                 </td>
                 <td>
-                  <span class="text-black fw-medium">{{ po.expectedDate | date:'dd MMM yyyy' }}</span>
+                  <span class="text-black fw-medium">{{ po.expectedDate | date:'dd MMM yy' }}</span>
                 </td>
                 <td class="text-end fw-bold text-black">
                   {{ po.totalAmount | currency:'USD':'symbol':'1.2-2' }}
                 </td>
                 <td>
                   <span class="status-pill" [ngClass]="poStatusClass(po.status)">
-                    {{ po.status }}
+                    {{ po.status === 'Partially Received' ? 'Partial' : po.status }}
                   </span>
                 </td>
               </tr>
             </tbody>
           </table>
-        </div>
 
-        <!-- Tab 2: Recent Supplier Payments -->
-        <div class="table-responsive flex-grow-1" *ngIf="activeLedgerTab() === 'payments'">
-          <table class="table table-striped align-middle mb-0">
+          <!-- Tab 2: Recent Supplier Payments -->
+          <table class="table table-striped align-middle mb-0" *ngIf="activeLedgerTab() === 'payments'">
             <thead>
               <tr>
-                <th scope="col">Payment No.</th>
-                <th scope="col">Supplier &amp; PO</th>
-                <th scope="col">Method</th>
-                <th scope="col" class="text-end">Amount</th>
-                <th scope="col">Status</th>
+                <th scope="col" style="width: 21%;">Payment No.</th>
+                <th scope="col" style="width: 29%;">Supplier &amp; PO</th>
+                <th scope="col" style="width: 18%;">Method</th>
+                <th scope="col" class="text-end" style="width: 14%;">Amount</th>
+                <th scope="col" style="width: 18%;">Status</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let pay of recentPayments">
+              <tr *ngFor="let pay of visiblePayments()">
                 <td>
                   <span class="code-badge">{{ pay.paymentNumber }}</span>
                 </td>
-                <td>
-                  <div class="fw-semibold text-black">{{ pay.supplierName }}</div>
-                  <div class="sub-text text-muted">{{ pay.poNumber }} · {{ pay.paymentDate | date:'dd MMM yyyy' }}</div>
+                <td class="text-truncate">
+                  <div class="fw-semibold text-black text-truncate" [title]="pay.supplierName">{{ pay.supplierName }}</div>
+                  <div class="sub-text text-muted text-truncate">{{ pay.poNumber }} · {{ pay.paymentDate | date:'dd MMM yy' }}</div>
                 </td>
                 <td>
                   <span class="category-chip">{{ pay.method }}</span>
@@ -136,7 +122,7 @@
                     class="status-pill"
                     [class.status-received]="pay.status === 'Completed'"
                     [class.status-partial]="pay.status === 'Pending Clearing'">
-                    {{ pay.status }}
+                    {{ pay.status === 'Pending Clearing' ? 'Clearing' : pay.status }}
                   </span>
                 </td>
               </tr>
@@ -146,8 +132,9 @@
 
         <!-- Panel Footer -->
         <div class="panel-card-footer d-flex align-items-center justify-content-between">
-          <span class="text-black-50 small">
-            Showing latest 5 {{ activeLedgerTab() === 'po' ? 'purchase orders' : 'supplier payments' }}
+          <span class="text-black-50">
+            Showing latest {{ activeLedgerTab() === 'po' ? visiblePurchaseOrders().length : visiblePayments().length }}
+            {{ activeLedgerTab() === 'po' ? 'purchase orders' : 'supplier payments' }}
           </span>
           <a
             [routerLink]="activeLedgerTab() === 'po' ? '/purchase-orders' : '/purchase-payments'"
@@ -156,18 +143,17 @@
           </a>
         </div>
       </div>
-
     </div>
 
-    <!-- Right Column (5 cols): Stock & Expiry Alerts + Catalog Distribution -->
-    <div class="col-12 col-xl-5 d-flex flex-column gap-3 grid-col">
+    <!-- Right Column (5fr): Two Strictly Equal-Height Cards -->
+    <div class="grid-col-right">
 
-      <!-- Stock & Batch Expiry Alerts Card -->
-      <div class="panel-card shadow-sm flex-grow-1 d-flex flex-column">
+      <!-- Card 1: Stock & Expiry Watchlist -->
+      <div class="panel-card shadow-sm">
         <div class="panel-card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
-          <div class="d-flex align-items-center gap-2">
+          <div class="d-flex align-items-center gap-2 min-w-0">
             <i class="bi bi-exclamation-triangle-fill text-black-50"></i>
-            <h6 class="panel-title mb-0">Stock &amp; Expiry Watchlist</h6>
+            <h6 class="panel-title mb-0 text-truncate">Stock &amp; Expiry Watchlist</h6>
           </div>
 
           <div class="btn-group btn-group-sm" role="group" aria-label="Alert filter">
@@ -182,18 +168,18 @@
           </div>
         </div>
 
-        <div class="alerts-list flex-grow-1">
+        <div class="alerts-list" #alertsWrap>
           <a
-            *ngFor="let alert of filteredAlerts()"
+            *ngFor="let alert of visibleAlerts()"
             [routerLink]="alert.route"
             class="alert-row text-decoration-none">
-            <div class="d-flex align-items-center gap-2 min-w-0">
+            <div class="d-flex align-items-center gap-2 min-w-0 flex-grow-1">
               <div class="avatar avatar-sm">
                 <i class="bi" [class.bi-boxes]="alert.type === 'Material'" [class.bi-box2-fill]="alert.type === 'Product'"></i>
               </div>
-              <div class="min-w-0">
-                <div class="fw-semibold text-black text-truncate small">{{ alert.name }}</div>
-                <div class="sub-text text-muted">
+              <div class="min-w-0 flex-grow-1">
+                <div class="fw-semibold text-black text-truncate small" [title]="alert.name">{{ alert.name }}</div>
+                <div class="sub-text text-muted text-truncate">
                   <span class="sku-tag">{{ alert.code }}</span> · {{ alert.category }}
                 </div>
               </div>
@@ -216,8 +202,8 @@
         </div>
 
         <div class="panel-card-footer d-flex align-items-center justify-content-between">
-          <span class="text-black-50 small">
-            {{ filteredAlerts().length }} items flagged for replenishment or lot review
+          <span class="text-black-50">
+            Showing {{ visibleAlerts().length }} of {{ filteredAlerts().length }} flagged items
           </span>
           <a routerLink="/materials" class="footer-link">
             Manage Inventory
@@ -225,28 +211,28 @@
         </div>
       </div>
 
-      <!-- Recent Production Batches & Lot Status Card -->
+      <!-- Card 2: Recent Production Batches & Lot Status -->
       <div class="panel-card shadow-sm">
         <div class="panel-card-header d-flex align-items-center justify-content-between">
-          <div class="d-flex align-items-center gap-2">
+          <div class="d-flex align-items-center gap-2 min-w-0">
             <i class="bi bi-layers-fill text-black-50"></i>
-            <h6 class="panel-title mb-0">Recent Production Batches &amp; Lot Status</h6>
+            <h6 class="panel-title mb-0 text-truncate">Recent Production Batches &amp; Lot Status</h6>
           </div>
-          <a routerLink="/products" class="footer-link">
+          <a routerLink="/products" class="footer-link flex-shrink-0 ms-2">
             Batch Ledger
           </a>
         </div>
 
-        <div class="batch-list">
+        <div class="batch-list" #batchesWrap>
           <a
-            *ngFor="let batch of recentBatches"
+            *ngFor="let batch of visibleBatches()"
             routerLink="/products"
             class="alert-row text-decoration-none">
-            <div class="d-flex align-items-center gap-2 min-w-0">
+            <div class="d-flex align-items-center gap-2 min-w-0 flex-grow-1">
               <span class="code-badge flex-shrink-0">{{ batch.batchNumber }}</span>
-              <div class="min-w-0">
-                <div class="fw-semibold text-black text-truncate small">{{ batch.productName }}</div>
-                <div class="sub-text text-muted">
+              <div class="min-w-0 flex-grow-1">
+                <div class="fw-semibold text-black text-truncate small" [title]="batch.productName">{{ batch.productName }}</div>
+                <div class="sub-text text-muted text-truncate">
                   <span class="sku-tag">{{ batch.sku }}</span> · Mfg {{ batch.mfgDate | date:'dd MMM yy' }} · Exp {{ batch.expiryDate | date:'dd MMM yy' }}
                 </div>
               </div>
@@ -260,6 +246,15 @@
                 <strong class="text-black">{{ batch.quantity }}</strong> {{ batch.unit }}
               </div>
             </div>
+          </a>
+        </div>
+
+        <div class="panel-card-footer d-flex align-items-center justify-content-between">
+          <span class="text-black-50">
+            Showing latest {{ visibleBatches().length }} of {{ recentBatches.length }} batches
+          </span>
+          <a routerLink="/products" class="footer-link">
+            View All Batches
           </a>
         </div>
       </div>

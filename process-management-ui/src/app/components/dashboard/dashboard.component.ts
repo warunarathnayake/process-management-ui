@@ -1,4 +1,14 @@
-import { Component, signal, computed } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  NgZone,
+  OnDestroy,
+  ViewChild,
+  computed,
+  inject,
+  signal
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
@@ -65,7 +75,20 @@ export interface RecentBatchItem {
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent {
+export class DashboardComponent implements AfterViewInit, OnDestroy {
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly zone = inject(NgZone);
+
+  @ViewChild('ledgerWrap') ledgerWrapRef?: ElementRef<HTMLElement>;
+  @ViewChild('alertsWrap') alertsWrapRef?: ElementRef<HTMLElement>;
+  @ViewChild('batchesWrap') batchesWrapRef?: ElementRef<HTMLElement>;
+
+  private resizeObserver?: ResizeObserver;
+  private frame = 0;
+
+  private lastLedgerRowH = 44;
+  private lastAlertRowH = 43;
+  private lastBatchRowH = 43;
 
   // Active tab in the main ledger card ('po' | 'payments')
   activeLedgerTab = signal<'po' | 'payments'>('po');
@@ -73,13 +96,18 @@ export class DashboardComponent {
   // Active filter in the alerts panel ('All' | 'Material' | 'Product')
   alertFilter = signal<'All' | 'Material' | 'Product'>('All');
 
+  // Dynamically calculated visible row limits based on available card height
+  ledgerLimit  = signal(4);
+  alertsLimit  = signal(2);
+  batchesLimit = signal(2);
+
   // ── 4 Top-Level KPI Cards ─────────────────────────────────────────────────
   readonly kpis: DashboardKpi[] = [
     {
       id: 'catalog-stock',
       label: 'Finished Goods Stock',
       value: '2,250 units',
-      subtext: '12 active SKUs · 18 production batches',
+      subtext: '12 SKUs · 18 batches',
       trend: '+8.4% this month',
       trendType: 'positive',
       icon: 'bi-box2-fill',
@@ -89,8 +117,8 @@ export class DashboardComponent {
       id: 'raw-materials',
       label: 'Raw Material Inventory',
       value: '$48,920.00',
-      subtext: '12 catalog materials · 6 categories',
-      trend: '3 items need attention',
+      subtext: '12 materials · 6 categories',
+      trend: '3 need attention',
       trendType: 'warning',
       icon: 'bi-boxes',
       route: '/materials'
@@ -99,7 +127,7 @@ export class DashboardComponent {
       id: 'open-pos',
       label: 'Active Purchase Orders',
       value: '$18,907.50',
-      subtext: '8 purchase orders · 10 active suppliers',
+      subtext: '8 orders · 10 suppliers',
       trend: '4 awaiting delivery',
       trendType: 'neutral',
       icon: 'bi-cart-check-fill',
@@ -109,8 +137,8 @@ export class DashboardComponent {
       id: 'supplier-settlements',
       label: 'Supplier Payments Settled',
       value: '$12,485.00',
-      subtext: '8 completed · 2 pending bank clearing',
-      trend: '$6,422.50 balance due',
+      subtext: '8 settled · 2 clearing',
+      trend: '$6,422.50 due',
       trendType: 'positive',
       icon: 'bi-credit-card-2-front-fill',
       route: '/purchase-payments'
@@ -163,6 +191,24 @@ export class DashboardComponent {
       expectedDate: '2026-03-10',
       totalAmount: 1750.00,
       status: 'Partially Received'
+    },
+    {
+      poNumber: 'PO-2026-003',
+      supplierName: 'Atlas Botanicals Co.',
+      supplierCode: 'SUP-001',
+      orderDate: '2026-02-20',
+      expectedDate: '2026-03-05',
+      totalAmount: 2890.00,
+      status: 'Received'
+    },
+    {
+      poNumber: 'PO-2026-002',
+      supplierName: 'Nordic Pure Oils',
+      supplierCode: 'SUP-003',
+      orderDate: '2026-02-14',
+      expectedDate: '2026-02-28',
+      totalAmount: 1940.00,
+      status: 'Received'
     }
   ];
 
@@ -212,6 +258,24 @@ export class DashboardComponent {
       method: 'Corporate Card',
       amount: 1800.00,
       status: 'Completed'
+    },
+    {
+      paymentNumber: 'PAY-2026-004',
+      poNumber: 'PO-2026-003',
+      supplierName: 'Nordic Pure Oils',
+      paymentDate: '2026-02-22',
+      method: 'Bank Transfer',
+      amount: 1940.00,
+      status: 'Completed'
+    },
+    {
+      paymentNumber: 'PAY-2026-003',
+      poNumber: 'PO-2026-001',
+      supplierName: 'Pacific Surfactants',
+      paymentDate: '2026-02-16',
+      method: 'Bank Transfer',
+      amount: 1405.00,
+      status: 'Completed'
     }
   ];
 
@@ -231,12 +295,12 @@ export class DashboardComponent {
     },
     {
       id: 2,
-      name: 'Charcoal Detoxifying Clay Mask',
-      code: 'PRD-SKN-008',
+      name: 'Invisible Mineral Sunscreen SPF 50',
+      code: 'PRD-SUN-011',
       type: 'Product',
-      category: 'Facial Skincare',
+      category: 'Sun Care',
       currentStock: 0,
-      minStock: 40,
+      minStock: 50,
       unit: 'units',
       alertType: 'Out of Stock',
       route: '/products'
@@ -255,6 +319,18 @@ export class DashboardComponent {
     },
     {
       id: 4,
+      name: 'Tinted Peptide Overnight Lip Mask',
+      code: 'PRD-LIP-008',
+      type: 'Product',
+      category: 'Lip Care',
+      currentStock: 25,
+      minStock: 40,
+      unit: 'units',
+      alertType: 'Low Stock',
+      route: '/products'
+    },
+    {
+      id: 5,
       name: 'Niacinamide (Vitamin B3) Powder',
       code: 'RM-ACT-003',
       type: 'Material',
@@ -304,15 +380,135 @@ export class DashboardComponent {
       quantity: 25,
       unit: 'units',
       status: 'Expiring Soon'
+    },
+    {
+      batchNumber: 'BAT-2026-015',
+      productName: 'Aromatherapy Botanical Bath Salts',
+      sku: 'PRD-BTH-014',
+      mfgDate: '2026-02-26',
+      expiryDate: '2028-02-26',
+      quantity: 130,
+      unit: 'units',
+      status: 'Active'
+    },
+    {
+      batchNumber: 'BAT-2026-012',
+      productName: 'Sandalwood Beard Grooming Elixir',
+      sku: 'PRD-MEN-012',
+      mfgDate: '2026-02-18',
+      expiryDate: '2027-08-18',
+      quantity: 110,
+      unit: 'units',
+      status: 'Active'
     }
   ];
 
+  // ── Window-Height Sliced Lists ────────────────────────────────────────────
+  visiblePurchaseOrders = computed(() =>
+    this.recentPurchaseOrders.slice(0, this.ledgerLimit())
+  );
+
+  visiblePayments = computed(() =>
+    this.recentPayments.slice(0, this.ledgerLimit())
+  );
+
+  visibleAlerts = computed(() =>
+    this.filteredAlerts().slice(0, this.alertsLimit())
+  );
+
+  visibleBatches = computed(() =>
+    this.recentBatches.slice(0, this.batchesLimit())
+  );
+
+  ngAfterViewInit(): void {
+    this.zone.runOutsideAngular(() => {
+      this.resizeObserver = new ResizeObserver(() => this.scheduleRecalculate());
+      this.resizeObserver.observe(this.host.nativeElement);
+      if (this.ledgerWrapRef?.nativeElement) {
+        this.resizeObserver.observe(this.ledgerWrapRef.nativeElement);
+      }
+      if (this.alertsWrapRef?.nativeElement) {
+        this.resizeObserver.observe(this.alertsWrapRef.nativeElement);
+      }
+      if (this.batchesWrapRef?.nativeElement) {
+        this.resizeObserver.observe(this.batchesWrapRef.nativeElement);
+      }
+      this.scheduleRecalculate();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.resizeObserver?.disconnect();
+    cancelAnimationFrame(this.frame);
+  }
+
+  private scheduleRecalculate(): void {
+    cancelAnimationFrame(this.frame);
+    this.frame = requestAnimationFrame(() => this.recalculateFits());
+  }
+
+  private recalculateFits(): void {
+    let nextLedger = this.ledgerLimit();
+    let nextAlerts = this.alertsLimit();
+    let nextBatches = this.batchesLimit();
+
+    // 1. Measure Left Table (`.table-responsive`)
+    const ledgerEl = this.ledgerWrapRef?.nativeElement;
+    if (ledgerEl && ledgerEl.clientHeight > 0) {
+      const thead = ledgerEl.querySelector('thead') as HTMLElement | null;
+      const headH = thead ? thead.getBoundingClientRect().height : 33;
+      const rows = Array.from(ledgerEl.querySelectorAll<HTMLElement>('tbody > tr'));
+      const measuredRowH = rows.reduce((m, r) => Math.max(m, r.getBoundingClientRect().height), 0);
+      if (measuredRowH > 0) {
+        this.lastLedgerRowH = Math.ceil(measuredRowH);
+      }
+      const bodySpace = ledgerEl.clientHeight - headH;
+      nextLedger = Math.max(2, Math.floor((bodySpace - 2) / this.lastLedgerRowH));
+    }
+
+    // 2. Measure Top-Right Watchlist (`.alerts-list`)
+    const alertsEl = this.alertsWrapRef?.nativeElement;
+    if (alertsEl && alertsEl.clientHeight > 0) {
+      const items = Array.from(alertsEl.querySelectorAll<HTMLElement>('.alert-row'));
+      const measuredItemH = items.reduce((m, r) => Math.max(m, r.getBoundingClientRect().height), 0);
+      if (measuredItemH > 0) {
+        this.lastAlertRowH = Math.ceil(measuredItemH);
+      }
+      nextAlerts = Math.max(1, Math.floor((alertsEl.clientHeight - 2) / this.lastAlertRowH));
+    }
+
+    // 3. Measure Bottom-Right Batches (`.batch-list`)
+    const batchesEl = this.batchesWrapRef?.nativeElement;
+    if (batchesEl && batchesEl.clientHeight > 0) {
+      const items = Array.from(batchesEl.querySelectorAll<HTMLElement>('.alert-row'));
+      const measuredItemH = items.reduce((m, r) => Math.max(m, r.getBoundingClientRect().height), 0);
+      if (measuredItemH > 0) {
+        this.lastBatchRowH = Math.ceil(measuredItemH);
+      }
+      nextBatches = Math.max(1, Math.floor((batchesEl.clientHeight - 2) / this.lastBatchRowH));
+    }
+
+    if (
+      nextLedger !== this.ledgerLimit() ||
+      nextAlerts !== this.alertsLimit() ||
+      nextBatches !== this.batchesLimit()
+    ) {
+      this.zone.run(() => {
+        this.ledgerLimit.set(nextLedger);
+        this.alertsLimit.set(nextAlerts);
+        this.batchesLimit.set(nextBatches);
+      });
+    }
+  }
+
   setLedgerTab(tab: 'po' | 'payments'): void {
     this.activeLedgerTab.set(tab);
+    this.scheduleRecalculate();
   }
 
   setAlertFilter(filter: 'All' | 'Material' | 'Product'): void {
     this.alertFilter.set(filter);
+    this.scheduleRecalculate();
   }
 
   poStatusClass(status: RecentPurchaseOrder['status']): string {

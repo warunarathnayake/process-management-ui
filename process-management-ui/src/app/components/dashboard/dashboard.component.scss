@@ -1,62 +1,74 @@
 @import 'variables';
 @import 'mixins';
 
-// ── Dashboard Shell (Fits Viewport Height Without Scrolling) ─────────────────
-.dashboard-page {
-  padding: 0.25rem 0;
+// ── Host & Dashboard Shell (Strictly Constrained Above Footer) ───────────────
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
   overflow: hidden;
 }
 
-// ── Page Header ──────────────────────────────────────────────────────────────
-.page-header {
-  flex-shrink: 0;
-
-  .page-title {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: $dark-primary;
-  }
-
-  .page-subtitle {
-    font-size: 0.85rem;
-    color: $dark-muted;
-  }
+.dashboard-page {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 0.6rem;
+  flex: 1 1 0;
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
+  overflow: hidden;
 }
 
 // ── Avatar (Solid Black Circle with White Icon) ──────────────────────────────
 .avatar {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background-color: #000000;
   color: #ffffff;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 
-  &.avatar-sm {
+  &.avatar-kpi {
     width: 30px;
     height: 30px;
     font-size: 0.82rem;
   }
+
+  &.avatar-sm {
+    width: 26px;
+    height: 26px;
+    font-size: 0.74rem;
+  }
 }
 
-// ── 4-Card KPI Strip ─────────────────────────────────────────────────────────
-.kpi-row {
-  flex-shrink: 0;
+// ── 4-Card KPI Strip (Compact Single-Row Grid) ───────────────────────────────
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.6rem;
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .kpi-card {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  padding: 0.95rem 1.15rem;
+  padding: 0.55rem 0.85rem;
   background-color: #ffffff;
   border: 1px solid $border-light;
-  border-radius: 12px;
+  border-radius: 10px;
+  min-width: 0;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {
@@ -65,23 +77,23 @@
   }
 
   .kpi-label {
-    font-size: 0.72rem;
+    font-size: 0.64rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.04em;
     color: $dark-muted;
-    margin-bottom: 0.2rem;
+    margin-bottom: 0.1rem;
   }
 
   .kpi-value {
-    font-size: 1.35rem;
+    font-size: clamp(1.05rem, 1.2vw, 1.22rem);
     font-weight: 800;
     color: $dark-primary;
-    line-height: 1.2;
+    line-height: 1.15;
   }
 
   .kpi-subtext {
-    font-size: 0.73rem;
+    font-size: 0.68rem;
     font-weight: 500;
     color: $dark-muted !important;
   }
@@ -90,9 +102,9 @@
 .trend-badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.14rem 0.55rem;
+  padding: 0.1rem 0.44rem;
   border-radius: 20px;
-  font-size: 0.68rem;
+  font-size: 0.63rem;
   font-weight: 600;
   white-space: nowrap;
 
@@ -118,85 +130,126 @@
   }
 }
 
-// ── Main Grid & Panel Cards ──────────────────────────────────────────────────
+// ── Main Content Grid (Strictly Constrained with minmax(0, 1fr)) ─────────────
 .dashboard-main-grid {
-  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  grid-template-rows: minmax(0, 1fr);
+  gap: 0.6rem;
   min-height: 0;
-
-  .grid-col {
-    min-height: 0;
-  }
+  min-width: 0;
+  overflow: hidden;
 }
 
+.grid-col-left {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.grid-col-right {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.6rem;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+// ── Panel Card (Header + Constrained Body + Footer with Pagination) ──────────
 .panel-card {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 0;
+  min-width: 0;
+  height: 100%;
   background-color: #ffffff;
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid $border-light;
   overflow: hidden;
 
   .panel-card-header {
-    padding: 0.75rem 1.25rem;
+    padding: 0.42rem 0.85rem;
     border-bottom: 1px solid $border-light;
     background-color: #ffffff;
 
     .panel-title {
-      font-size: 0.88rem;
+      font-size: 0.8rem;
       font-weight: 700;
       color: $dark-primary;
     }
 
     .btn-group .btn {
-      font-size: 0.74rem;
-      padding: 0.2rem 0.6rem;
+      font-size: 0.68rem;
+      padding: 0.14rem 0.5rem;
     }
   }
 
   .table-responsive {
     background-color: $bg-surface-subtle;
     overflow: hidden;
-    flex: 1 1 0;
     min-height: 0;
 
     .table {
       --bs-table-bg: #ffffff;
       --bs-table-striped-bg: rgba(0, 0, 0, 0.035);
-      font-size: 0.8rem;
+      font-size: 0.76rem;
+      table-layout: fixed;
+      width: 100%;
     }
 
     thead tr th {
-      padding: 0.65rem 1rem;
-      font-size: 0.7rem;
+      padding: 0.42rem 0.6rem;
+      font-size: 0.65rem;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.04em;
       color: $dark-muted;
       background-color: #ffffff;
       white-space: nowrap;
       position: sticky;
       top: 0;
       z-index: 2;
+
+      &:first-child {
+        padding-left: 0.85rem;
+      }
+
+      &:last-child {
+        padding-right: 0.85rem;
+      }
     }
 
     tbody td {
-      padding: 0.5rem 1rem;
+      padding: 0.36rem 0.6rem;
       color: #000000;
       white-space: nowrap;
+
+      &:first-child {
+        padding-left: 0.85rem;
+      }
+
+      &:last-child {
+        padding-right: 0.85rem;
+      }
     }
   }
 
   .panel-card-footer {
-    padding: 0.6rem 1.25rem;
-    font-size: 0.76rem;
+    padding: 0.38rem 0.85rem;
+    font-size: 0.72rem;
     background-color: $bg-surface-subtle;
     border-top: 1px solid $border-light;
-    margin-top: auto;
   }
 
   .footer-link {
-    font-size: 0.76rem;
+    font-size: 0.71rem;
     font-weight: 600;
     color: $dark-primary;
     text-decoration: none;
+    white-space: nowrap;
 
     &:hover {
       text-decoration: underline;
@@ -207,32 +260,33 @@
 // ── Badges & Chips ───────────────────────────────────────────────────────────
 .code-badge {
   display: inline-block;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 600;
   color: $dark-secondary;
   background-color: $bg-surface-subtle;
   border: 1px solid $border-light;
-  padding: 0.15rem 0.5rem;
+  padding: 0.1rem 0.42rem;
   border-radius: 6px;
   white-space: nowrap;
 }
 
 .category-chip {
   display: inline-block;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 500;
   color: $dark-secondary;
   background-color: $bg-surface-subtle;
   border: 1px solid $border-light;
-  padding: 0.16rem 0.55rem;
+  padding: 0.1rem 0.44rem;
   border-radius: 6px;
   white-space: nowrap;
 }
 
 .sub-text {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 500;
   color: $dark-muted !important;
+  line-height: 1.2;
 }
 
 .sku-tag {
@@ -243,9 +297,9 @@
 .status-pill {
   display: inline-flex;
   align-items: center;
-  padding: 0.22em 0.65em;
+  padding: 0.16em 0.55em;
   border-radius: 20px;
-  font-size: 0.7rem;
+  font-size: 0.66rem;
   font-weight: 600;
   white-space: nowrap;
 
@@ -270,26 +324,25 @@
   }
 }
 
-// ── Stock & Expiry Alerts Watchlist ──────────────────────────────────────────
-.alerts-list {
+// ── Stock & Expiry Alerts Watchlist & Batch List ─────────────────────────────
+.alerts-list,
+.batch-list {
   display: flex;
   flex-direction: column;
-  flex: 1 1 0;
   min-height: 0;
   overflow: hidden;
+  background-color: $bg-surface-subtle;
 }
 
 .alert-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.5rem 1.25rem;
+  padding: 0.34rem 0.85rem;
+  background-color: #ffffff;
   border-bottom: 1px solid $border-light;
+  flex-shrink: 0;
   transition: background-color 0.15s ease;
-
-  &:last-child {
-    border-bottom: none;
-  }
 
   &:hover {
     background-color: $bg-surface-subtle;
@@ -299,9 +352,9 @@
 .alert-badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.14rem 0.5rem;
+  padding: 0.1rem 0.44rem;
   border-radius: 12px;
-  font-size: 0.66rem;
+  font-size: 0.64rem;
   font-weight: 600;
   white-space: nowrap;
 
@@ -319,10 +372,4 @@
     background-color: #ffedd5;
     color: #c2410c;
   }
-}
-
-// ── Recent Production Batches List ───────────────────────────────────────────
-.batch-list {
-  display: flex;
-  flex-direction: column;
 }
