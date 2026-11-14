@@ -237,7 +237,7 @@
 </div>
 
 <!-- Add / Edit Material Modal -->
-<div class="modal fade show d-block" tabindex="-1" *ngIf="showModal()" (click)="closeModal()" aria-modal="true" role="dialog">
+<div class="modal fade show d-block" data-bs-theme="light" tabindex="-1" *ngIf="showModal()" (click)="closeModal()" aria-modal="true" role="dialog">
   <div class="modal-dialog modal-dialog-centered modal-lg" (click)="$event.stopPropagation()">
     <div class="modal-content shadow border-0">
 
@@ -495,7 +495,7 @@
 <div class="modal-backdrop fade show" *ngIf="showModal()" (click)="closeModal()"></div>
 
 <!-- Stock Adjustment Modal -->
-<div class="modal fade show d-block" tabindex="-1" *ngIf="showAdjustmentModal() && adjustmentMaterial() as am" (click)="closeAdjustmentModal()" aria-modal="true" role="dialog">
+<div class="modal fade show d-block" data-bs-theme="light" tabindex="-1" *ngIf="showAdjustmentModal() && adjustmentMaterial() as am" (click)="closeAdjustmentModal()" aria-modal="true" role="dialog">
   <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
     <div class="modal-content shadow border-0">
 
@@ -651,7 +651,7 @@
 <div class="modal-backdrop fade show" *ngIf="showAdjustmentModal()" (click)="closeAdjustmentModal()"></div>
 
 <!-- Stock History Modal -->
-<div class="modal fade show d-block" tabindex="-1" *ngIf="showHistoryModal() && historyLiveMaterial() as hm" (click)="closeHistoryModal()" aria-modal="true" role="dialog">
+<div class="modal fade show d-block" data-bs-theme="light" tabindex="-1" *ngIf="showHistoryModal() && historyLiveMaterial() as hm" (click)="closeHistoryModal()" aria-modal="true" role="dialog">
   <div class="modal-dialog modal-dialog-centered modal-xl" (click)="$event.stopPropagation()">
     <div class="modal-content shadow border-0">
 

@@ -247,7 +247,7 @@
 </div>
 
 <!-- Add / Edit Product Modal -->
-<div class="modal fade show d-block" tabindex="-1" *ngIf="showModal()" (click)="closeModal()" aria-modal="true" role="dialog">
+<div class="modal fade show d-block" data-bs-theme="light" tabindex="-1" *ngIf="showModal()" (click)="closeModal()" aria-modal="true" role="dialog">
   <div class="modal-dialog modal-dialog-centered modal-lg product-form-dialog" (click)="$event.stopPropagation()">
     <div class="modal-content shadow border-0">
 
@@ -718,7 +718,7 @@
 <div class="modal-backdrop fade show" *ngIf="showModal()" (click)="closeModal()"></div>
 
 <!-- View Product Details & Batches Modal -->
-<div class="modal fade show d-block" tabindex="-1" *ngIf="showViewModal() && viewingProduct() as vp" (click)="closeViewModal()" aria-modal="true" role="dialog">
+<div class="modal fade show d-block" data-bs-theme="light" tabindex="-1" *ngIf="showViewModal() && viewingProduct() as vp" (click)="closeViewModal()" aria-modal="true" role="dialog">
   <div class="modal-dialog modal-dialog-centered modal-xl" (click)="$event.stopPropagation()">
     <div class="modal-content shadow border-0">
 
@@ -924,7 +924,7 @@
 <div class="modal-backdrop fade show" *ngIf="showViewModal()" (click)="closeViewModal()"></div>
 
 <!-- Add Batch Modal -->
-<div class="modal fade show d-block" tabindex="-1" *ngIf="showBatchModal() && batchProduct() as bp" (click)="closeBatchModal()" aria-modal="true" role="dialog">
+<div class="modal fade show d-block" data-bs-theme="light" tabindex="-1" *ngIf="showBatchModal() && batchProduct() as bp" (click)="closeBatchModal()" aria-modal="true" role="dialog">
   <div class="modal-dialog modal-dialog-centered batch-form-dialog" (click)="$event.stopPropagation()">
     <div class="modal-content shadow border-0">
 

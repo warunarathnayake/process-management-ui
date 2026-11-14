@@ -217,7 +217,7 @@
 </div>
 
 <!-- Create / Edit Purchase Order Modal -->
-<div class="modal fade show d-block po-window-modal" tabindex="-1" *ngIf="showModal()" (click)="closeModal()" aria-modal="true" role="dialog">
+<div class="modal fade show d-block po-window-modal" data-bs-theme="light" tabindex="-1" *ngIf="showModal()" (click)="closeModal()" aria-modal="true" role="dialog">
   <div class="modal-dialog modal-xl po-window-modal-dialog" (click)="$event.stopPropagation()">
     <div class="modal-content shadow border-0">
 
@@ -554,7 +554,7 @@
 <div class="modal-backdrop fade show" *ngIf="showModal()" (click)="closeModal()"></div>
 
 <!-- Receive Stock (Goods Receipt / GRN) Modal -->
-<div class="modal fade show d-block po-window-modal" tabindex="-1" *ngIf="showReceiveModal() && receivingPO() as rpo" (click)="closeReceiveModal()" aria-modal="true" role="dialog">
+<div class="modal fade show d-block po-window-modal" data-bs-theme="light" tabindex="-1" *ngIf="showReceiveModal() && receivingPO() as rpo" (click)="closeReceiveModal()" aria-modal="true" role="dialog">
   <div class="modal-dialog modal-xl po-window-modal-dialog" (click)="$event.stopPropagation()">
     <div class="modal-content shadow border-0">
 
@@ -711,7 +711,7 @@
 <div class="modal-backdrop fade show" *ngIf="showReceiveModal()" (click)="closeReceiveModal()"></div>
 
 <!-- View Purchase Order Details Modal -->
-<div class="modal fade show d-block po-window-modal" tabindex="-1" *ngIf="showViewModal() && viewingPO() as vpo" (click)="closeViewModal()" aria-modal="true" role="dialog">
+<div class="modal fade show d-block po-window-modal" data-bs-theme="light" tabindex="-1" *ngIf="showViewModal() && viewingPO() as vpo" (click)="closeViewModal()" aria-modal="true" role="dialog">
   <div class="modal-dialog modal-xl po-window-modal-dialog" (click)="$event.stopPropagation()">
     <div class="modal-content shadow border-0">
 

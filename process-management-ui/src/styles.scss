@@ -156,6 +156,26 @@ body {
   }
 }
 
+// ── Global Modal Light Theme & Text Contrast ───────────────
+// Ensures all modals across the app use light-theme Bootstrap variables
+// instead of inheriting dark-mode muted text (--bs-secondary-color) from <html>.
+.modal {
+  --bs-body-color: #{$dark-primary};
+  --bs-body-bg: #{$bg-surface};
+  --bs-secondary-color: #{$dark-muted};
+  --bs-tertiary-color: #{$dark-muted};
+  --bs-emphasis-color: #{$dark-primary};
+  --bs-border-color: #{$border-color};
+
+  .text-muted {
+    color: #{$dark-muted} !important;
+  }
+
+  .text-secondary {
+    color: #{$dark-secondary} !important;
+  }
+}
+
 // ── Table Footer Action Legend ─────────────────────────────
 .action-legend {
   display: inline-flex;
