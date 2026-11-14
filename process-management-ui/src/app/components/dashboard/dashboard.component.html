@@ -1,0 +1,271 @@
+<div class="dashboard-page page-fill" data-bs-theme="light">
+
+  <!-- Page Header -->
+  <div class="page-header d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <h4 class="page-title mb-1">
+        <i class="bi bi-grid-1x2-fill me-2 text-black-50"></i>Operations Dashboard
+      </h4>
+      <p class="page-subtitle mb-0">
+        Real-time overview of raw materials, supplier procurement, production batches, and finished goods catalog
+      </p>
+    </div>
+  </div>
+
+  <!-- 4-Card KPI Strip -->
+  <div class="row g-3 mb-3 kpi-row">
+    <div class="col-12 col-sm-6 col-xl-3" *ngFor="let kpi of kpis">
+      <a [routerLink]="kpi.route" class="kpi-card shadow-sm text-decoration-none">
+        <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+          <div>
+            <div class="kpi-label">{{ kpi.label }}</div>
+            <div class="kpi-value">{{ kpi.value }}</div>
+          </div>
+          <div class="avatar">
+            <i class="bi" [ngClass]="kpi.icon"></i>
+          </div>
+        </div>
+        <div class="d-flex align-items-center justify-content-between gap-2 mt-auto pt-1">
+          <span class="kpi-subtext text-muted">{{ kpi.subtext }}</span>
+          <span class="trend-badge" [ngClass]="'trend-' + kpi.trendType">
+            {{ kpi.trend }}
+          </span>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Main Content Grid (Fills Remaining Window Height) -->
+  <div class="row g-3 dashboard-main-grid">
+
+    <!-- Left Column (7 cols): Recent Procurement & Payment Activity + Quick Shortcuts -->
+    <div class="col-12 col-xl-7 d-flex flex-column gap-3 grid-col">
+
+      <!-- Tabbed Activity Table Card -->
+      <div class="panel-card shadow-sm flex-grow-1 d-flex flex-column">
+        <div class="panel-card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-activity text-black-50"></i>
+            <h6 class="panel-title mb-0">Recent Procurement &amp; Settlement Activity</h6>
+          </div>
+
+          <div class="btn-group btn-group-sm" role="group" aria-label="Activity view switch">
+            <button
+              type="button"
+              class="btn btn-outline-dark btn-sm"
+              [class.active]="activeLedgerTab() === 'po'"
+              (click)="setLedgerTab('po')">
+              <i class="bi bi-cart-check me-1"></i>Purchase Orders
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-dark btn-sm"
+              [class.active]="activeLedgerTab() === 'payments'"
+              (click)="setLedgerTab('payments')">
+              <i class="bi bi-credit-card-2-front me-1"></i>Supplier Payments
+            </button>
+          </div>
+        </div>
+
+        <!-- Tab 1: Recent Purchase Orders -->
+        <div class="table-responsive flex-grow-1" *ngIf="activeLedgerTab() === 'po'">
+          <table class="table table-striped align-middle mb-0">
+            <thead>
+              <tr>
+                <th scope="col">PO Number</th>
+                <th scope="col">Supplier</th>
+                <th scope="col">Expected</th>
+                <th scope="col" class="text-end">Total</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let po of recentPurchaseOrders">
+                <td>
+                  <span class="code-badge">{{ po.poNumber }}</span>
+                </td>
+                <td>
+                  <div class="fw-semibold text-black">{{ po.supplierName }}</div>
+                  <div class="sub-text text-muted">{{ po.supplierCode }} · Ordered {{ po.orderDate | date:'dd MMM' }}</div>
+                </td>
+                <td>
+                  <span class="text-black fw-medium">{{ po.expectedDate | date:'dd MMM yyyy' }}</span>
+                </td>
+                <td class="text-end fw-bold text-black">
+                  {{ po.totalAmount | currency:'USD':'symbol':'1.2-2' }}
+                </td>
+                <td>
+                  <span class="status-pill" [ngClass]="poStatusClass(po.status)">
+                    {{ po.status }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Tab 2: Recent Supplier Payments -->
+        <div class="table-responsive flex-grow-1" *ngIf="activeLedgerTab() === 'payments'">
+          <table class="table table-striped align-middle mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Payment No.</th>
+                <th scope="col">Supplier &amp; PO</th>
+                <th scope="col">Method</th>
+                <th scope="col" class="text-end">Amount</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let pay of recentPayments">
+                <td>
+                  <span class="code-badge">{{ pay.paymentNumber }}</span>
+                </td>
+                <td>
+                  <div class="fw-semibold text-black">{{ pay.supplierName }}</div>
+                  <div class="sub-text text-muted">{{ pay.poNumber }} · {{ pay.paymentDate | date:'dd MMM yyyy' }}</div>
+                </td>
+                <td>
+                  <span class="category-chip">{{ pay.method }}</span>
+                </td>
+                <td class="text-end fw-bold text-black">
+                  {{ pay.amount | currency:'USD':'symbol':'1.2-2' }}
+                </td>
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.status-received]="pay.status === 'Completed'"
+                    [class.status-partial]="pay.status === 'Pending Clearing'">
+                    {{ pay.status }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Panel Footer -->
+        <div class="panel-card-footer d-flex align-items-center justify-content-between">
+          <span class="text-black-50 small">
+            Showing latest 5 {{ activeLedgerTab() === 'po' ? 'purchase orders' : 'supplier payments' }}
+          </span>
+          <a
+            [routerLink]="activeLedgerTab() === 'po' ? '/purchase-orders' : '/purchase-payments'"
+            class="footer-link">
+            View All {{ activeLedgerTab() === 'po' ? 'Purchase Orders' : 'Payments' }}
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Column (5 cols): Stock & Expiry Alerts + Catalog Distribution -->
+    <div class="col-12 col-xl-5 d-flex flex-column gap-3 grid-col">
+
+      <!-- Stock & Batch Expiry Alerts Card -->
+      <div class="panel-card shadow-sm flex-grow-1 d-flex flex-column">
+        <div class="panel-card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-exclamation-triangle-fill text-black-50"></i>
+            <h6 class="panel-title mb-0">Stock &amp; Expiry Watchlist</h6>
+          </div>
+
+          <div class="btn-group btn-group-sm" role="group" aria-label="Alert filter">
+            <button
+              *ngFor="let f of ['All', 'Material', 'Product']"
+              type="button"
+              class="btn btn-outline-dark btn-sm"
+              [class.active]="alertFilter() === f"
+              (click)="setAlertFilter($any(f))">
+              {{ f }}
+            </button>
+          </div>
+        </div>
+
+        <div class="alerts-list flex-grow-1">
+          <a
+            *ngFor="let alert of filteredAlerts()"
+            [routerLink]="alert.route"
+            class="alert-row text-decoration-none">
+            <div class="d-flex align-items-center gap-2 min-w-0">
+              <div class="avatar avatar-sm">
+                <i class="bi" [class.bi-boxes]="alert.type === 'Material'" [class.bi-box2-fill]="alert.type === 'Product'"></i>
+              </div>
+              <div class="min-w-0">
+                <div class="fw-semibold text-black text-truncate small">{{ alert.name }}</div>
+                <div class="sub-text text-muted">
+                  <span class="sku-tag">{{ alert.code }}</span> · {{ alert.category }}
+                </div>
+              </div>
+            </div>
+
+            <div class="text-end flex-shrink-0 ms-2">
+              <span class="alert-badge" [ngClass]="alertBadgeClass(alert.alertType)">
+                {{ alert.alertType }}
+              </span>
+              <div class="sub-text text-muted mt-1">
+                <ng-container *ngIf="alert.expiryInfo; else stockInfoTpl">
+                  {{ alert.expiryInfo }}
+                </ng-container>
+                <ng-template #stockInfoTpl>
+                  <strong class="text-black">{{ alert.currentStock }}</strong> / {{ alert.minStock }} {{ alert.unit }}
+                </ng-template>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="panel-card-footer d-flex align-items-center justify-content-between">
+          <span class="text-black-50 small">
+            {{ filteredAlerts().length }} items flagged for replenishment or lot review
+          </span>
+          <a routerLink="/materials" class="footer-link">
+            Manage Inventory
+          </a>
+        </div>
+      </div>
+
+      <!-- Recent Production Batches & Lot Status Card -->
+      <div class="panel-card shadow-sm">
+        <div class="panel-card-header d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-layers-fill text-black-50"></i>
+            <h6 class="panel-title mb-0">Recent Production Batches &amp; Lot Status</h6>
+          </div>
+          <a routerLink="/products" class="footer-link">
+            Batch Ledger
+          </a>
+        </div>
+
+        <div class="batch-list">
+          <a
+            *ngFor="let batch of recentBatches"
+            routerLink="/products"
+            class="alert-row text-decoration-none">
+            <div class="d-flex align-items-center gap-2 min-w-0">
+              <span class="code-badge flex-shrink-0">{{ batch.batchNumber }}</span>
+              <div class="min-w-0">
+                <div class="fw-semibold text-black text-truncate small">{{ batch.productName }}</div>
+                <div class="sub-text text-muted">
+                  <span class="sku-tag">{{ batch.sku }}</span> · Mfg {{ batch.mfgDate | date:'dd MMM yy' }} · Exp {{ batch.expiryDate | date:'dd MMM yy' }}
+                </div>
+              </div>
+            </div>
+
+            <div class="text-end flex-shrink-0 ms-2">
+              <span class="status-pill" [ngClass]="batchStatusClass(batch.status)">
+                {{ batch.status }}
+              </span>
+              <div class="sub-text text-muted mt-1">
+                <strong class="text-black">{{ batch.quantity }}</strong> {{ batch.unit }}
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

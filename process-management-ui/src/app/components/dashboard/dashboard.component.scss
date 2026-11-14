@@ -1,0 +1,328 @@
+@import 'variables';
+@import 'mixins';
+
+// ── Dashboard Shell (Fits Viewport Height Without Scrolling) ─────────────────
+.dashboard-page {
+  padding: 0.25rem 0;
+  overflow: hidden;
+}
+
+// ── Page Header ──────────────────────────────────────────────────────────────
+.page-header {
+  flex-shrink: 0;
+
+  .page-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: $dark-primary;
+  }
+
+  .page-subtitle {
+    font-size: 0.85rem;
+    color: $dark-muted;
+  }
+}
+
+// ── Avatar (Solid Black Circle with White Icon) ──────────────────────────────
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #000000;
+  color: #ffffff;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+
+  &.avatar-sm {
+    width: 30px;
+    height: 30px;
+    font-size: 0.82rem;
+  }
+}
+
+// ── 4-Card KPI Strip ─────────────────────────────────────────────────────────
+.kpi-row {
+  flex-shrink: 0;
+}
+
+.kpi-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0.95rem 1.15rem;
+  background-color: #ffffff;
+  border: 1px solid $border-light;
+  border-radius: 12px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    border-color: $dark-primary;
+    box-shadow: 0 4px 12px rgba(26, 31, 46, 0.08) !important;
+  }
+
+  .kpi-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $dark-muted;
+    margin-bottom: 0.2rem;
+  }
+
+  .kpi-value {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: $dark-primary;
+    line-height: 1.2;
+  }
+
+  .kpi-subtext {
+    font-size: 0.73rem;
+    font-weight: 500;
+    color: $dark-muted !important;
+  }
+}
+
+.trend-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.14rem 0.55rem;
+  border-radius: 20px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  white-space: nowrap;
+
+  &.trend-positive {
+    background-color: #dcfce7;
+    color: #15803d;
+  }
+
+  &.trend-warning {
+    background-color: #fef3c7;
+    color: #b45309;
+  }
+
+  &.trend-danger {
+    background-color: #fee2e2;
+    color: #dc2626;
+  }
+
+  &.trend-neutral {
+    background-color: $bg-surface-subtle;
+    color: $dark-secondary;
+    border: 1px solid $border-light;
+  }
+}
+
+// ── Main Grid & Panel Cards ──────────────────────────────────────────────────
+.dashboard-main-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+
+  .grid-col {
+    min-height: 0;
+  }
+}
+
+.panel-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  border: 1px solid $border-light;
+  overflow: hidden;
+
+  .panel-card-header {
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid $border-light;
+    background-color: #ffffff;
+
+    .panel-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: $dark-primary;
+    }
+
+    .btn-group .btn {
+      font-size: 0.74rem;
+      padding: 0.2rem 0.6rem;
+    }
+  }
+
+  .table-responsive {
+    background-color: $bg-surface-subtle;
+    overflow: hidden;
+    flex: 1 1 0;
+    min-height: 0;
+
+    .table {
+      --bs-table-bg: #ffffff;
+      --bs-table-striped-bg: rgba(0, 0, 0, 0.035);
+      font-size: 0.8rem;
+    }
+
+    thead tr th {
+      padding: 0.65rem 1rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: $dark-muted;
+      background-color: #ffffff;
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    tbody td {
+      padding: 0.5rem 1rem;
+      color: #000000;
+      white-space: nowrap;
+    }
+  }
+
+  .panel-card-footer {
+    padding: 0.6rem 1.25rem;
+    font-size: 0.76rem;
+    background-color: $bg-surface-subtle;
+    border-top: 1px solid $border-light;
+    margin-top: auto;
+  }
+
+  .footer-link {
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: $dark-primary;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// ── Badges & Chips ───────────────────────────────────────────────────────────
+.code-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: $dark-secondary;
+  background-color: $bg-surface-subtle;
+  border: 1px solid $border-light;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.category-chip {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: $dark-secondary;
+  background-color: $bg-surface-subtle;
+  border: 1px solid $border-light;
+  padding: 0.16rem 0.55rem;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.sub-text {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: $dark-muted !important;
+}
+
+.sku-tag {
+  font-weight: 600;
+  color: $dark-primary;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22em 0.65em;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+
+  &.status-received {
+    background-color: #dcfce7;
+    color: #15803d;
+  }
+
+  &.status-partial {
+    background-color: #fef3c7;
+    color: #b45309;
+  }
+
+  &.status-approved {
+    background-color: #e0f2fe;
+    color: #0369a1;
+  }
+
+  &.status-draft {
+    background-color: #f1f5f9;
+    color: #475569;
+  }
+}
+
+// ── Stock & Expiry Alerts Watchlist ──────────────────────────────────────────
+.alerts-list {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.alert-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1.25rem;
+  border-bottom: 1px solid $border-light;
+  transition: background-color 0.15s ease;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background-color: $bg-surface-subtle;
+  }
+}
+
+.alert-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.14rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.66rem;
+  font-weight: 600;
+  white-space: nowrap;
+
+  &.alert-out {
+    background-color: #fee2e2;
+    color: #dc2626;
+  }
+
+  &.alert-low {
+    background-color: #fef3c7;
+    color: #b45309;
+  }
+
+  &.alert-expiring {
+    background-color: #ffedd5;
+    color: #c2410c;
+  }
+}
+
+// ── Recent Production Batches List ───────────────────────────────────────────
+.batch-list {
+  display: flex;
+  flex-direction: column;
+}

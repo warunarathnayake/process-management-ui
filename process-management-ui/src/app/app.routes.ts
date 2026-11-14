@@ -16,8 +16,13 @@ export const routes: Routes = [
     children: [
       {
         path: 'app',
-        redirectTo: 'users',
+        redirectTo: 'dashboard',
         pathMatch: 'full'
+      },
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
       },
       {
         path: 'users',
@@ -131,7 +136,7 @@ export const routes: Routes = [
       },
       {
         path: '',
-        redirectTo: 'users',
+        redirectTo: 'dashboard',
         pathMatch: 'full'
       }
     ]
