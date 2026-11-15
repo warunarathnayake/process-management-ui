@@ -116,7 +116,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     {
       id: 'raw-materials',
       label: 'Raw Material Inventory',
-      value: '$48,920.00',
+      value: 'Rs. 48,920.00',
       subtext: '12 materials · 6 categories',
       trend: '3 need attention',
       trendType: 'warning',
@@ -126,7 +126,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     {
       id: 'open-pos',
       label: 'Active Purchase Orders',
-      value: '$18,907.50',
+      value: 'Rs. 18,907.50',
       subtext: '8 orders · 10 suppliers',
       trend: '4 awaiting delivery',
       trendType: 'neutral',
@@ -136,9 +136,9 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     {
       id: 'supplier-settlements',
       label: 'Supplier Payments Settled',
-      value: '$12,485.00',
+      value: 'Rs. 12,485.00',
       subtext: '8 settled · 2 clearing',
-      trend: '$6,422.50 due',
+      trend: 'Rs. 6,422.50 due',
       trendType: 'positive',
       icon: 'bi-credit-card-2-front-fill',
       route: '/purchase-payments'

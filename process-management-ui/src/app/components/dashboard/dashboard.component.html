@@ -80,7 +80,7 @@
                   <span class="text-black fw-medium">{{ po.expectedDate | date:'dd MMM yy' }}</span>
                 </td>
                 <td class="text-end fw-bold text-black">
-                  {{ po.totalAmount | currency:'USD':'symbol':'1.2-2' }}
+                  {{ po.totalAmount | currency:'Rs. ':'symbol':'1.2-2' }}
                 </td>
                 <td>
                   <span class="status-pill" [ngClass]="poStatusClass(po.status)">
@@ -115,7 +115,7 @@
                   <span class="category-chip">{{ pay.method }}</span>
                 </td>
                 <td class="text-end fw-bold text-black">
-                  {{ pay.amount | currency:'USD':'symbol':'1.2-2' }}
+                  {{ pay.amount | currency:'Rs. ':'symbol':'1.2-2' }}
                 </td>
                 <td>
                   <span

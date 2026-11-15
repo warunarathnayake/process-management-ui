@@ -499,13 +499,13 @@
           <!-- Pricing & Stock Section Separator -->
           <div class="col-12 pt-1">
             <h6 class="form-section-title mb-0">
-              <i class="bi bi-currency-dollar me-2"></i>Pricing &amp; Stock Levels
+              <i class="bi bi-cash-coin me-2"></i>Pricing &amp; Stock Levels
             </h6>
           </div>
 
           <!-- Selling Price -->
           <div class="col-md-3">
-            <label class="form-label form-label-sm">Selling Price ($)</label>
+            <label class="form-label form-label-sm">Selling Price (Rs.)</label>
             <div class="input-group input-group-sm">
               <span class="input-group-text"><i class="bi bi-tag"></i></span>
               <input
@@ -534,7 +534,7 @@
 
           <!-- Cost Price -->
           <div class="col-md-3">
-            <label class="form-label form-label-sm">Cost Price ($)</label>
+            <label class="form-label form-label-sm">Cost Price (Rs.)</label>
             <div class="input-group input-group-sm">
               <span class="input-group-text"><i class="bi bi-cash-stack"></i></span>
               <input
@@ -854,8 +854,8 @@
                     </span>
                   </div>
                 </td>
-                <td class="text-end fw-medium">{{ b.costPrice | currency:'USD':'symbol':'1.2-2' }}</td>
-                <td class="text-end fw-bold">{{ b.sellingPrice | currency:'USD':'symbol':'1.2-2' }}</td>
+                <td class="text-end fw-medium">{{ b.costPrice | currency:'Rs. ':'symbol':'1.2-2' }}</td>
+                <td class="text-end fw-bold">{{ b.sellingPrice | currency:'Rs. ':'symbol':'1.2-2' }}</td>
                 <td class="text-end fw-bold" [class.text-danger]="b.quantity === 0">
                   {{ b.quantity | number }} units
                 </td>
@@ -1118,7 +1118,7 @@
 
           <!-- Variant Unit Cost -->
           <div class="col-md-6">
-            <label class="form-label form-label-sm">Batch Unit Cost ($)</label>
+            <label class="form-label form-label-sm">Batch Unit Cost (Rs.)</label>
             <div class="input-group input-group-sm">
               <span class="input-group-text"><i class="bi bi-cash-stack"></i></span>
               <input
@@ -1147,7 +1147,7 @@
 
           <!-- Variant Selling Price -->
           <div class="col-md-6">
-            <label class="form-label form-label-sm">Batch Selling Price ($)</label>
+            <label class="form-label form-label-sm">Batch Selling Price (Rs.)</label>
             <div class="input-group input-group-sm">
               <span class="input-group-text"><i class="bi bi-tag"></i></span>
               <input

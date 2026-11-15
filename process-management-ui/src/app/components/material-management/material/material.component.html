@@ -123,7 +123,7 @@
 
             <!-- Weighted Average Cost (read-only) -->
             <td>
-              <span class="text-black fw-medium">{{ m.avgCost | currency:'USD':'symbol':'1.2-2' }}</span>
+              <span class="text-black fw-medium">{{ m.avgCost | currency:'Rs. ':'symbol':'1.2-2' }}</span>
               <span class="text-muted small ms-1">/ {{ unitShort(m.unit) }}</span>
             </td>
 
@@ -337,9 +337,9 @@
             </div>
 
             <div class="col-md-4">
-              <label class="form-label form-label-sm">Opening Unit Cost ($)</label>
+              <label class="form-label form-label-sm">Opening Unit Cost (Rs.)</label>
               <div class="input-group input-group-sm">
-                <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
+                <span class="input-group-text fw-semibold">Rs.</span>
                 <input
                   type="number"
                   class="form-control form-control-sm"
@@ -378,9 +378,9 @@
             </div>
 
             <div class="col-md-4">
-              <label class="form-label form-label-sm">Avg. Cost Per Unit ($)</label>
+              <label class="form-label form-label-sm">Avg. Cost Per Unit (Rs.)</label>
               <div class="input-group input-group-sm readonly-group" title="Weighted average, recalculated on each Goods Receipt">
-                <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
+                <span class="input-group-text fw-semibold">Rs.</span>
                 <input type="text" class="form-control form-control-sm" [value]="sel.avgCost | number:'1.2-2'" disabled />
                 <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
               </div>
@@ -688,11 +688,11 @@
             </div>
             <div>
               <div class="summary-label">Avg. Cost</div>
-              <div class="fw-bold text-black">{{ hm.avgCost | currency:'USD':'symbol':'1.2-2' }}</div>
+              <div class="fw-bold text-black">{{ hm.avgCost | currency:'Rs. ':'symbol':'1.2-2' }}</div>
             </div>
             <div>
               <div class="summary-label">Stock Value</div>
-              <div class="fw-bold text-black">{{ hm.currentStock * hm.avgCost | currency:'USD':'symbol':'1.2-2' }}</div>
+              <div class="fw-bold text-black">{{ hm.currentStock * hm.avgCost | currency:'Rs. ':'symbol':'1.2-2' }}</div>
             </div>
           </div>
         </div>
@@ -729,7 +729,7 @@
                   <td class="text-end fw-bold" [class.qty-in]="mv.quantity > 0" [class.qty-out]="mv.quantity < 0">
                     {{ mv.quantity > 0 ? '+' : '' }}{{ mv.quantity | number }}
                   </td>
-                  <td class="text-end">{{ mv.unitCost | currency:'USD':'symbol':'1.2-2' }}</td>
+                  <td class="text-end">{{ mv.unitCost | currency:'Rs. ':'symbol':'1.2-2' }}</td>
                   <td class="text-end fw-semibold">{{ mv.balanceAfter | number }}</td>
                   <td>
                     <ng-container *ngIf="mv.expiryDate as exp; else noExpiry">

@@ -532,7 +532,7 @@ export class PurchasePaymentComponent {
 
     const maxPayable = this.formMaxPayable();
     if (this.formData.status !== 'Voided' && amount > maxPayable + 0.001) {
-      alert(`Payment amount ($${amount.toFixed(2)}) exceeds the remaining PO balance ($${maxPayable.toFixed(2)}).`);
+      alert(`Payment amount (Rs. ${amount.toFixed(2)}) exceeds the remaining PO balance (Rs. ${maxPayable.toFixed(2)}).`);
       return;
     }
 

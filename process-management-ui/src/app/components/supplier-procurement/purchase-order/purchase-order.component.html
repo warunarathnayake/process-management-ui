@@ -109,7 +109,7 @@
 
             <!-- Total Amount -->
             <td>
-              <span class="fw-bold text-black">{{ orderTotal(po) | currency:'USD':'symbol':'1.2-2' }}</span>
+              <span class="fw-bold text-black">{{ orderTotal(po) | currency:'Rs. ':'symbol':'1.2-2' }}</span>
             </td>
 
             <!-- Status -->
@@ -339,7 +339,7 @@
                     <tr>
                       <th scope="col" style="width: 42%;">Raw Material</th>
                       <th scope="col" style="width: 22%;">Quantity</th>
-                      <th scope="col" style="width: 22%;">Unit Price ($)</th>
+                      <th scope="col" style="width: 22%;">Unit Price (Rs.)</th>
                       <th scope="col" class="text-end" style="width: 10%;">Line Total</th>
                       <th scope="col" class="text-center" style="width: 4%;"></th>
                     </tr>
@@ -388,7 +388,7 @@
                       <!-- Unit Price -->
                       <td>
                         <div class="input-group input-group-sm">
-                          <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
+                          <span class="input-group-text fw-semibold">Rs.</span>
                           <input
                             type="number"
                             class="form-control form-control-sm"
@@ -415,7 +415,7 @@
 
                       <!-- Line Total -->
                       <td class="text-end fw-semibold text-black">
-                        {{ (item.orderedQty || 0) * (item.unitPrice || 0) | currency:'USD':'symbol':'1.2-2' }}
+                        {{ (item.orderedQty || 0) * (item.unitPrice || 0) | currency:'Rs. ':'symbol':'1.2-2' }}
                       </td>
 
                       <!-- Remove -->
@@ -449,7 +449,7 @@
                 <div class="d-flex align-items-center gap-3">
                   <div>
                     <span class="text-muted small me-2">Order Total:</span>
-                    <span class="fw-bold text-black fs-6">{{ formTotal() | currency:'USD':'symbol':'1.2-2' }}</span>
+                    <span class="fw-bold text-black fs-6">{{ formTotal() | currency:'Rs. ':'symbol':'1.2-2' }}</span>
                   </div>
 
                   <nav aria-label="Order items pagination" *ngIf="itemsTotalPages() > 1">
@@ -607,7 +607,7 @@
                   <tr *ngFor="let rec of pagedReceiveItems(); let idx = index">
                     <td>
                       <div class="fw-medium text-black">{{ rec.materialName }}</div>
-                      <div class="sub-text text-muted">{{ rec.materialCode }} · {{ rec.unitPrice | currency:'USD':'symbol':'1.2-2' }} / {{ rec.unit }}</div>
+                      <div class="sub-text text-muted">{{ rec.materialCode }} · {{ rec.unitPrice | currency:'Rs. ':'symbol':'1.2-2' }} / {{ rec.unit }}</div>
                     </td>
                     <td class="text-end fw-medium">{{ rec.orderedQty | number }} {{ rec.unit }}</td>
                     <td class="text-end">{{ rec.alreadyReceived | number }} {{ rec.unit }}</td>
@@ -778,8 +778,8 @@
                     <td class="text-end">{{ item.orderedQty | number }} {{ item.unit }}</td>
                     <td class="text-end fw-semibold">{{ item.receivedQty | number }} {{ item.unit }}</td>
                     <td class="text-end">{{ (item.orderedQty - item.receivedQty) | number }} {{ item.unit }}</td>
-                    <td class="text-end">{{ item.unitPrice | currency:'USD':'symbol':'1.2-2' }}</td>
-                    <td class="text-end fw-bold">{{ item.orderedQty * item.unitPrice | currency:'USD':'symbol':'1.2-2' }}</td>
+                    <td class="text-end">{{ item.unitPrice | currency:'Rs. ':'symbol':'1.2-2' }}</td>
+                    <td class="text-end fw-bold">{{ item.orderedQty * item.unitPrice | currency:'Rs. ':'symbol':'1.2-2' }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -792,7 +792,7 @@
               <div class="d-flex align-items-center gap-3">
                 <div>
                   <span class="text-muted small me-2">Total Amount:</span>
-                  <span class="fw-bold text-black fs-6">{{ orderTotal(vpo) | currency:'USD':'symbol':'1.2-2' }}</span>
+                  <span class="fw-bold text-black fs-6">{{ orderTotal(vpo) | currency:'Rs. ':'symbol':'1.2-2' }}</span>
                 </div>
                 <nav aria-label="Ordered items pagination" *ngIf="viewItemsTotalPages() > 1">
                   <ul class="pagination pagination-sm pagination-outline-dark mb-0">

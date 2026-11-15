@@ -605,29 +605,29 @@ export class ProductComponent {
   priceDisplay(product: Product): string {
     const batches = (product.batches || []).filter(b => b.quantity > 0 && b.status !== 'Expired');
     if (batches.length <= 1) {
-      return `$${product.sellingPrice.toFixed(2)}`;
+      return `Rs. ${product.sellingPrice.toFixed(2)}`;
     }
     const prices = batches.map(b => b.sellingPrice);
     const min = Math.min(...prices);
     const max = Math.max(...prices);
     if (min === max) {
-      return `$${min.toFixed(2)}`;
+      return `Rs. ${min.toFixed(2)}`;
     }
-    return `$${min.toFixed(2)} – $${max.toFixed(2)}`;
+    return `Rs. ${min.toFixed(2)} – Rs. ${max.toFixed(2)}`;
   }
 
   costDisplay(product: Product): string {
     const batches = (product.batches || []).filter(b => b.quantity > 0 && b.status !== 'Expired');
     if (batches.length <= 1) {
-      return `$${product.costPrice.toFixed(2)}`;
+      return `Rs. ${product.costPrice.toFixed(2)}`;
     }
     const costs = batches.map(b => b.costPrice);
     const min = Math.min(...costs);
     const max = Math.max(...costs);
     if (min === max) {
-      return `$${min.toFixed(2)}`;
+      return `Rs. ${min.toFixed(2)}`;
     }
-    return `$${min.toFixed(2)} – $${max.toFixed(2)}`;
+    return `Rs. ${min.toFixed(2)} – Rs. ${max.toFixed(2)}`;
   }
 
   calculateMargin(selling: number, cost: number): number {
