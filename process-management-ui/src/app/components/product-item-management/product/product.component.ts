@@ -465,6 +465,42 @@ export class ProductComponent {
     Math.min(this.currentPage() * this.pageSize(), this.filteredProducts().length)
   );
 
+  // ── Batch Ledger Modal Inline Pager (3 rows per page) ─────────────────────
+  readonly batchPageSize = 3;
+  batchPage = signal(1);
+
+  allProductBatches = computed<ProductBatch[]>(() => this.viewingProduct()?.batches ?? []);
+
+  batchTotalPages = computed(() =>
+    Math.max(1, Math.ceil(this.allProductBatches().length / this.batchPageSize))
+  );
+
+  pagedProductBatches = computed<ProductBatch[]>(() => {
+    const p = Math.min(this.batchPage(), this.batchTotalPages());
+    const start = (p - 1) * this.batchPageSize;
+    return this.allProductBatches().slice(start, start + this.batchPageSize);
+  });
+
+  batchShowingFrom = computed(() => {
+    const total = this.allProductBatches().length;
+    if (total === 0) return 0;
+    const p = Math.min(this.batchPage(), this.batchTotalPages());
+    return (p - 1) * this.batchPageSize + 1;
+  });
+
+  batchShowingTo = computed(() => {
+    const total = this.allProductBatches().length;
+    if (total === 0) return 0;
+    const p = Math.min(this.batchPage(), this.batchTotalPages());
+    return Math.min(p * this.batchPageSize, total);
+  });
+
+  goToBatchPage(page: number): void {
+    if (page >= 1 && page <= this.batchTotalPages()) {
+      this.batchPage.set(page);
+    }
+  }
+
   // ── Helpers ────────────────────────────────────────────────────────────────
   private round2(v: number): number {
     return Math.round(v * 100) / 100;
@@ -1033,6 +1069,7 @@ export class ProductComponent {
   // ── View Product Details Modal ─────────────────────────────────────────────
   openViewModal(product: Product): void {
     this.viewingProduct.set(product);
+    this.batchPage.set(1);
     this.showViewModal.set(true);
   }
 
@@ -1125,6 +1162,7 @@ export class ProductComponent {
     if (this.viewingProduct()?.id === prod.id) {
       const updated = this.products().find(p => p.id === prod.id) || null;
       this.viewingProduct.set(updated);
+      this.batchPage.set(this.batchTotalPages());
     }
 
     this.closeBatchModal();

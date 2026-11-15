@@ -719,11 +719,11 @@
 
 <!-- View Product Details & Batches Modal -->
 <div class="modal fade show d-block" data-bs-theme="light" tabindex="-1" *ngIf="showViewModal() && viewingProduct() as vp" (click)="closeViewModal()" aria-modal="true" role="dialog">
-  <div class="modal-dialog modal-dialog-centered modal-xl" (click)="$event.stopPropagation()">
+  <div class="modal-dialog modal-dialog-centered modal-xl product-view-dialog" (click)="$event.stopPropagation()">
     <div class="modal-content shadow border-0">
 
       <!-- Modal Header -->
-      <div class="modal-header border-0 pt-4 px-4 pb-0 d-block">
+      <div class="modal-header border-0 pt-3 px-4 pb-0 d-block">
         <h5 class="modal-title fs-5 fw-bold mb-1">
           <i class="bi bi-box2-fill me-2 text-black-50"></i>
           Product Specifications &amp; Batch Ledger
@@ -734,9 +734,9 @@
       </div>
 
       <!-- Modal Body -->
-      <div class="modal-body px-4 py-3">
+      <div class="modal-body px-4 py-2">
         <!-- Hero Box -->
-        <div class="product-summary-box p-3 rounded-3 mb-3 d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div class="product-summary-box p-2 px-3 rounded-3 mb-2 d-flex align-items-center justify-content-between flex-wrap gap-3 flex-shrink-0">
           <div class="d-flex align-items-center gap-2">
             <div class="avatar">
               <i class="bi bi-box-seam"></i>
@@ -764,10 +764,10 @@
         </div>
 
         <!-- 4-Card Financials & Inventory Metric Strip -->
-        <div class="row g-2 mb-3">
+        <div class="row g-2 mb-2 flex-shrink-0">
           <!-- Selling Price (shows range if variant across batches) -->
           <div class="col-sm-6 col-md-3">
-            <div class="metric-card p-3 rounded-3 h-100">
+            <div class="metric-card p-2 px-3 rounded-3 h-100">
               <div class="metric-label text-muted small">Selling Price</div>
               <div class="fw-bold text-black fs-5">{{ priceDisplay(vp) }}</div>
               <div class="sub-text text-muted">Catalog / Variant Price</div>
@@ -776,7 +776,7 @@
 
           <!-- Unit Cost (shows range if variant across batches) -->
           <div class="col-sm-6 col-md-3">
-            <div class="metric-card p-3 rounded-3 h-100">
+            <div class="metric-card p-2 px-3 rounded-3 h-100">
               <div class="metric-label text-muted small">Unit Cost</div>
               <div class="fw-bold text-black fs-5">{{ costDisplay(vp) }}</div>
               <div class="sub-text text-muted">Batch Production Cost</div>
@@ -785,7 +785,7 @@
 
           <!-- Nearest Expiry Date -->
           <div class="col-sm-6 col-md-3">
-            <div class="metric-card p-3 rounded-3 h-100">
+            <div class="metric-card p-2 px-3 rounded-3 h-100">
               <div class="metric-label text-muted small">Nearest Expiry</div>
               <div class="fw-bold text-black fs-5">
                 {{ nearestExpiryDate(vp) ? (nearestExpiryDate(vp) | date:'dd MMM yyyy') : '—' }}
@@ -806,7 +806,7 @@
 
           <!-- Total Stock -->
           <div class="col-sm-6 col-md-3">
-            <div class="metric-card p-3 rounded-3 h-100">
+            <div class="metric-card p-2 px-3 rounded-3 h-100">
               <div class="metric-label text-muted small">Total Finished Stock</div>
               <div class="fw-bold text-black fs-5">{{ vp.currentStock | number }} <span class="fs-6 fw-normal text-muted">units</span></div>
               <div class="sub-text text-muted">Across {{ (vp.batches || []).length }} batch(es)</div>
@@ -815,68 +815,95 @@
         </div>
 
         <!-- Batches & Expiry Ledger Table -->
-        <div class="d-flex align-items-center justify-content-between mb-2">
+        <div class="d-flex align-items-center justify-content-between mb-1 flex-shrink-0">
           <h6 class="form-section-title mb-0">
             <i class="bi bi-layers me-2"></i>Product Batches &amp; Expiry Ledger
           </h6>
-          <button type="button" class="btn btn-outline-dark btn-sm py-1 px-2" style="font-size: 0.75rem;" (click)="openAddBatchModal(vp)">
-            <i class="bi bi-plus-circle me-1"></i> Add Batch
-          </button>
+          <div class="d-flex align-items-center gap-2">
+            <div class="batch-inline-pager d-flex align-items-center gap-2" *ngIf="batchTotalPages() > 1">
+              <span class="text-muted small">
+                <strong class="text-black">{{ batchShowingFrom() }}–{{ batchShowingTo() }}</strong> of <strong class="text-black">{{ allProductBatches().length }}</strong>
+              </span>
+              <div class="btn-group btn-group-sm" role="group" aria-label="Batch ledger page navigation">
+                <button
+                  type="button"
+                  class="btn btn-outline-dark pager-arrow-btn"
+                  [disabled]="batchPage() === 1"
+                  (click)="goToBatchPage(batchPage() - 1)"
+                  title="Previous batches">
+                  <i class="bi bi-chevron-left"></i>
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline-dark pager-arrow-btn"
+                  [disabled]="batchPage() === batchTotalPages()"
+                  (click)="goToBatchPage(batchPage() + 1)"
+                  title="Next batches">
+                  <i class="bi bi-chevron-right"></i>
+                </button>
+              </div>
+            </div>
+            <button type="button" class="btn btn-outline-dark btn-sm py-1 px-2" style="font-size: 0.75rem;" (click)="openAddBatchModal(vp)">
+              <i class="bi bi-plus-circle me-1"></i> Add Batch
+            </button>
+          </div>
         </div>
 
-        <div class="batches-table-wrap mb-3" data-bs-theme="light">
-          <table class="table table-striped align-middle mb-0">
-            <thead>
-              <tr>
-                <th scope="col">Batch No.</th>
-                <th scope="col">Mfg Date</th>
-                <th scope="col">Expiry Date</th>
-                <th scope="col" class="text-end">Unit Cost</th>
-                <th scope="col" class="text-end">Selling Price</th>
-                <th scope="col" class="text-end">Quantity</th>
-                <th scope="col">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let b of vp.batches">
-                <td>
-                  <span class="code-badge">{{ b.batchNumber }}</span>
-                </td>
-                <td>{{ b.mfgDate | date:'dd MMM yyyy' }}</td>
-                <td>
-                  <div class="d-flex align-items-center gap-1">
-                    <span class="fw-medium">{{ b.expiryDate | date:'dd MMM yyyy' }}</span>
-                    <span class="expiry-badge expiry-expired ms-1" *ngIf="expiryStatus(b.expiryDate) === 'expired'">
-                      <i class="bi bi-exclamation-octagon-fill"></i> Expired
+        <div class="batches-table-wrap mb-2" data-bs-theme="light">
+          <div class="batches-table-body">
+            <table class="table table-striped align-middle mb-0">
+              <thead>
+                <tr>
+                  <th scope="col">Batch No.</th>
+                  <th scope="col">Mfg Date</th>
+                  <th scope="col">Expiry Date</th>
+                  <th scope="col" class="text-end">Unit Cost</th>
+                  <th scope="col" class="text-end">Selling Price</th>
+                  <th scope="col" class="text-end">Quantity</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let b of pagedProductBatches()">
+                  <td>
+                    <span class="code-badge">{{ b.batchNumber }}</span>
+                  </td>
+                  <td>{{ b.mfgDate | date:'dd MMM yyyy' }}</td>
+                  <td>
+                    <div class="d-flex align-items-center gap-1">
+                      <span class="fw-medium">{{ b.expiryDate | date:'dd MMM yyyy' }}</span>
+                      <span class="expiry-badge expiry-expired ms-1" *ngIf="expiryStatus(b.expiryDate) === 'expired'">
+                        <i class="bi bi-exclamation-octagon-fill"></i> Expired
+                      </span>
+                      <span class="expiry-badge expiry-soon ms-1" *ngIf="expiryStatus(b.expiryDate) === 'soon'">
+                        <i class="bi bi-hourglass-split"></i> {{ daysToExpiry(b.expiryDate) }}d
+                      </span>
+                    </div>
+                  </td>
+                  <td class="text-end fw-medium">{{ b.costPrice | currency:'Rs. ':'symbol':'1.2-2' }}</td>
+                  <td class="text-end fw-bold">{{ b.sellingPrice | currency:'Rs. ':'symbol':'1.2-2' }}</td>
+                  <td class="text-end fw-bold" [class.text-danger]="b.quantity === 0">
+                    {{ b.quantity | number }} units
+                  </td>
+                  <td>
+                    <span class="batch-status-badge" [ngClass]="'batch-' + (b.status ? b.status.toLowerCase() : 'active')">
+                      {{ b.status }}
                     </span>
-                    <span class="expiry-badge expiry-soon ms-1" *ngIf="expiryStatus(b.expiryDate) === 'soon'">
-                      <i class="bi bi-hourglass-split"></i> {{ daysToExpiry(b.expiryDate) }}d
-                    </span>
-                  </div>
-                </td>
-                <td class="text-end fw-medium">{{ b.costPrice | currency:'Rs. ':'symbol':'1.2-2' }}</td>
-                <td class="text-end fw-bold">{{ b.sellingPrice | currency:'Rs. ':'symbol':'1.2-2' }}</td>
-                <td class="text-end fw-bold" [class.text-danger]="b.quantity === 0">
-                  {{ b.quantity | number }} units
-                </td>
-                <td>
-                  <span class="batch-status-badge" [ngClass]="'batch-' + (b.status ? b.status.toLowerCase() : 'active')">
-                    {{ b.status }}
-                  </span>
-                </td>
-              </tr>
-              <tr *ngIf="!vp.batches || vp.batches.length === 0">
-                <td colspan="7" class="text-center py-3 text-muted">
-                  No production batches recorded yet for this product.
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                  </td>
+                </tr>
+                <tr *ngIf="allProductBatches().length === 0" class="empty-row">
+                  <td colspan="7" class="text-center py-3 text-muted">
+                    No production batches recorded yet for this product.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <!-- Detailed Specifications Grid -->
-        <div class="specs-grid p-3 rounded-3 mb-3">
-          <div class="row g-3">
+        <div class="specs-grid p-2 px-3 rounded-3 mb-2 flex-shrink-0">
+          <div class="row g-2">
             <div class="col-sm-6 col-md-3">
               <div class="text-muted small fw-medium">Barcode / UPC</div>
               <div class="text-black fw-semibold">{{ vp.barcode || '—' }}</div>
@@ -897,7 +924,7 @@
         </div>
 
         <!-- Description / Formulation Notes -->
-        <div class="p-3 rounded-3 description-box" *ngIf="vp.description">
+        <div class="p-2 px-3 rounded-3 description-box flex-shrink-0" *ngIf="vp.description">
           <div class="fw-semibold text-black small mb-1">
             <i class="bi bi-card-text me-1 text-muted"></i> Product Description &amp; Specifications
           </div>
@@ -906,7 +933,7 @@
       </div>
 
       <!-- Modal Footer -->
-      <div class="modal-footer border-0 px-4 pb-4 pt-2 gap-2">
+      <div class="modal-footer border-0 px-4 pb-3 pt-2 gap-2">
         <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeViewModal()">
           <i class="bi bi-x-circle"></i> Close
         </button>

@@ -326,6 +326,36 @@
     &.batch-form-dialog {
       max-width: 640px;
     }
+
+    &.product-view-dialog {
+      max-width: 1040px;
+      max-height: calc(100vh - 1.5rem);
+      margin-top: 0.75rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      flex-direction: column;
+
+      .modal-content {
+        display: flex;
+        flex-direction: column;
+        max-height: calc(100vh - 1.5rem);
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      .modal-header,
+      .modal-footer {
+        flex-shrink: 0;
+      }
+
+      .modal-body {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+      }
+    }
   }
 }
 
@@ -353,11 +383,35 @@
     color: $dark-primary;
   }
 
+  .batch-inline-pager {
+    font-size: 0.74rem;
+
+    .pager-arrow-btn {
+      padding: 0.1rem 0.42rem;
+      font-size: 0.72rem;
+      line-height: 1.2;
+
+      &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+    }
+  }
+
   .batches-table-wrap {
     background: #ffffff;
     border: 1px solid $border-light;
     border-radius: 12px;
     overflow: hidden;
+    flex-shrink: 0;
+
+    .batches-table-body {
+      background-color: #ffffff;
+
+      tbody tr:not(.empty-row) {
+        height: 42px;
+      }
+    }
 
     .table {
       --bs-table-bg: #ffffff;
@@ -382,8 +436,12 @@
     tbody td {
       color: #000;
       white-space: nowrap;
-      padding: 0.4rem 0.75rem;
+      padding: 0.3rem 0.75rem;
       vertical-align: middle;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: 0;
     }
   }
 
