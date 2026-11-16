@@ -197,10 +197,20 @@
 
       <!-- Modal Header -->
       <div class="modal-header border-0 pt-4 px-4 pb-0 d-block">
-        <h5 class="modal-title fs-5 fw-bold mb-1">
-          <i class="bi bi-tag-fill me-2 text-black-50"></i>
-          {{ isEditMode() ? 'Edit Product Category' : 'Add New Product Category' }}
-        </h5>
+        <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
+          <h5 class="modal-title fs-5 fw-bold mb-0">
+            <i class="bi bi-tag-fill me-2 text-black-50"></i>
+            {{ isEditMode() ? 'Edit Product Category' : 'Add New Product Category' }}
+          </h5>
+          <button
+            type="button"
+            class="modal-close-btn"
+            (click)="closeModal()"
+            aria-label="Close"
+            title="Close">
+            <i class="bi bi-x-circle"></i>
+          </button>
+        </div>
         <p class="modal-subtitle mb-0">
           {{ isEditMode() ? 'Update product category details and classifications.' : 'Enter category details for organizing finished products in the sales catalog.' }}
         </p>
@@ -288,9 +298,6 @@
 
       <!-- Modal Footer -->
       <div class="modal-footer border-0 px-4 pb-4 pt-0 gap-2">
-        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeModal()">
-          <i class="bi bi-x-circle"></i> Cancel
-        </button>
         <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="resetForm()">
           <i class="bi bi-arrow-counterclockwise"></i> Reset
         </button>

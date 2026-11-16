@@ -253,10 +253,20 @@
 
       <!-- Modal Header -->
       <div class="modal-header border-0 pt-3 px-4 pb-0 d-block">
-        <h5 class="modal-title fs-5 fw-bold mb-1">
-          <i class="bi bi-box2-fill me-2 text-black-50"></i>
-          {{ isEditMode() ? 'Edit Product' : 'Add New Product' }}
-        </h5>
+        <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
+          <h5 class="modal-title fs-5 fw-bold mb-0">
+            <i class="bi bi-box2-fill me-2 text-black-50"></i>
+            {{ isEditMode() ? 'Edit Product' : 'Add New Product' }}
+          </h5>
+          <button
+            type="button"
+            class="modal-close-btn"
+            (click)="closeModal()"
+            aria-label="Close"
+            title="Close">
+            <i class="bi bi-x-circle"></i>
+          </button>
+        </div>
         <p class="modal-subtitle mb-0">
           {{ isEditMode() ? 'Update catalog specifications, batch details, pricing, and stock settings.' : 'Enter product information, initial batch details, and pricing to register in the catalog.' }}
         </p>
@@ -701,9 +711,6 @@
 
       <!-- Modal Footer -->
       <div class="modal-footer border-0 px-4 pb-3 pt-1 gap-2">
-        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeModal()">
-          <i class="bi bi-x-circle"></i> Cancel
-        </button>
         <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="resetForm()">
           <i class="bi bi-arrow-counterclockwise"></i> Reset
         </button>
@@ -724,10 +731,20 @@
 
       <!-- Modal Header -->
       <div class="modal-header border-0 pt-3 px-4 pb-0 d-block">
-        <h5 class="modal-title fs-5 fw-bold mb-1">
-          <i class="bi bi-box2-fill me-2 text-black-50"></i>
-          Product Specifications &amp; Batch Ledger
-        </h5>
+        <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
+          <h5 class="modal-title fs-5 fw-bold mb-0">
+            <i class="bi bi-box2-fill me-2 text-black-50"></i>
+            Product Specifications &amp; Batch Ledger
+          </h5>
+          <button
+            type="button"
+            class="modal-close-btn"
+            (click)="closeViewModal()"
+            aria-label="Close"
+            title="Close">
+            <i class="bi bi-x-circle"></i>
+          </button>
+        </div>
         <p class="modal-subtitle mb-0">
           Complete catalog overview, production batches, expiry dates, and variant pricing.
         </p>
@@ -934,9 +951,6 @@
 
       <!-- Modal Footer -->
       <div class="modal-footer border-0 px-4 pb-3 pt-2 gap-2">
-        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeViewModal()">
-          <i class="bi bi-x-circle"></i> Close
-        </button>
         <button type="button" class="btn btn-outline-dark btn-sm modal-btn modal-btn-wide" (click)="openAddBatchModal(vp)">
           <i class="bi bi-plus-circle"></i> Add Batch
         </button>
@@ -957,10 +971,20 @@
 
       <!-- Modal Header -->
       <div class="modal-header border-0 pt-4 px-4 pb-0 d-block">
-        <h5 class="modal-title fs-5 fw-bold mb-1">
-          <i class="bi bi-plus-circle-fill me-2 text-black-50"></i>
-          Add Production Batch
-        </h5>
+        <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
+          <h5 class="modal-title fs-5 fw-bold mb-0">
+            <i class="bi bi-plus-circle-fill me-2 text-black-50"></i>
+            Add Production Batch
+          </h5>
+          <button
+            type="button"
+            class="modal-close-btn"
+            (click)="closeBatchModal()"
+            aria-label="Close"
+            title="Close">
+            <i class="bi bi-x-circle"></i>
+          </button>
+        </div>
         <p class="modal-subtitle mb-0">
           Record a new batch with variant selling price, cost, and expiry date for {{ bp.name }} ({{ bp.sku }}).
         </p>
@@ -1205,9 +1229,6 @@
 
       <!-- Modal Footer -->
       <div class="modal-footer border-0 px-4 pb-4 pt-2 gap-2">
-        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeBatchModal()">
-          <i class="bi bi-x-circle"></i> Cancel
-        </button>
         <button type="button" class="btn btn-outline-dark btn-sm modal-btn modal-btn-wide" (click)="saveNewBatch()">
           <i class="bi bi-check-circle"></i> Save Batch
         </button>

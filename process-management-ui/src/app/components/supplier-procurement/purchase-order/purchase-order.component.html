@@ -223,10 +223,20 @@
 
       <!-- Modal Header -->
       <div class="modal-header border-0 pt-3 px-4 pb-0 d-block flex-shrink-0">
-        <h5 class="modal-title fs-5 fw-bold mb-1">
-          <i class="bi bi-cart-plus-fill me-2 text-black-50"></i>
-          {{ isEditMode() ? 'Edit Purchase Order' : 'Create Purchase Order' }}
-        </h5>
+        <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
+          <h5 class="modal-title fs-5 fw-bold mb-0">
+            <i class="bi bi-cart-plus-fill me-2 text-black-50"></i>
+            {{ isEditMode() ? 'Edit Purchase Order' : 'Create Purchase Order' }}
+          </h5>
+          <button
+            type="button"
+            class="modal-close-btn"
+            (click)="closeModal()"
+            aria-label="Close"
+            title="Close">
+            <i class="bi bi-x-circle"></i>
+          </button>
+        </div>
         <p class="modal-subtitle mb-0">
           {{ isEditMode() ? 'Update purchase order details, supplier terms, and ordered raw materials.' : 'Select a supplier and add raw materials, quantities, and unit prices.' }}
         </p>
@@ -537,9 +547,6 @@
 
       <!-- Modal Footer -->
       <div class="modal-footer border-0 px-4 pb-3 pt-2 gap-2 flex-shrink-0">
-        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeModal()">
-          <i class="bi bi-x-circle"></i> Cancel
-        </button>
         <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="resetForm()">
           <i class="bi bi-arrow-counterclockwise"></i> Reset
         </button>
@@ -560,10 +567,20 @@
 
       <!-- Modal Header -->
       <div class="modal-header border-0 pt-3 px-4 pb-0 d-block flex-shrink-0">
-        <h5 class="modal-title fs-5 fw-bold mb-1">
-          <i class="bi bi-house-add-fill me-2 text-black-50"></i>
-          Receive Stock (Goods Receipt)
-        </h5>
+        <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
+          <h5 class="modal-title fs-5 fw-bold mb-0">
+            <i class="bi bi-house-add-fill me-2 text-black-50"></i>
+            Receive Stock (Goods Receipt)
+          </h5>
+          <button
+            type="button"
+            class="modal-close-btn"
+            (click)="closeReceiveModal()"
+            aria-label="Close"
+            title="Close">
+            <i class="bi bi-x-circle"></i>
+          </button>
+        </div>
         <p class="modal-subtitle mb-0">
           Record delivered quantities and lot expiry dates against purchase order {{ rpo.poNumber }}.
         </p>
@@ -694,9 +711,6 @@
 
       <!-- Modal Footer -->
       <div class="modal-footer border-0 px-4 pb-3 pt-2 gap-2 flex-shrink-0">
-        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeReceiveModal()">
-          <i class="bi bi-x-circle"></i> Cancel
-        </button>
         <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="resetReceiveForm()">
           <i class="bi bi-arrow-counterclockwise"></i> Reset
         </button>
@@ -717,17 +731,27 @@
 
       <!-- Modal Header -->
       <div class="modal-header border-0 pt-3 px-4 pb-0 d-block flex-shrink-0">
-        <h5 class="modal-title fs-5 fw-bold mb-1">
-          <i class="bi bi-file-earmark-text-fill me-2 text-black-50"></i>
-          Purchase Order Details
-        </h5>
+        <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
+          <h5 class="modal-title fs-5 fw-bold mb-0">
+            <i class="bi bi-file-earmark-text-fill me-2 text-black-50"></i>
+            Purchase Order Details
+          </h5>
+          <button
+            type="button"
+            class="modal-close-btn"
+            (click)="closeViewModal()"
+            aria-label="Close"
+            title="Close">
+            <i class="bi bi-x-circle"></i>
+          </button>
+        </div>
         <p class="modal-subtitle mb-0">
           Summary of ordered items, delivery progress, and cost breakdown.
         </p>
       </div>
 
       <!-- Modal Body -->
-      <div class="modal-body px-4 py-2 po-form-modal-body">
+      <div class="modal-body px-4 py-2 po-form-modal-body" [class.pb-3]="!canReceive(vpo)">
         <!-- PO Summary Box -->
         <div class="po-summary-box p-3 rounded-3 mb-2 d-flex align-items-center justify-content-between flex-wrap gap-3 flex-shrink-0">
           <div class="d-flex align-items-center gap-2">
@@ -910,12 +934,8 @@
       </div>
 
       <!-- Modal Footer -->
-      <div class="modal-footer border-0 px-4 pb-3 pt-2 gap-2 flex-shrink-0">
-        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeViewModal()">
-          <i class="bi bi-x-circle"></i> Close
-        </button>
+      <div class="modal-footer border-0 px-4 pb-3 pt-2 gap-2 flex-shrink-0" *ngIf="canReceive(vpo)">
         <button
-          *ngIf="canReceive(vpo)"
           type="button"
           class="btn btn-outline-dark btn-sm modal-btn modal-btn-wide"
           (click)="receiveFromView()">

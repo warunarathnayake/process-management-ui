@@ -243,10 +243,20 @@
 
       <!-- Modal Header -->
       <div class="modal-header border-0 pt-4 px-4 pb-0 d-block">
-        <h5 class="modal-title fs-5 fw-bold mb-1">
-          <i class="bi bi-box-seam-fill me-2 text-black-50"></i>
-          {{ isEditMode() ? 'Edit Material & Stock' : 'Add New Raw Material' }}
-        </h5>
+        <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
+          <h5 class="modal-title fs-5 fw-bold mb-0">
+            <i class="bi bi-box-seam-fill me-2 text-black-50"></i>
+            {{ isEditMode() ? 'Edit Material & Stock' : 'Add New Raw Material' }}
+          </h5>
+          <button
+            type="button"
+            class="modal-close-btn"
+            (click)="closeModal()"
+            aria-label="Close"
+            title="Close">
+            <i class="bi bi-x-circle"></i>
+          </button>
+        </div>
         <p class="modal-subtitle mb-0">
           {{ isEditMode() ? 'Update raw material specifications and reorder parameters.' : 'Enter raw material specifications, opening stock, and reorder parameters.' }}
         </p>
@@ -478,9 +488,6 @@
 
       <!-- Modal Footer -->
       <div class="modal-footer border-0 px-4 pb-4 pt-2 gap-2">
-        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeModal()">
-          <i class="bi bi-x-circle"></i> Cancel
-        </button>
         <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="resetForm()">
           <i class="bi bi-arrow-counterclockwise"></i> Reset
         </button>
@@ -501,10 +508,20 @@
 
       <!-- Modal Header -->
       <div class="modal-header border-0 pt-4 px-4 pb-0 d-block">
-        <h5 class="modal-title fs-5 fw-bold mb-1">
-          <i class="bi bi-sliders me-2 text-black-50"></i>
-          Stock Adjustment
-        </h5>
+        <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
+          <h5 class="modal-title fs-5 fw-bold mb-0">
+            <i class="bi bi-sliders me-2 text-black-50"></i>
+            Stock Adjustment
+          </h5>
+          <button
+            type="button"
+            class="modal-close-btn"
+            (click)="closeAdjustmentModal()"
+            aria-label="Close"
+            title="Close">
+            <i class="bi bi-x-circle"></i>
+          </button>
+        </div>
         <p class="modal-subtitle mb-0">
           Correct stock for count differences, damage, expiry, or other non-purchase changes.
         </p>
@@ -634,9 +651,6 @@
 
       <!-- Modal Footer -->
       <div class="modal-footer border-0 px-4 pb-4 pt-2 gap-2">
-        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeAdjustmentModal()">
-          <i class="bi bi-x-circle"></i> Cancel
-        </button>
         <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="resetAdjustmentForm()">
           <i class="bi bi-arrow-counterclockwise"></i> Reset
         </button>
@@ -657,10 +671,20 @@
 
       <!-- Modal Header -->
       <div class="modal-header border-0 pt-4 px-4 pb-0 d-block">
-        <h5 class="modal-title fs-5 fw-bold mb-1">
-          <i class="bi bi-clock-history me-2 text-black-50"></i>
-          Stock History
-        </h5>
+        <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
+          <h5 class="modal-title fs-5 fw-bold mb-0">
+            <i class="bi bi-clock-history me-2 text-black-50"></i>
+            Stock History
+          </h5>
+          <button
+            type="button"
+            class="modal-close-btn"
+            (click)="closeHistoryModal()"
+            aria-label="Close"
+            title="Close">
+            <i class="bi bi-x-circle"></i>
+          </button>
+        </div>
         <p class="modal-subtitle mb-0">
           Complete audit trail of every stock movement for this material.
         </p>
@@ -798,9 +822,6 @@
 
       <!-- Modal Footer -->
       <div class="modal-footer border-0 px-4 pb-4 pt-2 gap-2">
-        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeHistoryModal()">
-          <i class="bi bi-x-circle"></i> Close
-        </button>
         <button type="button" class="btn btn-outline-dark btn-sm modal-btn modal-btn-wide" (click)="adjustFromHistory()">
           <i class="bi bi-sliders"></i> Adjust Stock
         </button>

@@ -248,10 +248,20 @@
 
       <!-- Modal Header -->
       <div class="modal-header border-0 pt-4 px-4 pb-0 d-block">
-        <h5 class="modal-title fs-5 fw-bold mb-1">
-          <i class="bi bi-credit-card-2-front-fill me-2 text-black-50"></i>
-          {{ isEditMode() ? 'Edit Purchase Payment' : 'Record Purchase Payment' }}
-        </h5>
+        <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
+          <h5 class="modal-title fs-5 fw-bold mb-0">
+            <i class="bi bi-credit-card-2-front-fill me-2 text-black-50"></i>
+            {{ isEditMode() ? 'Edit Purchase Payment' : 'Record Purchase Payment' }}
+          </h5>
+          <button
+            type="button"
+            class="modal-close-btn"
+            (click)="closeModal()"
+            aria-label="Close"
+            title="Close">
+            <i class="bi bi-x-circle"></i>
+          </button>
+        </div>
         <p class="modal-subtitle mb-0">
           {{ isEditMode() ? 'Update payment method, reference details, or settlement status.' : 'Select a purchase order and record a full or partial supplier payment.' }}
         </p>
@@ -472,9 +482,6 @@
 
       <!-- Modal Footer -->
       <div class="modal-footer border-0 px-4 pb-4 pt-2 gap-2">
-        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeModal()">
-          <i class="bi bi-x-circle"></i> Cancel
-        </button>
         <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="resetForm()">
           <i class="bi bi-arrow-counterclockwise"></i> Reset
         </button>
@@ -495,17 +502,27 @@
 
       <!-- Modal Header -->
       <div class="modal-header border-0 pt-3 px-4 pb-0 d-block flex-shrink-0">
-        <h5 class="modal-title fs-5 fw-bold mb-1">
-          <i class="bi bi-credit-card-2-front-fill me-2 text-black-50"></i>
-          Purchase Payment &amp; PO Ledger
-        </h5>
+        <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
+          <h5 class="modal-title fs-5 fw-bold mb-0">
+            <i class="bi bi-credit-card-2-front-fill me-2 text-black-50"></i>
+            Purchase Payment &amp; PO Ledger
+          </h5>
+          <button
+            type="button"
+            class="modal-close-btn"
+            (click)="closeViewModal()"
+            aria-label="Close"
+            title="Close">
+            <i class="bi bi-x-circle"></i>
+          </button>
+        </div>
         <p class="modal-subtitle mb-0">
           Voucher details for {{ vp.paymentNumber }} and complete payment history for {{ vp.poNumber }}.
         </p>
       </div>
 
       <!-- Modal Body -->
-      <div class="modal-body px-4 py-2 po-form-modal-body">
+      <div class="modal-body px-4 py-2 po-form-modal-body" [class.pb-3]="!canClear(vp)">
         <!-- Payment & PO Summary Box -->
         <div class="po-summary-box p-3 rounded-3 mb-2 d-flex align-items-center justify-content-between flex-wrap gap-3 flex-shrink-0">
           <div class="d-flex align-items-center gap-2">
@@ -638,12 +655,8 @@
       </div>
 
       <!-- Modal Footer -->
-      <div class="modal-footer border-0 px-4 pb-3 pt-2 gap-2 flex-shrink-0">
-        <button type="button" class="btn btn-outline-dark btn-sm modal-btn" (click)="closeViewModal()">
-          <i class="bi bi-x-circle"></i> Close
-        </button>
+      <div class="modal-footer border-0 px-4 pb-3 pt-2 gap-2 flex-shrink-0" *ngIf="canClear(vp)">
         <button
-          *ngIf="canClear(vp)"
           type="button"
           class="btn btn-outline-dark btn-sm modal-btn modal-btn-wide"
           (click)="markAsCleared(vp)">
