@@ -314,11 +314,9 @@
 // ── Native Bootstrap Modal Customization ─────────────────────────────────────
 .modal {
   overflow-y: hidden;
+  --bs-modal-margin: 0.75rem;
 
   .modal-dialog {
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
-
     &.product-form-dialog {
       max-width: 980px;
     }
@@ -329,13 +327,9 @@
 
     &.product-view-dialog {
       max-width: 1040px;
-      max-height: calc(100vh - 1.5rem);
-      margin-top: 0.75rem;
-      margin-bottom: 0.75rem;
-      display: flex;
-      flex-direction: column;
 
       .modal-content {
+        width: 100%;
         display: flex;
         flex-direction: column;
         max-height: calc(100vh - 1.5rem);
